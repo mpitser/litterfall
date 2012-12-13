@@ -1,11 +1,22 @@
 # Import data from Litterfall database and send to MongoDB
 
 import pymysql
+import ConfigParser
 
 # Need to start with SSH tunnel to Moodle host
-# e.g. ssh -n -N -f -L 3306:localhost:3306 swarthmo@moodle.swarthmore.edu
+# e.g. ssh -n -N -f -L 3306:localhost:3306 aruethe2@acadweb.swarthmore.edu
 
-conn = pymysql.connect(host='127.0.0.1', port=3306, user='root', passwd='', db='moonwatch')
+# Load config (for database info, etc)
+Config = ConfigParser.ConfigParser()
+Config.read("litterfall_translate.conf")
+MySQL_host = Config.get('MySQL', "host")
+MySQL_user = Config.get('MySQL', 'user')
+MySQL_pw = Config.get('MySQL', 'pw')
+MySQL_db = Config.get('MySQL', 'db')
+
+print MySQL_db
+
+conn = pymysql.connect(host=MySQL_host, port=3306, user=MySQL_user, passwd=MySQL_pw, db=MySQL_db)
 cur = conn.cursor()
 
 # Get all the sites
@@ -14,6 +25,7 @@ cur.execute("SELECT distinct location from jlm_litterfall_observation")
 for r in cur.fetchall():
    print r[0]
 
+exit(0)
 
 # Get all the observations
 cur.execute("SELECT o.sample_id, o.location, o.plot, o.colltype, o.observerA, o.observerB, o.observerC, o.notes, o.collection_date, o.sky_condition, o.precipitation_condition from jlm_litterfall_observation as o")

@@ -1,0 +1,11 @@
+[MySQL]
+host: 127.0.0.1
+user: <insert value here>
+pw: <insert value here>
+db: <insert value here>
+
+[MongoDB]
+host: <insert value here>
+user: <insert value here>
+pw: <insert value here>
+db: <insert value here>
