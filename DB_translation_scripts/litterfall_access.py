@@ -37,12 +37,15 @@ def get_unique_observation_parameters():
 	return parameters
 
 
-# Get the last n observations for a specific site and plot
+
+# Get the last n observations for a specific site and plot.  Set limit to zero to retrieve all results.
 def get_last_observations(site, plot, num_of_observations):
 	results = mongo_db.observations.find({"site":site, "plot":plot}, limit = num_of_observations).sort('collection_date',-1)
 	return list(results)
 	
-	
+
+# Examples
 print get_unique_observation_parameters()
 print get_last_observations("Swamp", 1, 1)
+print len(get_last_observations("Swamp", 1, 0))
 
