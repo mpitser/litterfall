@@ -14,23 +14,35 @@ MongoDB_db = Config.get('MongoDB', "db")
 mongo = MongoClient(MongoDB_host, 27017)
 mongo_db = mongo[MongoDB_db]
 
-
+# Utility function to remove empty strings from a list of values
 def remove_empty_values_from_list(the_list):
    return [value for value in the_list if value != ""]
 
-parameters = {
-	"site":[],
-	"plot":[],
-	"collection_type": [],
-	"precipitation_condition": [],
-	"sky_condition": []
-}
 
-for p in parameters.keys():
-   	results = mongo_db.observations.distinct(p)
-	parameters[p] = sorted(remove_empty_values_from_list(results))
+# Get a list of all the unique values for observation parameters
+def get_unique_observation_parameters():
 
-print parameters
+	parameters = {
+		"site":[],
+		"plot":[],
+		"collection_type": [],
+		"precipitation_condition": [],
+		"sky_condition": []
+	}
+	
+	for p in parameters.keys():
+		results = mongo_db.observations.distinct(p)
+		parameters[p] = sorted(remove_empty_values_from_list(results))
+	
+	return parameters
 
 
+# Get the last n observations for a specific site and plot
+def get_last_observations(site, plot, num_of_observations):
+	results = mongo_db.observations.find({"site":site, "plot":plot}, limit = num_of_observations).sort('collection_date',-1)
+	return list(results)
+	
+	
+print get_unique_observation_parameters()
+print get_last_observations("Swamp", 1, 1)
 
