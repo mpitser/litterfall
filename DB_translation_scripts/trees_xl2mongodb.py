@@ -69,20 +69,14 @@ for file in args.excel_filenames:
 		try:
 			dia_2009 = sheet.row_values(rownum)[headers.index("2009 DBH cm")]
 			notes_2009 = sheet.row_values(rownum)[headers.index("2009 Comments")]
-			if dia_2009!="":
-				observation['diameter']["20090101"]["value"] = dia_2009
-			if notes_2009!="":
-				observation['diameter']["20090101"]["notes"] = notes_2009
+			observation['diameter']["20090101"] = {'value': dia_2009, 'notes':notes_2009}
 		except ValueError:
 			print "No 2009 data"
 	
 		try:
 			dia_2008 = sheet.row_values(rownum)[headers.index("2008 DBH cm")]
 			notes_2008 = sheet.row_values(rownum)[headers.index("2008 Comments")]
-			if dia_2008!="":
-				observation['diameter']["20080101"]["value"] = dia_2008
-			if notes_2008!="":
-				observation['diameter']["20080101"]["notes"] = notes_2008
+			observation['diameter']["20080101"] = {'value': dia_2008, 'notes':notes_2008}
 		except ValueError:
 			print "No 2008 data"
 			
