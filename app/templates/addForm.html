@@ -1,0 +1,25 @@
+<h1>Add New Record</h1>
+<form action="#edit">
+	<div class="formElm">	
+		<label>Location:</label>
+		<%= locations %>
+	</div>
+	<div class="formElm">	
+		<label>Plot:</label>
+		<%= plots %>
+	</div>
+	<div class="formElm">	
+		<label>Date:</label>
+		<input type="text" name="recordDate" class="datePicker" />
+	</div>
+	<div class="formElm">	
+		<label>Observation Type:</label>
+		<select name="type">
+			<option value="leaf">Leaf Fall</option>
+			<option value="tree">Tree Data</option>
+		</select>
+	</div>
+	<div class="formElm">	
+		<input type="submit" value="Next" />
+	</div>
+</form>
