@@ -57,7 +57,7 @@
     <div class="container">
       <h1>Updating Data Records <small>[Location], [Plot]</small></h1>
 
- 	<table class="table-striped">
+ 	<table class="table-striped" id="tab_update">
 	<thead>
 		<tr>
 		<th></th>
@@ -211,9 +211,20 @@
     <!-- Placed at the end of the document so the pages load faster -->
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
     <script src="js/bootstrap.js"></script>
+    <script src="js/jquery.dataTables.js"></script>
+	
 	<script>
  	$('.dbh').tooltip({trigger:'hover'})
 	</script>
-
+	<script>
+    $('#tab_update').dataTable( {
+        "bPaginate": false,
+        "bLengthChange": false,
+        "bFilter": true,
+        "bSort": false,
+        "bInfo": false,
+        "bAutoWidth": false
+    } )
+	</script>
   </body>
 </html>
