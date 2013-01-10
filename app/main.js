@@ -37,75 +37,60 @@ $(document).ready(function(){
     	}
 	});
 	
-	//Generic view that uses an HTML based template included using require.js
-	var AppTemplateView = Backbone.View.extend({
-    	el: $('#litterfall'),
-    	options: {
-    		variables: {},
-    		stripBody: true,
-			templateFile: 'index.html' //home template as default
-		},
+	//build a row in the plot table representing a tree
+	var plotRowView = Backbone.View.extend({
+		tagName: 'tr',
+		template: '\
+			<td>\
+				<button class="update-btn btn btn-mini btn-danger" type="button">Update</button>\
+			</td>\
+			<td>\
+				<%= id %>\
+				<% if (sub_id != "0"){ %>\
+					.<%= sub_id %>\
+				<% } %>\
+			</td>\
+			<td>\
+				<%= species %>\
+			</td>\
+			<td>\
+				<%= theta %>\
+			</td>\
+			<td>\
+				<%= distance %>\
+			</td>\
+			<td>\
+				<%= thisDiameter %> on <%= thisDate.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %>\
+			</td>\
+			<td>\
+				<%= thisComment %>\
+		</td>',
 		initialize: function(){
 			this.render();
 		},
 		render: function(){
-			var thisView = this;
-			var requirePath = 'lib/text!templates/' + this.options.templateFile + ((this.options.stripBody) ? '!strip' : '');
-			require([requirePath], function(templateHTML){
-				var template = _.template(templateHTML, thisView.options.variables );
-				thisView.$el.html( template );
-			});
+			var thisTree = this.model.toJSON();
+			thisTree.thisDate = "";
+			for (date in thisTree.diameter){
+				if (date > thisTree.thisDate){
+					thisTree.thisDate = date;
+				}
+			}
+			thisTree.thisDiameter = thisTree.diameter[thisTree.thisDate].value;
+			thisTree.thisComment = thisTree.diameter[thisTree.thisDate].notes;
+			this.$el.attr('id', thisTree._id.$oid).html(_.template(this.template, thisTree));
+			this.options.targetEl.append(this.el);
 		},
 		events: {
-			"click #get-plot": "getPlot"
+			'click .update-btn': 'updateTree'
 		},
-		getPlot: function(){
-			alert('plot!');
+		updateTree: function(){
+			console.log("updating tree:" + this.model.toJSON().id);
 		}
 	});
 	
-	//View that listens to the Plot collection events (generates Tree table)
-	var appPlotView = Backbone.View.extend({
-		el: $('#litterfall'),
-    	options: {
-    		variables: {},
-			templateFile: 'plotList.html' //home template as default
-		},
-		template: _.template("<li><%= tree.name %></li>"),
-		initialize: function(){
-			var thisView = this;
-			this.collection = new Plot;
-			//this.collection.bind("reset", this.render(), this);
-			//this.collection.bind("change", this.render(), this);
-			this.collection.fetch({
-				success: function(){
-					thisView.render();
-				}
-			});
-			
-		},
-		add: function(tree){
-			var treeView = new appPlotView({
-				model: tree
-			});
-			// set cache
-			this._treesInPlot[tree.get('id')] = treeView;
-			treeView.render();
-		},
-		render: function(){
-			var thisView = this;
-			var treeData;
-			this.collection.each(function(m){
-				treeData = thisView.collection.get(m.id);
-				thisView.$el.append(thisView.template({tree: treeData}));
-			});
-		}
-	});
-	
-	//Declare the tree object (Model)
 	var singleOption = Backbone.Model.extend({});
 	
-	//Declare the plot collection, contains tree objects
 	var selectionOptions = Backbone.Collection.extend({
 		model: singleOption,
 		url: "app/data/sites.json"
@@ -113,16 +98,20 @@ $(document).ready(function(){
 	
 	//Declare the tree object (Model)
 	var Tree = Backbone.Model.extend({
-		defaults: {
-			name: "tree"
+		initialize: function(){
+			var plotRow = new plotRowView({
+				targetEl: $("#plot-table"),
+				model: this
+			});
 		}
 	});
 	
 	//Declare the plot collection, contains tree objects
 	var Plot = Backbone.Collection.extend({
 		model: Tree,
-		url: "app/data/plottrees.json"
+		url: "/"
 	});
+	
     // Instantiate the router
     var app_router = new AppRouter;
    
@@ -134,13 +123,13 @@ $(document).ready(function(){
 		});
     });
     
+    //Site, plot selection
     app_router.on('route:updateObservation', function () {
     	var  templateFile = 'update.html';
 		require(['lib/text!templates/' + templateFile + '!strip'], function(templateHTML){
 			$('#main').html(templateHTML);
-			var locationOptions = new selectionOptions({
-				url: "app/data/sites.json"
-			});
+			var locationOptions = new selectionOptions;
+			locationOptions.url = "app/data/sites.json";
 			var locationSelect = new selectionOptionsView({
 				el: $('#site-select'),
 				collection: locationOptions
@@ -153,10 +142,18 @@ $(document).ready(function(){
 		});
     });
     
-    app_router.on('route:editPlot', function(type, site, plot) {
+    //Plot view
+    app_router.on('route:editPlot', function(site, plot) {
     	var  templateFile = 'update2.html';
 		require(['lib/text!templates/' + templateFile + '!strip'], function(templateHTML){
-			$('#main').html(templateHTML);
+			$('#main').html(_.template(templateHTML, {
+				site: decodeURI(site), 
+				plot: plot
+			}));
+			var thisPlot = new Plot;
+			//need to use site and plot variable to build url to python script
+			thisPlot.url = 'app/data/knoll_plotdata.json';
+			thisPlot.fetch();
 		});
     });
     
@@ -164,3 +161,16 @@ $(document).ready(function(){
     Backbone.history.start();
 	
 });
+
+/*
+$('.dbh').tooltip({trigger:'hover'})
+
+$('#plot-table').dataTable( {
+    "bPaginate": false,
+    "bLengthChange": false,
+    "bFilter": true,
+    "bSort": false,
+    "bInfo": false,
+    "bAutoWidth": false
+} )
+*/
