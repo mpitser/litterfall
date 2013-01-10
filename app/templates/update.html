@@ -40,12 +40,12 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </a>
-          <a class="brand" href="/tree-data">Crum Woods</a>
+          <a class="brand" href="#">Crum Woods</a>
           <div class="nav-collapse collapse">
             <ul class="nav">
-              <li class="active"><a href="/tree-data">Home</a></li>
-              <li><a href="reports.html">View Reports</a></li>
-              <li><a href="update.html">Update Data Records</a></li>
+              <li><a href="#">Home</a></li>
+              <li><a href="#update">View Reports</a></li>
+              <li class="active"><a href="update.html">Update Data Records</a></li>
             </ul>
           </div><!--/.nav-collapse -->
         </div>
@@ -54,60 +54,40 @@
 
     <div class="container">
 
-      <h1>Updating Data Records</h1>
+      <h1>Update Data Records</h1>
       <p>Fill out the form below to begin updating the data records</p>
 	<div class="row">
 		<form>
-		<div class="span4">
-			<h3>Date</h3>
-			<input type="date" placeholder="Observation Date">
-			
-			<h3>Observer(s)</h3>
-			<input type="text" placeholder="Observer Name">
-
-		</div>
 	
 	<div class="span4">
 		<div>
-		<h3>Location</h3>
-		<select>
-		  <option>1</option>
-		  <option>2</option>
-		  <option>3</option>
-		  <option>4</option>
-		  <option>5</option>
+		<h3>Site</h3>
+		<select id="site-select" name="site">
 		</select>
 		</div>
 
 	<div><h3>Plot</h3>
-		<select>
+		<select id="plot-select" name="plot">
 		  <option>1</option>
 		  <option>2</option>
-		  <option>3</option>
-		  <option>4</option>
-		  <option>5</option>
 		</select>
 	</div>
 	</div>
 	<div class="span4">
 		<div>
 			<h3>Collection Type</h3>
-			<select>
-		  		<option>litterfall</option>
-		  		<option>tree data</option>
+			<select id="type-select" name="type-select">
+		  		<option value="litterfall">Litterfall</option>
+		  		<option value="trees">Tree Data</option>
 			</select>
 		</div>
 		<div style="margin:25px 0px;">
-  			<a href="update2.html"><button class="btn btn-large btn-primary" type="button">Continue ></button></a>
+  			<button id="get-plot" class="btn btn-large btn-primary" type="button">Continue ></button>
 		</div>
 	</div>
     </div> <!-- /container -->
 
-    <!-- Le javascript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-    <script src="js/bootstrap.js"></script>
+   
 
   </body>
 </html>
