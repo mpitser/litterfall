@@ -28,26 +28,25 @@ if site == 'all':
     data = obs.find({'collection_type':'tree'}).distinct('site')
     n = len(data)
 else:
-    data = obs.find({'collection_type':'tree','plot': int(plot), 'site': site})    
-    n = data.count()
+    data = obs.find({'collection_type':'tree','plot': int(plot), 'site': site})
+    sorted_data = data.sort("id", 1)
+    n = sorted_data.count()
 
 json_data = [0]*n
 
 # copy it over to another empty array
 for i in range(0,n):
-    json_data[i] = data[i]
+    json_data[i] = sorted_data[i]
 
 ser_data = json.dumps(json_data, default=json_util.default, separators=(',', ':'))
 
-# hierarchy: site > plot > quadrant
-# let's see how many sites there are
-
 print 'Content-Type: application/json\n'
+#for j in range(0,n):
+#	print sorted_data[j]['id']
 print ser_data
 
-#print 'List of unique sites are:'
-#print json.dumps(t_all)
-
+# hierarchy: site > plot > quadrant
+# let's see how many sites there are
 '''
 # for each site, plots and quadrants, find out how many trees there are
 for site in sites:

@@ -58,7 +58,7 @@ for file in args.excel_filenames:
 	
 		observation['species'] = sheet.row_values(rownum)[headers.index("2009 Species full name")]
 		observation['species_certainty'] = sheet.row_values(rownum)[headers[::-1].index("Species ID certainty 0, 50 or 100%")]
-		observation['theta'] = sheet.row_values(rownum)[headers.index("2009 Angle Degrees")]
+		observation['angle'] = sheet.row_values(rownum)[headers.index("2009 Angle Degrees")]
 		observation['distance'] = sheet.row_values(rownum)[headers.index("2009 Distance meters")]
 		observation['dbh_marked'] = bool(sheet.row_values(rownum)[headers[::-1].index("Marked DBH location yes/no?")] == "Y")
 		
