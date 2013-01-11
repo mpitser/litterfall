@@ -1,9 +1,15 @@
-#!/usr/bin/env python
+#! /usr/bin/python
 from datetime import datetime
 import json
-import pymongo
+import cgi
+from pymongo import MongoClient
 from bson import json_util
 import ConfigParser
+
+# get the query string
+query = cgi.FieldStorage()
+plot = query.getvalue('plot')
+site = query.getvalue('site')
 
 # Load config (for database info, etc)
 Config = ConfigParser.ConfigParser()
@@ -18,14 +24,29 @@ mongo_db = mongo[MongoDB_db]
 # Use MongoDB observation collection
 obs = mongo_db.observations
 
-# need to grab the variables form the front end
+if site == 'all':
+    data = obs.find({'collection_type':'tree'}).distinct('site')
+    n = len(data)
+else:
+    data = obs.find({'collection_type':'tree','plot': int(plot), 'site': site})    
+    n = data.count()
+
+json_data = [0]*n
+
+# copy it over to another empty array
+for i in range(0,n):
+    json_data[i] = data[i]
+
+ser_data = json.dumps(json_data, default=json_util.default, separators=(',', ':'))
 
 # hierarchy: site > plot > quadrant
 # let's see how many sites there are
-t_all = obs.find({'collection_type':'tree'}).distinct('site')
-print t_all
-#sites = t_all.distinct('site')
-print json.dumps(t_all)
+
+print 'Content-Type: application/json\n'
+print ser_data
+
+#print 'List of unique sites are:'
+#print json.dumps(t_all)
 
 '''
 # for each site, plots and quadrants, find out how many trees there are
@@ -48,15 +69,3 @@ for site in sites:
             print 'has', num_trees
             print
 '''
-
-# try experiment with sending some data
-t_in_p1 = obs.find({'collection_type':'tree','plot':1, 'site': 'Knoll', 'quadrant': 1})
-
-n = t_in_p1.count()
-json_data = [0]*n
-print 'Content-Type: application/json\n'
-for i in range(0,n):
-    json_data[i] = t_in_p1[i]
-
-ser_data = json.dumps(json_data,default=json_util.default, separators=(',', ':'))
-print ser_data
