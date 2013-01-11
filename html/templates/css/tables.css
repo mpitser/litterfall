@@ -43,3 +43,45 @@ table th
 }
 /* @end Tables */
 
+.add-new {
+	padding:5px;
+}
+.add-new td, .editing td
+{
+	border:1px dashed red;}
+
+table.table-striped > tbody.edit-historical > tr:first-child> td, 
+{
+	background-color:#FFCCCC;
+	border-top:1px solid red;
+}
+table.table-striped > tbody.edit-historical > tr > td:first-child
+{
+		border-left:1px solid red;
+}
+table.table-striped > tbody.edit-historical > tr:last-child> td
+{
+		background-color:#FFCCCC;
+		border-bottom:1px solid red;
+}
+table.table-striped > tbody.edit-historical > tr > td:last-child
+{
+		border-right:1px solid red;
+}
+.table-striped tbody tr.view-more-records td{
+}
+.view-more-records td{
+	text-align:right;
+	color: #444;
+}
+
+.button-row .btn
+{
+	margin:10px;
+}
+
+button a, button a:hover {color:#FFF;}
+
+#tree-info ul{
+margin:20px 40px;	
+}
