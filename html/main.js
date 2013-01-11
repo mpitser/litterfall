@@ -52,7 +52,7 @@ $(document).ready(function(){
 				<%= species %>\
 			</td>\
 			<td>\
-				<%= theta %>\
+				<%= angle %>\
 			</td>\
 			<td>\
 				<%= distance %>\
