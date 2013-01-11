@@ -9,15 +9,15 @@
     <meta name="author" content="">
 
     <!-- Le styles -->
-    <link href="css/bootstrap.css" rel="stylesheet">
-    <link href="css/tables.css" rel="stylesheet">
+    <link href="../css/bootstrap.css" rel="stylesheet">
+    <link href="../css/tables.css" rel="stylesheet">
 
     <style>
       body {
         padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
       }
     </style>
-    <link href="css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="../../css/bootstrap-responsive.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -56,25 +56,24 @@
 
     <div class="container">
       <h1>Updating Data Records <small>[Location], [Plot]</small></h1>
-
+		<h2>[Tree ID]</h2>
+		<div id="tree-info">
+			<ul>
+				<li>Species: [species]<i class="icon-edit"></i></li>
+				<li>Angle Degrees: [Angle Degrees]<i class="icon-edit"></i></li>
+				<li>Distance Meters: [Distance Meters]<i class="icon-edit"></i></li>
+			</ul>
+		</div>
+			<div class="button-row">
+			<button class="btn btn-mini btn-success pull-left" type="button"><a href="update-existing2.html">+ New Entry</a></button>			</div>
          <table class="table-striped">
 		<thead>
 			<tr>
 			<th></th>
+			<th>Date</th>
+			<th>Observers</th>
 			<th>
-				Tree ID
-			</th>
-			<th>
-				Species
-			</th>
-			<th>
-				Angle Degrees
-			</th>
-			<th>
-				Distance Meters
-			</th>
-			<th>
-				Last DBH (cm) <a href="#" class="dbh" rel="tooltip" data-placement="top" data-original-title="Diameter at Breast Height"><small>info</small></a>
+			DBH (cm) <a href="#" class="dbh" rel="tooltip" data-placement="top" data-original-title="Diameter at Breast Height"><small>info</small></a>
 			</th>
 			<th>
 				Comments
@@ -84,28 +83,7 @@
 		<tbody>
 		<tr>
 	<td>
-	<a href="update3.html#update-table"><button class="btn btn-mini btn-danger" type="button">Update</button></a>
-	</td>
-	<td>
-	</td>
-	<td>
-	</td>
-	<td>
-	</td>
-	<td>
-	</td>
-	<td>
-	</td>
-	<td>
-	</td>
-	</tr>
-		<tr>
-	<td>
-	<a href="update3.html#update-table"><button class="btn btn-mini btn-danger" type="button">Update</button></a>
-	</td>
-	<td>
-	</td>
-	<td>
+	<button class="btn btn-mini btn-primary edit-existing" type="button">Edit</button>
 	</td>
 	<td>
 	</td>
@@ -118,28 +96,7 @@
 	</tr>
 		<tr>
 	<td>
-	<a href="update3.html#update-table"><button class="btn btn-mini btn-danger" type="button">Update</button></a>
-	</td>
-	<td>
-	</td>
-	<td>
-	</td>
-	<td>
-	</td>
-	<td>
-	</td>
-	<td>
-	</td>
-	<td>
-	</td>
-	</tr>
-		<tr>
-	<td>
-	<a href="update3.html#update-table"><button class="btn btn-mini btn-danger" type="button">Update</button></a>
-	</td>
-	<td>
-	</td>
-	<td>
+	<button class="btn btn-mini btn-primary edit-existing" type="button">Edit</button>
 	</td>
 	<td>
 	</td>
@@ -152,28 +109,7 @@
 	</tr>
 		<tr>
 	<td>
-	<a href="update3.html#update-table"><button class="btn btn-mini btn-danger" type="button">Update</button></a>
-	</td>
-	<td>
-	</td>
-	<td>
-	</td>
-	<td>
-	</td>
-	<td>
-	</td>
-	<td>
-	</td>
-	<td>
-	</td>
-	</tr>
-		<tr>
-	<td>
-	<a href="update3.html#update-table"><button class="btn btn-mini btn-danger" type="button">Update</button></a>
-	</td>
-	<td>
-	</td>
-	<td>
+		<button class="btn btn-mini btn-primary edit-existing" type="button">Edit</button>
 	</td>
 	<td>
 	</td>
@@ -186,11 +122,49 @@
 	</tr>
 		<tr>
 	<td>
-	<a href="update3.html#update-table"><button class="btn btn-mini btn-danger" type="button">Update</button></a>
+		<button class="btn btn-mini btn-primary edit-existing" type="button">Edit</button>
+		</td>
+	<td>
+	</td>
+	<td>
 	</td>
 	<td>
 	</td>
 	<td>
+	</td>
+	</tr>
+		<tr>
+	<td>
+		<button class="btn btn-mini btn-primary edit-existing" type="button">Edit</button>
+	
+	</td>
+	<td>
+	</td>
+	<td>
+	</td>
+	<td>
+	</td>
+	<td>
+	</td>
+	</tr>
+		<tr>
+	<td>
+		<button class="btn btn-mini btn-primary edit-existing" type="button">Edit</button>
+	
+	</td>
+	<td>
+	</td>
+	<td>
+	</td>
+	<td>
+	</td>
+	<td>
+	</td>
+	</tr>
+		<tr>
+	<td>
+		<button class="btn btn-mini btn-primary edit-existing" type="button">Edit</button>
+	
 	</td>
 	<td>
 	</td>
@@ -203,65 +177,29 @@
 	</tr>
 		</tbody>
 		</table>
+		<div class="button-row">
+			<button class="btn btn-mini btn-success pull-left" type="button"><a href="update-existing2.html">+ New Entry</a></button>
+		</div>
 
-	<h1>Currently Updating [Tree ID]</h1>
-
-		  <table id="update-table" class="table-striped">
-			<thead>
-				<tr>
-				<th></th>
-				<th>
-					Tree ID
-				</th>
-				<th>
-					Species
-				</th>
-				<th>
-					Angle Degrees
-				</th>
-				<th>
-					Distance Meters
-				</th>
-				<th>
-					Last DBH (cm) <a href="#" class="dbh" rel="tooltip" data-placement="top" data-original-title="Diameter at Breast Height"><small>info</small></a>
-				</th>
-				<th>
-					Comments
-				</th>
-
-			</tr>
-			</thead>
-			<tbody>
-			<tr>
-			<td>
-			<button class="btn btn-mini btn-success" type="button">Submit</button>
-			</td>
-			<td>
-			</td>
-			<td>
-			</td>
-			<td>
-			</td>
-			<td>
-			</td>
-			<td>
-			</td>
-			<td>
-
-			</td>
-		</tr>
-	</tbody>
-		</table>
     </div> <!-- /container -->
 
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-    <script src="js/bootstrap.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script src="../js/bootstrap.js"></script>
 	<script>
  	$('.dbh').tooltip({trigger:'hover'})
 	</script>
+	<script>
+	$(function() {                       
+	$(".edit-existing").click(function() {  
+	$(this).toggleClass("btn-danger");   
+	$(this).parents('tr').toggleClass("editing");      
+	  });
+	});
+	</script>
+	
 
   </body>
 </html>
