@@ -2,8 +2,8 @@
 
 //app object contains global app information
 var app = {
-	initialize: function(){
-		
+	config: {
+		cgiDir: '../cgi-bin/'
 	}
 };
 
@@ -22,7 +22,7 @@ $(document).ready(function(){
 	
 	//build an options list
 	var selectionOptionsView = Backbone.View.extend({
-    	template: '<option value="<%= option %>"><%= option %></option>',
+    	template: '<option value="<%= value %>"><%= name %></option>',
     	initialize: function(){
     		 _.bindAll(this, 'render'); // fixes loss of context for 'this' within methods
 			 this.collection.on('add', this.render); 
@@ -30,7 +30,7 @@ $(document).ready(function(){
     	},
     	render: function(){
     		this.collection.each(function(option){
-    			this.$el.append(_.template(this.template, {option: option.toJSON().site}));
+    			this.$el.append(_.template(this.template, option.toJSON()));
     		}, this);
     	}
 	});
@@ -83,7 +83,7 @@ $(document).ready(function(){
 			'click .update-btn': 'updateTree'
 		},
 		updateTree: function(){
-			console.log("updating tree:" + this.model.toJSON().id);
+			console.log("updating tree:" + this.model.toJSON().id  + this.model.toJSON().dead);
 		}
 	});
 	
@@ -91,7 +91,21 @@ $(document).ready(function(){
 	
 	var selectionOptions = Backbone.Collection.extend({
 		model: singleOption,
-		url: "data/sites.json"
+		url: "data/sites.json",
+    	parse: function(response){
+    		var parsedOptions = [];
+    		for (element in response){
+    			if (_.isString(response[element])){
+    				parsedOptions.push({
+    					value: response[element],
+    					name: response[element]
+    				});
+    			} else {
+    				parsedOptions.push(response[element]);
+    			}
+    		}
+    		return parsedOptions;
+    	}
 	});
 	
 	//Declare the tree object (Model)
@@ -127,7 +141,7 @@ $(document).ready(function(){
 		require(['lib/text!templates/' + templateFile + '!strip'], function(templateHTML){
 			$('#main').html(templateHTML);
 			var locationOptions = new selectionOptions;
-			locationOptions.url = "data/sites.json";
+			locationOptions.url = app.config.cgiDir + "litterfall.py?site=all";
 			var locationSelect = new selectionOptionsView({
 				el: $('#site-select'),
 				collection: locationOptions
@@ -150,7 +164,7 @@ $(document).ready(function(){
 			}));
 			var thisPlot = new Plot;
 			//need to use site and plot variable to build url to python script
-			thisPlot.url = 'data/knoll_plotdata.json';
+			thisPlot.url = app.config.cgiDir + 'litterfall.py?site=' + site + '&plot=' + plot;
 			thisPlot.fetch();
 		});
     });
