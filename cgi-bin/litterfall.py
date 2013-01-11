@@ -26,17 +26,20 @@ obs = mongo_db.observations
 
 if site == 'all':
     data = obs.find({'collection_type':'tree'}).distinct('site')
+    for j in range(0,len(data)):
+    	data[j] = data[j].encode('ascii','ignore')
+    data.sort(key=str.lower)
     n = len(data)
 else:
     data = obs.find({'collection_type':'tree','plot': int(plot), 'site': site})
-    sorted_data = data.sort("id", 1)
-    n = sorted_data.count()
+    data = data.sort("id", 1)
+    n = data.count()
 
 json_data = [0]*n
 
 # copy it over to another empty array
 for i in range(0,n):
-    json_data[i] = sorted_data[i]
+    json_data[i] = data[i]
 
 ser_data = json.dumps(json_data, default=json_util.default, separators=(',', ':'))
 
