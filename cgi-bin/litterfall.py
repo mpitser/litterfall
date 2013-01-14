@@ -32,7 +32,7 @@ if site == 'all':
     n = len(data)
 else:
     data = obs.find({'collection_type':'tree','plot': int(plot), 'site': site})
-    data = data.sort("id", 1)
+    data = data.sort("tree_id", 1)
     n = data.count()
 
 json_data = [0]*n
