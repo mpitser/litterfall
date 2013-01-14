@@ -44,8 +44,8 @@ $(document).ready(function(){
 			</td>\
 			<td>\
 				<%= tree_id %>\
-				<% if (tree_sub_id != "0"){ %>\
-					.<%= tree_sub_id %>\
+				<% if (sub_tree_id != "0"){ %>\
+					.<%= sub_tree_id %>\
 				<% } %>\
 			</td>\
 			<td>\
