@@ -105,7 +105,7 @@ $(document).ready(function(){
     			if (_.isString(response[element])){								//if the response is a string (e.g., a location), store it in the array:
     				parsedOptions.push({										//for Backbone's use, stores object from JSON information as key:value pair (object)
     					value: response[element],
-    					name: response[element]
+    					name: response[element].charAt(0).toUpperCase() + response[element].slice(1);
     				});
     			} else {
     				parsedOptions.push(response[element]);						//<WHAT DOES THIS DO?> [ ]
