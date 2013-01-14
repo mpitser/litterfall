@@ -2,52 +2,77 @@
 from datetime import datetime
 import json
 import cgi
+import cgitb; cgitb.enable()
+import os
 from pymongo import MongoClient
 from bson import json_util
 import ConfigParser
 
-# get the query string
+# some global variables
 query = cgi.FieldStorage()
 plot = query.getvalue('plot')
 site = query.getvalue('site')
+quadrant = query.getvalue('quadrant')
+tree_id = query.getvalue('tree_id')
+species = query.getvalue('species')
+angle = query.getvalue('angle')
+distance = query.getvalue('distance')
+diameter = query.getvalue('diameter')
+	
+def getdata(obs):
+	if site == 'all':
+		data = obs.find({'collection_type':'tree'}).distinct('site')
+		for j in range(0,len(data)):
+			data[j] = data[j].encode('ascii','ignore')
+		data.sort(key=str.lower)
+		n = len(data)
+	else:
+		data = obs.find({'collection_type':'tree','plot': int(plot), 'site': site})
+		data = data.sort("tree_id", 1)
+		n = data.count()
+	
+	json_data = [0]*n
+	
+	# copy it over to another empty array
+	for i in range(0,n):
+		json_data[i] = data[i]
+	
+	ser_data = json.dumps(json_data, default=json_util.default, separators=(',', ':'))
+	print ser_data
 
-# Load config (for database info, etc)
-Config = ConfigParser.ConfigParser()
-Config.read("litterfall_translate.conf")
-MongoDB_host = Config.get('MongoDB', "host")
-MongoDB_db = Config.get('MongoDB', "db")
+def postdata(obs):	
+	stuff = {'posting data': 'lalala'}
+	ser_stuff = json.dumps(stuff, default=json_util.default, separators=(',', ':'))
+	print ser_stuff
+	
+def main():
+	# Load config (for database info, etc)
+	Config = ConfigParser.ConfigParser()
+	Config.read("litterfall_translate.conf")
+	MongoDB_host = Config.get('MongoDB', "host")
+	MongoDB_db = Config.get('MongoDB', "db")
+	
+	# Connect to MongoDB
+	mongo = MongoClient(MongoDB_host, 27017)
+	mongo_db = mongo[MongoDB_db]	
+	
+	# Use MongoDB observation collection
+	obs = mongo_db.observations
+	
+	method = os.environ['REQUEST_METHOD']
 
-# Connect to MongoDB
-mongo = MongoClient(MongoDB_host, 27017)
-mongo_db = mongo[MongoDB_db]	
-
-# Use MongoDB observation collection
-obs = mongo_db.observations
-
-if site == 'all':
-    data = obs.find({'collection_type':'tree'}).distinct('site')
-    n = len(data)
-else:
-    data = obs.find({'collection_type':'tree','plot': int(plot), 'site': site})    
-    n = data.count()
-
-json_data = [0]*n
-
-# copy it over to another empty array
-for i in range(0,n):
-    json_data[i] = data[i]
-
-ser_data = json.dumps(json_data, default=json_util.default, separators=(',', ':'))
-
+	print 'Content-Type: application/json\n'
+	
+	if method == 'GET':
+		getdata(obs)
+	elif method == 'POST':
+		postdata(obs)
+			
+if __name__ == "__main__":
+    main()
+    
 # hierarchy: site > plot > quadrant
 # let's see how many sites there are
-
-print 'Content-Type: application/json\n'
-print ser_data
-
-#print 'List of unique sites are:'
-#print json.dumps(t_all)
-
 '''
 # for each site, plots and quadrants, find out how many trees there are
 for site in sites:
