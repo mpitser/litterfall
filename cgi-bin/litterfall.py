@@ -40,7 +40,6 @@ def getdata(obs):
 	ser_data = json.dumps(json_data, default=json_util.default, separators=(',', ':'))
 	print ser_data
 
-<<<<<<< HEAD
 def postdata(obs):	
 	stuff = {'posting data': 'lalala'}
 	ser_stuff = json.dumps(stuff, default=json_util.default, separators=(',', ':'))
@@ -61,44 +60,6 @@ def main():
 	obs = mongo_db.observations
 	
 	method = os.environ['REQUEST_METHOD']
-=======
-# Load config (for database info, etc)
-Config = ConfigParser.ConfigParser()
-Config.read("litterfall_translate.conf")
-MongoDB_host = Config.get('MongoDB', "host")
-MongoDB_db = Config.get('MongoDB', "db")
-
-# Connect to MongoDB
-mongo = MongoClient(MongoDB_host, 27017)
-mongo_db = mongo[MongoDB_db]	
-
-# Use MongoDB observation collection
-obs = mongo_db.observations
-
-if site == 'all':
-    data = obs.find({'collection_type':'tree'}).distinct('site')
-    for j in range(0,len(data)):
-    	data[j] = data[j].encode('ascii','ignore')
-    data.sort(key=str.lower)
-    n = len(data)
-else:
-    data = obs.find({'collection_type':'tree','plot': int(plot), 'site': site})
-    data = data.sort("tree_id", 1)
-    n = data.count()
-
-json_data = [0]*n
-
-# copy it over to another empty array
-for i in range(0,n):
-    json_data[i] = data[i]
-
-ser_data = json.dumps(json_data, default=json_util.default, separators=(',', ':'))
-
-print 'Content-Type: application/json\n'
-#for j in range(0,n):
-#	print sorted_data[j]['id']
-print ser_data
->>>>>>> 5202285bb0c46c5e9f2fc73ab663d39c4dd31775
 
 	print 'Content-Type: application/json\n'
 	
