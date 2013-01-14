@@ -43,9 +43,9 @@ $(document).ready(function(){
 				<button class="update-btn btn btn-mini btn-danger" type="button">Update</button>\
 			</td>\
 			<td>\
-				<%= id %>\
-				<% if (sub_id != "0"){ %>\
-					.<%= sub_id %>\
+				<%= tree_id %>\
+				<% if (tree_sub_id != "0"){ %>\
+					.<%= tree_sub_id %>\
 				<% } %>\
 			</td>\
 			<td>\
@@ -123,8 +123,8 @@ $(document).ready(function(){
 			site: '',
 			plot: '',
 			_id: '',
-			id: 0,
-			sub_id: 0,
+			tree_id: 0,
+			sub_tree_id: 0,
 			quadrant: 0,
 			angle: 0,
 			distance: 0,
