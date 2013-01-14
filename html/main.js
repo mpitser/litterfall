@@ -40,7 +40,7 @@ $(document).ready(function(){
 		tagName: 'tr',
 		template: '\
 			<td>\
-				<button class="update-btn btn btn-mini btn-danger" type="button">Update</button>\
+				<button class="update-btn btn btn-mini btn-primary" type="button">Update</button>\
 			</td>\
 			<td>\
 				<%= tree_id %>\
@@ -83,6 +83,7 @@ $(document).ready(function(){
 			this.$el.attr('id', thisTree._id.$oid).html(_.template(this.template, thisTree));
 			
 			this.options.targetEl.append(this.el);								   //appends the tree's row element to table
+			
 		},
 		events: {
 			'click .update-btn': 'updateTree'									//if update button is clicked, runs updateTree function
@@ -105,7 +106,7 @@ $(document).ready(function(){
     			if (_.isString(response[element])){								//if the response is a string (e.g., a location), store it in the array:
     				parsedOptions.push({										//for Backbone's use, stores object from JSON information as key:value pair (object)
     					value: response[element],
-    					name: response[element]
+    					name: response[element].charAt(0).toUpperCase() + response[element].slice(1)
     				});
     			} else {
     				parsedOptions.push(response[element]);						//<WHAT DOES THIS DO?> [ ]
@@ -186,6 +187,11 @@ $(document).ready(function(){
 				site: decodeURI(site), 
 				plot: plot
 			}));
+			
+			//DBH Tooltip 
+			updateFunctions();
+
+			
 			var thisPlot = new Plot;
 			//need to use site and plot variable to build url to python script
 			thisPlot.url = app.config.cgiDir + 'litterfall.py?site=' + site + '&plot=' + plot;
@@ -196,10 +202,27 @@ $(document).ready(function(){
     // Start Backbone history a necessary step for bookmarkable URL's; enables user to click BACK without navigating to entirely different domain
     Backbone.history.start();
 	
+		
+	
 });
+// Start Bootstrap and template related jQuery
+	
+	function updateFunctions(){
+	$('.dbh').tooltip({trigger:'hover'})
+	$('.dropdown-toggle').dropdown()
+}
+// End Bootstrap and template related jQuery
+
+// Start Active Nav Tracking
+$(function(){
+  $(".nav a").click(function(){
+    $(this).parent().addClass('active'). // <li>
+      siblings().removeClass('active');
+  });
+});
+// End Active Nav Tracking
 
 /*
-$('.dbh').tooltip({trigger:'hover'})
 
 $('#plot-table').dataTable( {
     "bPaginate": false,
