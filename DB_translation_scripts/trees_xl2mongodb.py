@@ -52,9 +52,9 @@ for file in args.excel_filenames:
 		observation['quadrant'] = int(sheet.row_values(rownum)[headers.index("Quadrant")])
 		
 		full_tree_id = str(sheet.row_values(rownum)[headers.index("2009 Tree Number")]).split(".")
-		observation['id'] = full_tree_id[0]
+		observation['tree_id'] = int(full_tree_id[0])
 		if len(full_tree_id) > 1:
-			observation['sub_id'] = full_tree_id[1]
+			observation['sub_tree_id'] = int(full_tree_id[1])
 	
 		observation['species'] = sheet.row_values(rownum)[headers.index("2009 Species full name")]
 		observation['species_certainty'] = sheet.row_values(rownum)[headers[::-1].index("Species ID certainty 0, 50 or 100%")]
