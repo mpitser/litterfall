@@ -202,7 +202,7 @@ $(document).ready(function(){
     // Start Backbone history a necessary step for bookmarkable URL's; enables user to click BACK without navigating to entirely different domain
     Backbone.history.start();
 	
-	
+		
 	
 });
 // Start Bootstrap and template related jQuery
@@ -210,7 +210,18 @@ $(document).ready(function(){
 	function updateFunctions(){
 	$('.dbh').tooltip({trigger:'hover'})
 	$('.dropdown-toggle').dropdown()
-}	
+}
+// End Bootstrap and template related jQuery
+
+// Start Active Nav Tracking
+$(function(){
+  $(".nav a").click(function(){
+    $(this).parent().addClass('active'). // <li>
+      siblings().removeClass('active');
+  });
+});
+// End Active Nav Tracking
+
 /*
 
 $('#plot-table').dataTable( {
