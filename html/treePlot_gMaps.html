@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <style type="text/css">
+      html { height: 100% }
+      body { height: 100%; margin: 0; padding: 0 }
+      #map_canvas { height: 100% }
+    </style>
+    <script type="text/javascript"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCvHZX2niyfAZtimsNIgOSLlwKvylTQwIY&sensor=true">
+    </script>
+    
+    <script src="lib/jquery.min.js"></script>
+    
+    <script type="text/javascript">
+      function initialize() {
+        var mapOptions = {
+          center: new google.maps.LatLng(39.903445, -75.358998),
+          zoom: 20,
+          mapTypeId: google.maps.MapTypeId.HYBRID
+        };
+        var map = new google.maps.Map(document.getElementById("map_canvas"),
+            mapOptions);
+        
+        var plotBounds = [
+		new google.maps.LatLng(39.903479, -75.359067),
+		new google.maps.LatLng(39.903393, -75.359051),
+		new google.maps.LatLng(39.903415, -75.358919),
+		new google.maps.LatLng(39.903498, -75.358950),
+		new google.maps.LatLng(39.903479, -75.359067)
+		];
+        
+        plot = new google.maps.Polyline({
+        	  strokeColor: "#FF0000",
+			  strokeOpacity: 0.8,
+			  strokeWeight: 2,
+			  map: map,
+			  path: plotBounds
+		  });
+        
+        var marker = new google.maps.Marker({
+        	position: new google.maps.LatLng(39.903445, -75.358998),
+        	animation: google.maps.Animation.DROP,
+        	map: map,
+        	title: "Litterfall Catcher 1"
+        });     
+        
+       	var R = 6371000;              //radius of earth in meters
+        plotCenterPoint = new google.maps.LatLng(39.903445, -75.358998);
+        
+        //NOTE: Get plot data
+        $.getJSON("http://ec2-50-19-28-191.compute-1.amazonaws.com/cgi-bin/litterfall.py?site=Knoll&plot=1", function(data) {
+        //alert(data);
+        
+			trees = [];
+			
+			$.each(data, function(index, tree) {
+				var d = tree.distance;
+				var brng = tree.angle * (Math.PI/180);
+				
+				//calculate most recent diameter for tree
+				recentDate = "";
+				for (date in tree.diameter){                      //loop through the list of existing dates and store the most recent
+					if (date > recentDate){					  //Date format is YYYYMMDD (reformated in template html above)
+						recentDate = date;
+					}
+				}
+				diameter = tree.diameter[recentDate].value;    //gets diameter from most recent measurement
+				
+				latToRad = (plotCenterPoint.lat() * Math.PI/180);
+				lngToRad = (plotCenterPoint.lng() * Math.PI/180);
+				
+				// calculation to align with GoogleMaps: http://www.movable-type.co.uk/scripts/latlong.html        
+				var treeLat = Math.asin(Math.sin(latToRad)*Math.cos(d/R) + Math.cos(latToRad)*Math.sin(d/R)*Math.cos(brng) );
+				var treeLng = lngToRad + Math.atan2(Math.sin(brng)*Math.sin(d/R)*Math.cos(latToRad), Math.cos(d/R)-Math.sin(latToRad)*Math.sin(treeLat));
+				
+				//centerLat = 39.903445;
+				//centerLong = -75.358998;
+				
+				latFromRad = treeLat * 180/Math.PI;
+				lngFromRad = treeLng * 180/Math.PI;
+				
+				var treeOptions = {
+					strokeColor: "#FF0000",
+					strokeOpacity: 0.8,
+					strokeWeight: .5,
+					fillColor: "#FF0000",
+					fillOpacity: 100,
+					map: map,
+					center: new google.maps.LatLng(latFromRad, lngFromRad),  
+					radius: diameter/50,
+				};
+				trees[index] = new google.maps.Circle(treeOptions);
+				
+				var markers = [];
+				
+				
+//NOTE: Continue work here: ensure labels appear on page				
+				markers[index] = new google.maps.Marker({
+					position: new google.maps.LatLng(latFromRad, lngFromRad),
+					animation: google.maps.Animation.DROP,
+					map: map,
+					title: str(tree.tree_id)
+				});
+        	 });
+        });
+        
+        
+        
+        /*
+        var d = 7.2;
+    	var brng = 45 * (Math.PI/180);
+    	
+    	latToRad = (plotCenterPoint.lat() * Math.PI/180);
+    	lngToRad = (plotCenterPoint.lng() * Math.PI/180);
+        
+        // calculation to align with GoogleMaps: http://www.movable-type.co.uk/scripts/latlong.html        
+        var treeLat = Math.asin(Math.sin(latToRad)*Math.cos(d/R) + Math.cos(latToRad)*Math.sin(d/R)*Math.cos(brng) );
+        var treeLng = lngToRad + Math.atan2(Math.sin(brng)*Math.sin(d/R)*Math.cos(latToRad), Math.cos(d/R)-Math.sin(latToRad)*Math.sin(treeLat));
+        
+        //centerLat = 39.903445;
+        //centerLong = -75.358998;
+        
+		var populationOptions = {
+		strokeColor: "#FF0000",
+		strokeOpacity: 0.8,
+		strokeWeight: .5,
+		fillColor: "#FF0000",
+		fillOpacity: 100,
+		map: map,
+		center: new google.maps.LatLng(treeLat * 180/Math.PI, treeLng * 180/Math.PI),  
+		radius: 1
+    };
+    cityCircle = new google.maps.Circle(populationOptions);
+    */
+      }  
+    </script>
+  </head>
+  <body onload="initialize()">
+    <div id="map_canvas" style="width:100%; height:100%"></div>
+  </body>
+</html>
