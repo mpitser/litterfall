@@ -2,44 +2,30 @@
 <html>
   <head>
     <title>Test JSON data</title>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
-	<script src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/jquery.dataTables.js"></script>
+  	<div id="main"></div>
+  	<script src="lib/jquery.min.js"></script>
+  	<script src="templates/js/bootstrap.js"></script>
+    <script src="lib/underscore-min.js"></script>
+    <script src="lib/backbone-min.js"></script>
+    <script src="lib/require.js"></script>
+
   </head>
 
 <body>
-  <table id="test_table" border="1">
-	<thead>
-      <tr>
-        <th>Tree ID</th>
-        <th>Diameter</th>
-	  </tr>
-	</thead>
-	<tbody>
-      <tr>
-        <td>row 1, cell 1</td>
-        <td>row 1, cell 2</td>
-      </tr>
-      <tr>
-        <td>row 2, cell 1</td>
-        <td>row 2, cell 2</td>
-      </tr>
-	</tbody>
-  </table>
 
   <script>
 
-//   $.getJSON("json_expdata.json",Function(data){
-//      $.each(data,function(item){
-//        console.log(data[item].distance);
-//      })
-//    });
- 
-  	$(document).ready(function() {
-      $('#example').dataTable( {
-        "bProcessing": true,
-        "sAjaxSource": 'json_expdata.json'
-      } );
-	} );
+	var book = new Backbone.Model({
+	  title: "The Rough Riders",
+	  author: "Theodore Roosevelt"
+	});
+	
+	console.log(book)
+	//var location = book.url();
+	//console.log(location);
+	
+	//book.save();
+
   </script>
 
   <hr>
