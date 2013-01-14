@@ -47,15 +47,14 @@ def main():
 	# Use MongoDB observation collection
 	obs = mongo_db.observations
 	
-	#method = os.environ['REQUEST_METHOD']
+	method = os.environ['REQUEST_METHOD']
 	
-	debug = os.environ
-	debug['REQUEST_METHOD'] = 'PUT'
-	method = debug['REQUEST_METHOD']
+	#debug = os.environ
+	#debug['REQUEST_METHOD'] = 'PUT'
+	#method = debug['REQUEST_METHOD']
 	
-	#print 'Content-Type: application/json\n'
-	print 'Content-Type: text/html\n'
-	print method
+	print 'Content-Type: application/json\n'
+	#print 'Content-Type: text/html\n'
 	
 	if method == 'GET':
 		query = cgi.FieldStorage()
