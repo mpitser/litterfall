@@ -40,7 +40,7 @@ $(document).ready(function(){
 		tagName: 'tr',
 		template: '\
 			<td>\
-				<button class="update-btn btn btn-mini btn-danger" type="button">Update</button>\
+				<button class="update-btn btn btn-mini btn-primary" type="button">Update</button>\
 			</td>\
 			<td>\
 				<%= tree_id %>\
@@ -83,6 +83,7 @@ $(document).ready(function(){
 			this.$el.attr('id', thisTree._id.$oid).html(_.template(this.template, thisTree));
 			
 			this.options.targetEl.append(this.el);								   //appends the tree's row element to table
+			
 		},
 		events: {
 			'click .update-btn': 'updateTree'									//if update button is clicked, runs updateTree function
@@ -186,6 +187,11 @@ $(document).ready(function(){
 				site: decodeURI(site), 
 				plot: plot
 			}));
+			
+			//DBH Tooltip 
+			updateFunctions();
+
+			
 			var thisPlot = new Plot;
 			//need to use site and plot variable to build url to python script
 			thisPlot.url = app.config.cgiDir + 'litterfall.py?site=' + site + '&plot=' + plot;
@@ -196,11 +202,15 @@ $(document).ready(function(){
     // Start Backbone history a necessary step for bookmarkable URL's; enables user to click BACK without navigating to entirely different domain
     Backbone.history.start();
 	
-	$('.dbh').tooltip({trigger:'hover'})
-
+	
 	
 });
-
+// Start Bootstrap and template related jQuery
+	
+	function updateFunctions(){
+	$('.dbh').tooltip({trigger:'hover'})
+	$('.dropdown-toggle').dropdown()
+}	
 /*
 
 $('#plot-table').dataTable( {
