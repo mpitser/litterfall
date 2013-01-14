@@ -52,7 +52,7 @@ $(document).ready(function(){
 				<%= species %>\
 			</td>\
 			<td>\
-				<%= theta %>\
+				<%= angle %>\
 			</td>\
 			<td>\
 				<%= distance %>\
@@ -172,10 +172,12 @@ $(document).ready(function(){
     // Start Backbone history a necessary step for bookmarkable URL's
     Backbone.history.start();
 	
+	$('.dbh').tooltip({trigger:'hover'})
+
+	
 });
 
 /*
-$('.dbh').tooltip({trigger:'hover'})
 
 $('#plot-table').dataTable( {
     "bPaginate": false,
