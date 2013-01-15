@@ -133,7 +133,10 @@ $(document).ready(function(){
 			species: '',
 			species_certainty: 0,
 			dead: true,
-			dbh_marked: false
+			dbh_marked: false,
+			url: '',
+			lat: 0,
+			lng: 0
 		},
 		initialize: function(){
 			var plotRow = new plotRowView({

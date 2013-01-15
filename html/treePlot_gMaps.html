@@ -15,6 +15,22 @@
     
     <script type="text/javascript">
       function initialize() {
+        
+	  function detectBrowser() {
+	  var useragent = navigator.userAgent;
+	  var mapdiv = document.getElementById("map_canvas");
+	
+	
+	  if (useragent.indexOf('iPhone') != -1 || useragent.indexOf('Android') != -1 ) {
+		mapdiv.style.width = '100%';
+		mapdiv.style.height = '100%';
+	  	} else {
+		mapdiv.style.width = '600px';
+		mapdiv.style.height = '800px';
+	  	}
+	  }
+        
+        
         var mapOptions = {
           center: new google.maps.LatLng(39.903445, -75.358998),
           zoom: 20,
@@ -66,6 +82,7 @@
 						recentDate = date;
 					}
 				}
+				
 				diameter = tree.diameter[recentDate].value;    //gets diameter from most recent measurement
 				
 				latToRad = (plotCenterPoint.lat() * Math.PI/180);
@@ -78,9 +95,11 @@
 				//centerLat = 39.903445;
 				//centerLong = -75.358998;
 				
-				latFromRad = treeLat * 180/Math.PI;
-				lngFromRad = treeLng * 180/Math.PI;
+				tree.lat = treeLat * 180/Math.PI;
+				tree.lng = treeLng * 180/Math.PI;
 				
+				tree.url = "http://ec2-50-19-28-191.compute-1.amazonaws.com/#update/trees/" + (tree.site) + "/" + String(tree.plot)	
+			
 				var treeOptions = {
 					strokeColor: "#FF0000",
 					strokeOpacity: 0.8,
@@ -88,20 +107,31 @@
 					fillColor: "#FF0000",
 					fillOpacity: 100,
 					map: map,
-					center: new google.maps.LatLng(latFromRad, lngFromRad),  
+					center: new google.maps.LatLng(tree.lat, tree.lng),  
 					radius: diameter/50,
+					clickable: true
 				};
 				trees[index] = new google.maps.Circle(treeOptions);
 				
 				var markers = [];
 				
 				
-//NOTE: Continue work here: ensure labels appear on page				
+			//	Labels tree information				
 				markers[index] = new google.maps.Marker({
-					position: new google.maps.LatLng(latFromRad, lngFromRad),
+					position: new google.maps.LatLng(tree.lat, tree.lng),
 					animation: google.maps.Animation.DROP,
 					map: map,
-					title: String(tree.tree_id)
+					title: "Tree " + String(tree.tree_id) + "." + String(tree.sub_tree_id),
+					//visible: false
+				});
+				
+			//waits for click, links to edit page
+				google.maps.event.addListener(markers[index], 'click', function(){
+					//alert('go to ' + tree.url);
+					window.location.href = tree.url;
+					
+				//We could also (potentially) include historical or other tree information in a pop-up box that appears 
+				//when a user clicks on the scpecific marker for a tree
 				});
         	 });
         });
