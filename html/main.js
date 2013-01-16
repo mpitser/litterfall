@@ -15,7 +15,7 @@ $(document).ready(function(){
         routes: {
             "update": "updateObservation", //inits the add record "wizard", leads to the edit pages
             "update/trees/site/:location/plot/:plot": "editPlot",
-            "update/trees/site/:location/plot/:plot/treeid/:treeid(/subtreeid/:subtreeid)": "editTree",
+            "update/trees/site/:location/plot/:plot/treeid/:treeid(/:subTreeId)": "editTree",
             "*actions": "defaultRoute" // Backbone will try match the route above first
         }
 	});
@@ -87,7 +87,7 @@ $(document).ready(function(){
 		updateTree: function(){
 			//goto update tree page
 			var subId = this.model.get("sub_tree_id");
-			var treeUrl = "/treeid/" + this.model.get("tree_id") + ((subId) ? '/subtreeid/' + subId : '');
+			var treeUrl = "/treeid/" + this.model.get("tree_id") + ((subId) ? '/' + subId : '');
 			document.location.hash = document.location.hash + treeUrl
 			//save a tree to the DB
 			//this.model.save();
@@ -174,8 +174,8 @@ $(document).ready(function(){
 		updateTree: function(){
 			//goto update tree page
 			var subId = this.model.get("sub_tree_id");
-			var treeUrl = this.model.get("tree_id") + ((subId) ? '/' + subId : '');
-			document.location.hash = document.location.hash + '/' + treeUrl
+			var treeUrl = "/treeid/" + this.model.get("tree_id") + ((subId) ? '/' + subId : '');
+			document.location.hash = document.location.hash + treeUrl
 			//save a tree to the DB
 			//this.model.save();
 		}
@@ -317,12 +317,20 @@ $(document).ready(function(){
     app_router.on('route:editTree', function(site, plot, treeId, subTreeId) {						//reloads page based on selected location (site) and plot
     	var  templateFile = 'update-tree.html';
 		require(['lib/text!templates/' + templateFile + '!strip'], function(templateHTML){			//<WHAT DOES THIS FUNCTION DO?> [ ] (some sort of require wrapper)
+			
+			if(typeof subTreeId === 'undefined'){
+   				subTreeId = '0';
+ 			} else {
+ 				subTreeId = subTreeId;
+ 			}
+			
 			$('#main').html(_.template(templateHTML, {
 				site: decodeURI(site), 
 				plot: plot,
 				treeId: treeId,
 				subTreeId: subTreeId
 			}));
+			
 
 			var thisTree = new Tree({editView: true});
 			thisTree.url = app.config.cgiDir + 'litterfall.py?site=' + site + '&plot=' + plot + '&treeid=' + treeId + '&subtreeid=' + subTreeId;
