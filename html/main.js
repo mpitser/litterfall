@@ -218,12 +218,11 @@ $(document).ready(function(){
 			diameter: {},
 			species: '',
 			species_certainty: 0,
-			dead: false,
+			dead: true,
 			dbh_marked: false,
-            url: '',
+			url: '',
 			lat: 0,
-	 		lng: 0,
-			dbh_marked: false
+			lng: 0
 		},
 		initialize: function(){
 			if (this.get('editView')){
