@@ -30,8 +30,9 @@ def getdata(obs, site, plot):
 	print ser_data
 
 def postdata(obs, data):
-	print json.dumps(data, default=json_util.default, separators=(',', ':'))
-	#obs.save(data)
+	data = json.loads(data)
+	print data
+	obs.save(data)
 	
 def main():
 	# Load config (for database info, etc)
@@ -48,22 +49,17 @@ def main():
 	obs = mongo_db.observations
 	
 	method = os.environ['REQUEST_METHOD']
-	
-	#debug = os.environ
-	#debug['REQUEST_METHOD'] = 'PUT'
-	#method = debug['REQUEST_METHOD']
+			
+	form = cgi.FieldStorage()
 	
 	print 'Content-Type: application/json\n'
-	#print 'Content-Type: text/html\n'
 	
 	if method == 'GET':
-		query = cgi.FieldStorage()
-		plot = query.getvalue('plot')
-		site = query.getvalue('site')
+		plot = form.getvalue('plot')
+		site = form.getvalue('site')
 		getdata(obs, site, plot)
-	elif method == 'PUT':
-		data = {'_id':'13246876532135'}
-		print debug
+	elif method == 'POST':
+		data = form.file.read()
 		postdata(obs, data)
 
 		

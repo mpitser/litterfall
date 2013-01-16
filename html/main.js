@@ -3,7 +3,7 @@
 //app object contains global app information
 var app = {
 	config: {
-		cgiDir: '../cgi-bin/'
+		cgiDir: './cgi-bin/'
 	}
 };
 
@@ -90,7 +90,7 @@ $(document).ready(function(){
 		},
 		updateTree: function(){
 			//logs in console: the selected tree's ID and 'dead' values (alive or dead)
-			console.log("updating tree:" + this.model.toJSON().id  + this.model.toJSON().dead);
+			this.model.save()
 		}
 	});
 	
@@ -119,7 +119,7 @@ $(document).ready(function(){
 	
 	//Declare the tree object (Model)
 	var Tree = Backbone.Model.extend({
-		urlRoot: '/tree',
+		//urlRoot: '/tree',
 		defaults: {
 			site: '',
 			plot: '',
