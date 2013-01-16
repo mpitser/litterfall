@@ -4,11 +4,18 @@ from pymongo import MongoClient
 from bson import json_util
 import json
 import cgi
-# for debug purpose
-import cgitb; cgitb.enable()
 import os
 import ConfigParser
-	
+# for debug purpose
+import cgitb; cgitb.enable()
+
+
+#############################################################################
+# this is python script that takes in query parameters from					#
+# js, queries database for data and returns to js in JSON format			#
+# in addition, it can validate the data before saving it to the database	#
+#############################################################################
+
 def getdata(obs, site, plot, treeid, subtreeid):
 	if site == 'all':
 		# then return an array of distince sites
@@ -52,6 +59,12 @@ def getdata(obs, site, plot, treeid, subtreeid):
 	
 	ser_data = json.dumps(json_data, default=json_util.default, separators=(',', ':'))
 	print ser_data
+
+def validate(obs, data):
+	# data is dictionary
+	data_val = obs.find(data)
+	flag = True 		
+	return flag
 	
 def main():
 	# Load config (for database info, etc)
@@ -68,14 +81,16 @@ def main():
 	obs = mongo_db.observations
 	
 	method = os.environ['REQUEST_METHOD']
-			
+	
 	print 'Content-Type: application/json\n'
 	
 	if method == 'POST' or method == 'PUT':
 		form = cgi.FieldStorage()
-		data = json.loads(form.file.read(), object_hook=json_util.object_hook)
+		data = json.loads(form.file.read(), object_hook=json_util.object_hook)	
+		#flag = validate(obs, data)
 		if len(data):
 			obs.save(data)
+			
 	elif method == 'GET':
 		query = cgi.FieldStorage()
 		plot = query.getvalue('plot')

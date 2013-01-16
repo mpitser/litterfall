@@ -152,9 +152,19 @@ $(document).ready(function(){
 			this.$el.html(_.template(this.template, {tree: thisTree}));
 		},
 		events: {
-			'click .btn-new-observation': 'newObservation',	
+			'click .btn-new-observation': 'newObservation',
+			'click .edit-existing': 'XDtestfunc',
 			'click td.editable': 'editValue'
 		},
+		
+		XDtestfunc: function(){
+			foo_dict = this.model.get('diameter');
+			foo_dict['88880101'] = {'notes':'test', 'value': 999};
+			this.model.set({'diameter':foo_dict});
+			console.log(this.model.get('tree_id'));
+			this.model.save();
+		},
+		
 		newObservation: function(){
 			//add a new blank row to the observation table
 			var diameters = _.clone(this.model.get('diameter')); //must clone object to update it
@@ -240,7 +250,7 @@ $(document).ready(function(){
 				el: $('#treeEditView'),
 				model: this
 			});
-			console.log(this.toJSON());
+			//console.log(this.toJSON());
 		},
 		parse: function(response){
 			response.full_tree_id = response.tree_id + (response.sub_tree_id * .1);
