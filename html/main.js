@@ -85,10 +85,6 @@ $(document).ready(function(){
 			'click .update-btn': 'updateTree'									//if update button is clicked, runs updateTree function
 		},
 		updateTree: function(){
-<<<<<<< HEAD
-			//logs in console: the selected tree's ID and 'dead' values (alive or dead)
-			this.model.save()
-=======
 			//goto update tree page
 			var subId = this.model.get("sub_tree_id");
 			var treeUrl = this.model.get("tree_id") + ((subId) ? '/' + subId : '');
@@ -182,7 +178,6 @@ $(document).ready(function(){
 			document.location.hash = document.location.hash + '/' + treeUrl
 			//save a tree to the DB
 			//this.model.save();
->>>>>>> 5278c2e8b4eb861ed493bfb366c62bc043b735db
 		}
 	});
 	
@@ -211,10 +206,6 @@ $(document).ready(function(){
 	
 	//Declare the tree object (Model)
 	var Tree = Backbone.Model.extend({
-<<<<<<< HEAD
-		//urlRoot: '/tree',
-=======
->>>>>>> 5278c2e8b4eb861ed493bfb366c62bc043b735db
 		defaults: {
 			site: '',
 			plot: '',

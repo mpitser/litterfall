@@ -8,31 +8,43 @@ import cgitb; cgitb.enable()
 import os
 import ConfigParser
 	
-
 def getdata(obs, site, plot, treeid, subtreeid):
 	if site == 'all':
+		# then return an array of distince sites
 		data = obs.find({'collection_type':'tree'}).distinct('site')
 		for j in range(0,len(data)):
 			data[j] = data[j].encode('ascii','ignore')
 		data.sort(key=str.lower)
 		n = len(data)
 	else:
+		# then the query is about a particular site and plot
 		findQuery = {
 			'collection_type':'tree',
 			'plot': int(plot),
 			'site': site
 		}
 		if treeid != None:
+			# if there is a tree id, then append
 			findQuery['tree_id'] = int(treeid)
 			if subtreeid != None:
+				# if there is a sub tree id, then append
 				findQuery['sub_tree_id'] = int(subtreeid)
+				
+		# get the data
 		data = obs.find(findQuery).sort("tree_id", 1)
 		n = data.count()
 
-	if  treeid != None:
-		# return a single model
+	# validate the return data
+	# if only a treeid is given and
+	# that particular tree has subtrees
+	# then return nothing
+	if  treeid != None and n > 1:
+		json_data = None
+	elif n == 1:
+		# return one single tree
 		json_data = data[0]
 	else:
+		# then it is asking for all the trees in that plot
 		# copy it over to another empty array
 		json_data = [0]*n
 		for i in range(0,n):
@@ -40,14 +52,6 @@ def getdata(obs, site, plot, treeid, subtreeid):
 	
 	ser_data = json.dumps(json_data, default=json_util.default, separators=(',', ':'))
 	print ser_data
-<<<<<<< HEAD
-
-def postdata(obs, data):
-	data = json.loads(data)
-	print data
-	obs.save(data)
-=======
->>>>>>> 5278c2e8b4eb861ed493bfb366c62bc043b735db
 	
 def main():
 	# Load config (for database info, etc)
@@ -69,16 +73,6 @@ def main():
 	
 	print 'Content-Type: application/json\n'
 	
-<<<<<<< HEAD
-	if method == 'GET':
-		plot = form.getvalue('plot')
-		site = form.getvalue('site')
-		getdata(obs, site, plot)
-	elif method == 'POST':
-		data = form.file.read()
-		postdata(obs, data)
-=======
-	
 	if method == 'POST' or method == 'PUT':
 		form = cgi.FieldStorage()
 		data = json.loads(form.file.read(), object_hook=json_util.object_hook)
@@ -91,7 +85,6 @@ def main():
 		treeid = query.getvalue('treeid')
 		subtreeid = query.getvalue('subtreeid')
 		getdata(obs, site, plot, treeid, subtreeid)
->>>>>>> 5278c2e8b4eb861ed493bfb366c62bc043b735db
 
 		
 if __name__ == "__main__":
