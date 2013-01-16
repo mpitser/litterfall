@@ -321,7 +321,7 @@ $(document).ready(function(){
 				site: decodeURI(site), 
 				plot: plot,
 				treeId: treeId
-				subTreeId: (subTreeId ? subTreeId : '0')
+				subTreeId: subTreeId
 			}));
 
 			var thisTree = new Tree({editView: true});
