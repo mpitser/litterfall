@@ -7,8 +7,9 @@ import cgi
 import cgitb; cgitb.enable()
 import os
 import ConfigParser
-		
-def getdata(obs, site, plot):
+	
+
+def getdata(obs, site, plot, treeid, subtreeid):
 	if site == 'all':
 		data = obs.find({'collection_type':'tree'}).distinct('site')
 		for j in range(0,len(data)):
@@ -16,22 +17,29 @@ def getdata(obs, site, plot):
 		data.sort(key=str.lower)
 		n = len(data)
 	else:
-		data = obs.find({'collection_type':'tree','plot': int(plot), 'site': site})
-		data = data.sort("tree_id", 1)
+		findQuery = {
+			'collection_type':'tree',
+			'plot': int(plot),
+			'site': site
+		}
+		if treeid != None:
+			findQuery['tree_id'] = int(treeid)
+			if subtreeid != None:
+				findQuery['sub_tree_id'] = int(subtreeid)
+		data = obs.find(findQuery).sort("tree_id", 1)
 		n = data.count()
-	
-	json_data = [0]*n
-	
-	# copy it over to another empty array
-	for i in range(0,n):
-		json_data[i] = data[i]
+
+	if  treeid != None:
+		# return a single model
+		json_data = data[0]
+	else:
+		# copy it over to another empty array
+		json_data = [0]*n
+		for i in range(0,n):
+			json_data[i] = data[i]
 	
 	ser_data = json.dumps(json_data, default=json_util.default, separators=(',', ':'))
 	print ser_data
-
-def postdata(obs, data):
-	print json.dumps(data, default=json_util.default, separators=(',', ':'))
-	#obs.save(data)
 	
 def main():
 	# Load config (for database info, etc)
@@ -56,15 +64,19 @@ def main():
 	print 'Content-Type: application/json\n'
 	#print 'Content-Type: text/html\n'
 	
-	if method == 'GET':
+	
+	if method == 'POST' or method == 'PUT':
+		form = cgi.FieldStorage()
+		data = json.loads(form.file.read(), object_hook=json_util.object_hook)
+		if len(data):
+			obs.save(data)
+	elif method == 'GET':
 		query = cgi.FieldStorage()
 		plot = query.getvalue('plot')
 		site = query.getvalue('site')
-		getdata(obs, site, plot)
-	elif method == 'PUT':
-		data = {'_id':'13246876532135'}
-		print debug
-		postdata(obs, data)
+		treeid = query.getvalue('treeid')
+		subtreeid = query.getvalue('subtreeid')
+		getdata(obs, site, plot, treeid, subtreeid)
 
 		
 if __name__ == "__main__":
