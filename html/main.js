@@ -14,8 +14,8 @@ $(document).ready(function(){
 	var AppRouter = Backbone.Router.extend({
         routes: {
             "update": "updateObservation", //inits the add record "wizard", leads to the edit pages
-            "update/trees/:location/:plot": "editPlot",
-            "update/trees/:location/:plot/*treeid": "editTree",
+            "update/trees/site/:location/plot/:plot": "editPlot",
+            "update/trees/site/:location/plot/:plot/treeid/:treeid(/subtreeid/:subtreeid)": "editTree",
             "*actions": "defaultRoute" // Backbone will try match the route above first
         }
 	});
@@ -87,8 +87,8 @@ $(document).ready(function(){
 		updateTree: function(){
 			//goto update tree page
 			var subId = this.model.get("sub_tree_id");
-			var treeUrl = this.model.get("tree_id") + ((subId) ? '/' + subId : '');
-			document.location.hash = document.location.hash + '/' + treeUrl
+			var treeUrl = "/treeid/" + this.model.get("tree_id") + ((subId) ? '/subtreeid/' + subId : '');
+			document.location.hash = document.location.hash + treeUrl
 			//save a tree to the DB
 			//this.model.save();
 		}
@@ -287,7 +287,7 @@ $(document).ready(function(){
 			});
 			locationOptions.fetch();
 			$('#get-plot').click(function(){														//waits for user to select plot
-				var getPlotUrl = "update/" + $('#type-select').val() + '/' + encodeURI($('#site-select').val()) + '/' + $('#plot-select').val()
+				var getPlotUrl = "update/" + $('#type-select').val() + '/site/' + encodeURI($('#site-select').val()) + '/plot/' + $('#plot-select').val()
 				document.location.hash = getPlotUrl;
 			});
 		});
@@ -314,18 +314,18 @@ $(document).ready(function(){
     });
     
     //Edit tree view
-    app_router.on('route:editTree', function(site, plot, treeId) {											//reloads page based on selected location (site) and plot
+    app_router.on('route:editTree', function(site, plot, treeId, subTreeId) {						//reloads page based on selected location (site) and plot
     	var  templateFile = 'update-tree.html';
 		require(['lib/text!templates/' + templateFile + '!strip'], function(templateHTML){			//<WHAT DOES THIS FUNCTION DO?> [ ] (some sort of require wrapper)
 			$('#main').html(_.template(templateHTML, {
 				site: decodeURI(site), 
 				plot: plot,
-				treeId: treeId.replace('/','.')
+				treeId: treeId
+				subTreeId: (subTreeId ? subTreeId : '0')
 			}));
-			
-			var treeIds = treeId.split('/');
+
 			var thisTree = new Tree({editView: true});
-			thisTree.url = app.config.cgiDir + 'litterfall.py?site=' + site + '&plot=' + plot + '&treeid=' + treeIds[0] + '&subtreeid=' + ((treeIds.length > 1) ? treeIds[1] : '0');
+			thisTree.url = app.config.cgiDir + 'litterfall.py?site=' + site + '&plot=' + plot + '&treeid=' + treeId + '&subtreeid=' + subTreeId;
 			thisTree.fetch();
 
 			//DBH Tooltip 
