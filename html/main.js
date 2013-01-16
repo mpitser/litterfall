@@ -43,25 +43,22 @@ $(document).ready(function(){
 				<button class="update-btn btn btn-mini btn-primary" type="button">Update</button>\
 			</td>\
 			<td>\
-				<%= tree_id %>\
-				<% if (sub_tree_id != "0"){ %>\
-					.<%= sub_tree_id %>\
-				<% } %>\
+				<%= tree.full_tree_id %>\
 			</td>\
 			<td>\
-				<%= species %>\
+				<%= tree.species %>\
 			</td>\
 			<td>\
-				<%= angle %>\
+				<%= tree.angle %>\
 			</td>\
 			<td>\
-				<%= distance %>\
+				<%= tree.distance %>\
 			</td>\
 			<td>\
-				<%= thisDiameter %> on <%= thisDate.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %>\
+				<%= tree.thisDiameter %> on <%= tree.thisDate.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %>\
 			</td>\
 			<td>\
-				<%= thisComment %>\
+				<%= tree.thisComment %>\
 		</td>',
 		initialize: function(){
 			this.render();
@@ -80,17 +77,112 @@ $(document).ready(function(){
 			//$el --> gets the jQuery object for this view's element 
 			//*.attr('id', thisTree._id.$oid) --> sets 'id' to MongoDB value for tree's ID
 			//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
-			this.$el.attr('id', thisTree._id.$oid).html(_.template(this.template, thisTree));
+			this.$el.attr('id', thisTree._id.$oid).html(_.template(this.template, {tree: thisTree}));
 			
 			this.options.targetEl.append(this.el);								   //appends the tree's row element to table
-			
 		},
 		events: {
 			'click .update-btn': 'updateTree'									//if update button is clicked, runs updateTree function
 		},
 		updateTree: function(){
+<<<<<<< HEAD
 			//logs in console: the selected tree's ID and 'dead' values (alive or dead)
 			this.model.save()
+=======
+			//goto update tree page
+			var subId = this.model.get("sub_tree_id");
+			var treeUrl = this.model.get("tree_id") + ((subId) ? '/' + subId : '');
+			document.location.hash = document.location.hash + '/' + treeUrl
+			//save a tree to the DB
+			//this.model.save();
+		}
+	});
+	
+	//build a row in the plot table representing a tree
+	var treeEditView = Backbone.View.extend({
+		tagName: 'div',
+		template: '\
+		<div id="tree-info">\
+			<ul>\
+				<li>Species: <%= tree.species %><i class="icon-edit"></i></li>\
+				<li>Angle Degrees: <%= tree.angle %><i class="icon-edit"></i></li>\
+				<li>Distance Meters: <%= tree.distance %><i class="icon-edit"></i></li>\
+			</ul>\
+		</div>\
+		<div class="button-row">\
+			<button class="btn-new-observation btn btn-mini btn-success pull-left" type="button">+ New Entry</button>\
+		</div>\
+		<table class="table-striped">\
+			<thead>\
+				<tr>\
+					<th></th>\
+					<th>Date</th>\
+					<th>Observers</th>\
+					<th>\
+						DBH (cm) <a href="#" class="dbh" rel="tooltip" data-placement="top" data-original-title="Diameter at Breast Height"><small>info</small></a>\
+					</th>\
+					<th>\
+						Comments\
+					</th>\
+				</tr>\
+			</thead>\
+			<tbody>\
+			<% _.each(tree.datesDesc, function(date){ %>\
+			<tr>\
+				<td>\
+					<button class="btn btn-mini btn-primary edit-existing" type="button">Edit</button>\
+				</td>\
+				<td class="editable"><%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %></td>\
+				<td class="editable"><%= (tree.diameter[date].observers || []).join(", ") %></td>\
+				<td class="editable"><%= tree.diameter[date].value %></td>\
+				<td class="editable"><%= tree.diameter[date].notes %></td>\
+			</tr>\
+			<% }); %>\
+			</tbody>\
+			</table>\
+			<div class="button-row">\
+				<button class="btn-new-observation btn btn-mini btn-success pull-left" type="button">+ New Entry</button>\
+			</div>\
+		',
+		initialize: function(){
+			this.render();
+			this.model.on('change:diameter', this.render, this); //diameter will change when new observation is added
+		},
+		render: function(){
+			console.log('render edit');
+			var thisTree = this.model.toJSON();
+			//get the dates in descending order
+			thisTree.datesDesc = _.keys(thisTree.diameter).sort().reverse();
+			this.$el.html(_.template(this.template, {tree: thisTree}));
+		},
+		events: {
+			'click .btn-new-observation': 'newObservation',	
+			'click td.editable': 'editValue'
+		},
+		newObservation: function(){
+			//add a new blank row to the observation table
+			var diameters = _.clone(this.model.get('diameter')); //must clone object to update it
+			var today = new Date();
+			var newDateKey = [today.getFullYear(),((today.getMonth() < 9) ? 0 : ""),(today.getMonth() + 1),((today.getDate() < 10) ? 0 : ""),today.getDate()].join(""); //yes it generates the date in YYYYMMDD format
+			if (diameters[newDateKey] == undefined){ //prevent overwriting of dates
+				diameters[newDateKey] = {
+					value: 'n/a',
+					note: ""
+				};
+				this.model.set({"diameter": diameters});
+			}
+		},
+		editValue: function(event){
+			$(event.target).css("color", "red"); //event attaching test
+		},
+		updateTree: function(){
+			//goto update tree page
+			var subId = this.model.get("sub_tree_id");
+			var treeUrl = this.model.get("tree_id") + ((subId) ? '/' + subId : '');
+			document.location.hash = document.location.hash + '/' + treeUrl
+			//save a tree to the DB
+			//this.model.save();
+>>>>>>> 5278c2e8b4eb861ed493bfb366c62bc043b735db
 		}
 	});
 	
@@ -119,7 +211,10 @@ $(document).ready(function(){
 	
 	//Declare the tree object (Model)
 	var Tree = Backbone.Model.extend({
+<<<<<<< HEAD
 		//urlRoot: '/tree',
+=======
+>>>>>>> 5278c2e8b4eb861ed493bfb366c62bc043b735db
 		defaults: {
 			site: '',
 			plot: '',
@@ -132,21 +227,50 @@ $(document).ready(function(){
 			diameter: {},
 			species: '',
 			species_certainty: 0,
-			dead: true,
+			dead: false,
+			dbh_marked: false,
+            url: '',
+			lat: 0,
+	 		lng: 0,
 			dbh_marked: false
 		},
 		initialize: function(){
+			if (this.get('editView')){
+				this.on('change:_id', this.editViewInitialize, this);
+			}
+		},
+		plotViewInitialize: function(){
 			var plotRow = new plotRowView({
 				targetEl: $("#plot-table"),
 				model: this
 			});
+		},
+		editViewInitialize: function(){
+			var editForm = new treeEditView({
+				el: $('#treeEditView'),
+				model: this
+			});
+			console.log(this.toJSON());
+		},
+		parse: function(response){
+			response.full_tree_id = response.tree_id + (response.sub_tree_id * .1);
+			return response;
 		}
 	});
 	
 	//Declare the plot collection, contains tree objects
 	var Plot = Backbone.Collection.extend({
 		model: Tree,
-		url: "/"
+		url: "/",
+  		initialize: function(){
+  			 this.on('reset', this.renderTrees); 
+  			 this.on('add', this.renderTrees); 
+  		},
+  		renderTrees: function(){
+  			this.each(function(tree){
+  				tree.plotViewInitialize();
+  			}, this);
+  		}
 	});
 	
     // Instantiate the router
@@ -199,6 +323,25 @@ $(document).ready(function(){
 		});
     });
     
+    //Edit tree view
+    app_router.on('route:editTree', function(site, plot, treeId) {											//reloads page based on selected location (site) and plot
+    	var  templateFile = 'update-tree.html';
+		require(['lib/text!templates/' + templateFile + '!strip'], function(templateHTML){			//<WHAT DOES THIS FUNCTION DO?> [ ] (some sort of require wrapper)
+			$('#main').html(_.template(templateHTML, {
+				site: decodeURI(site), 
+				plot: plot,
+				treeId: treeId.replace('/','.')
+			}));
+			
+			var treeIds = treeId.split('/');
+			var thisTree = new Tree({editView: true});
+			thisTree.url = app.config.cgiDir + 'litterfall.py?site=' + site + '&plot=' + plot + '&treeid=' + treeIds[0] + '&subtreeid=' + ((treeIds.length > 1) ? treeIds[1] : '0');
+			thisTree.fetch();
+
+			//DBH Tooltip 
+			updateFunctions();
+		});
+    });
     // Start Backbone history a necessary step for bookmarkable URL's; enables user to click BACK without navigating to entirely different domain
     Backbone.history.start();
 	
@@ -207,7 +350,7 @@ $(document).ready(function(){
 });
 // Start Bootstrap and template related jQuery
 	
-	function updateFunctions(){
+function updateFunctions(){
 	$('.dbh').tooltip({trigger:'hover'})
 	$('.dropdown-toggle').dropdown()
 }
