@@ -193,7 +193,6 @@ $(document).ready(function(){
 	
 	var singleOption = Backbone.Model.extend({});								//creates empty Model (to be a site, once information is loaded)
 	
-	
 	var selectionOptions = Backbone.Collection.extend({							//creates Collection of singleOption Models (to-be locations, plots, collection type)
 		model: singleOption,
 		url: "data/sites.json",													//calls for server DB's location (plot, etc. information)

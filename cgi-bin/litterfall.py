@@ -63,8 +63,11 @@ def getdata(obs, site, plot, treeid, subtreeid):
 def validate(obs, data):
 	# data is dictionary
 	data_val = obs.find(data)
-	flag = True 		
-	return flag
+	# check if it returns multiple documents
+	if data_val.count() > 1:
+		return False
+	else:
+		return True
 	
 def main():
 	# Load config (for database info, etc)
