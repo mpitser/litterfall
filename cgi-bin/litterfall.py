@@ -4,6 +4,7 @@ from pymongo import MongoClient
 from bson import json_util
 import json
 import cgi
+# for debug purpose
 import cgitb; cgitb.enable()
 import os
 import ConfigParser
@@ -28,8 +29,7 @@ def getdata(obs, site, plot, treeid, subtreeid):
 			findQuery['tree_id'] = int(treeid)
 			if subtreeid != None:
 				# if there is a sub tree id, then append
-				findQuery['sub_tree_id'] = int(subtreeid)
-				
+				findQuery['sub_tree_id'] = int(subtreeid)			
 		# get the data
 		data = obs.find(findQuery).sort("tree_id", 1)
 		n = data.count()
@@ -69,8 +69,6 @@ def main():
 	
 	method = os.environ['REQUEST_METHOD']
 			
-	form = cgi.FieldStorage()
-	
 	print 'Content-Type: application/json\n'
 	
 	if method == 'POST' or method == 'PUT':
@@ -85,7 +83,6 @@ def main():
 		treeid = query.getvalue('treeid')
 		subtreeid = query.getvalue('subtreeid')
 		getdata(obs, site, plot, treeid, subtreeid)
-
 		
 if __name__ == "__main__":
     main()
