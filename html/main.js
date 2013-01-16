@@ -320,7 +320,7 @@ $(document).ready(function(){
 			$('#main').html(_.template(templateHTML, {
 				site: decodeURI(site), 
 				plot: plot,
-				treeId: treeId
+				treeId: treeId,
 				subTreeId: subTreeId
 			}));
 
