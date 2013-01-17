@@ -145,7 +145,7 @@ $(document).ready(function(){
 			this.model.on('change:diameter', this.render, this); //diameter will change when new observation is added
 		},
 		render: function(){
-			console.log('render edit');
+			//console.log('render edit');
 			var thisTree = this.model.toJSON();
 			//get the dates in descending order
 			thisTree.datesDesc = _.keys(thisTree.diameter).sort().reverse();
@@ -161,7 +161,7 @@ $(document).ready(function(){
 			foo_dict = this.model.get('diameter');
 			foo_dict['88880101'] = {'notes':'test', 'value': 999};
 			this.model.set({'diameter':foo_dict});
-			console.log(this.model.get('tree_id'));
+			//console.log(this.model.get('tree_id'));
 			this.model.save();
 		},
 		
