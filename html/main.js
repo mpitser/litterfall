@@ -86,7 +86,8 @@ $(document).ready(function(){
 			
 		},
 		events: {
-			'click .update-btn': 'updateTree'									//if update button is clicked, runs updateTree function
+			'click .update-btn': 'updateTree',									//if update button is clicked, runs updateTree function
+			'click .add-new-tree': 'updateTree',	
 		},
 		updateTree: function(){
 			//logs in console: the selected tree's ID and 'dead' values (alive or dead)
@@ -188,15 +189,21 @@ $(document).ready(function(){
 				plot: plot
 			}));
 			
-			//DBH Tooltip 
+			//jQuery calls for, DBH Tooltip and updating functionality
 			updateFunctions();
-
+			
 			
 			var thisPlot = new Plot;
 			//need to use site and plot variable to build url to python script
 			thisPlot.url = app.config.cgiDir + 'litterfall.py?site=' + site + '&plot=' + plot;
 			thisPlot.fetch();
+			
+			$('.add-new-tree').click(function(){
+				thisPlot.add(new Tree());
+			});
+			
 		});
+		
     });
     
     // Start Backbone history a necessary step for bookmarkable URL's; enables user to click BACK without navigating to entirely different domain
@@ -210,6 +217,7 @@ $(document).ready(function(){
 	function updateFunctions(){
 	$('.dbh').tooltip({trigger:'hover'})
 	$('.dropdown-toggle').dropdown()
+	
 }
 // End Bootstrap and template related jQuery
 
