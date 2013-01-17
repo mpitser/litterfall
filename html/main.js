@@ -15,7 +15,7 @@ $(document).ready(function(){
         routes: {
             "update": "updateObservation", //inits the add record "wizard", leads to the edit pages
             "update/trees/site/:location/plot/:plot": "editPlot",
-            "update/trees/site/:location/plot/:plot/treeid/:treeid(/:subTreeId)": "editTree",
+            "update/trees/site/:location/plot/:plot/treeid/:treeid(/subtreeid/:subTreeId)": "editTree",
             "*actions": "defaultRoute" // Backbone will try match the route above first
         }
 	});
@@ -87,7 +87,7 @@ $(document).ready(function(){
 		updateTree: function(){
 			//goto update tree page
 			var subId = this.model.get("sub_tree_id");
-			var treeUrl = "/treeid/" + this.model.get("tree_id") + ((subId) ? '/' + subId : '');
+			var treeUrl = "/treeid/" + this.model.get("tree_id") + ((subId) ? '/subtreeid/' + subId : '');
 			document.location.hash = document.location.hash + treeUrl
 			//save a tree to the DB
 			//this.model.save();
@@ -108,7 +108,7 @@ $(document).ready(function(){
 		<div class="button-row">\
 			<button class="btn-new-observation btn btn-mini btn-success pull-left" type="button">+ New Entry</button>\
 		</div>\
-		<table class="table-striped">\
+		<table id="tree_observations" class="table-striped">\
 			<thead>\
 				<tr>\
 					<th></th>\
@@ -126,12 +126,13 @@ $(document).ready(function(){
 			<% _.each(tree.datesDesc, function(date){ %>\
 			<tr>\
 				<td>\
-					<button class="btn btn-mini btn-primary edit-existing" type="button">Edit</button>\
+					<button class="display_cell btn btn-mini btn-primary edit-existing" type="button">Edit</button>\
+					<div class="edit_cell btn-group"><button class="btn-save_observation btn btn-mini btn-success" type="button">Submit</button><button class="btn btn-mini btn-danger" type="button">Cancel</button>\
 				</td>\
-				<td class="editable"><%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %></td>\
-				<td class="editable"><%= (tree.diameter[date].observers || []).join(", ") %></td>\
-				<td class="editable"><%= tree.diameter[date].value %></td>\
-				<td class="editable"><%= tree.diameter[date].notes %></td>\
+				<td class="editable"><span class="display_cell date_select"><%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %></span><span class="edit_cell date_select"><input type="text" value="<%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %>"/></span></td>\
+				<td class="editable"><span class="display_cell observers"><%= (tree.diameter[date].observers || []).join(", ") %></span><span class="edit_cell observers"><input type="text" value="<%= (tree.diameter[date].observers || []).join(", ") %>"></span></td>\
+				<td class="editable"><span class="display_cell diameter"><%= tree.diameter[date].value %></span><span class="edit_cell diameter"><input type="text" value="<%= tree.diameter[date].value %>"></span></td>\
+				<td class="editable"><span class="display_cell notes"><%= tree.diameter[date].notes %></span><span class="edit_cell notes"><input type="text" value="<%= tree.diameter[date].notes %>"></span></span></td>\
 			</tr>\
 			<% }); %>\
 			</tbody>\
@@ -153,7 +154,8 @@ $(document).ready(function(){
 		},
 		events: {
 			'click .btn-new-observation': 'newObservation',	
-			'click td.editable': 'editValue'
+			'click td.editable': 'editValue',
+			'click .btn-save-observation': 'saveObservation'
 		},
 		newObservation: function(){
 			//add a new blank row to the observation table
@@ -167,6 +169,21 @@ $(document).ready(function(){
 				};
 				this.model.set({"diameter": diameters});
 			}
+
+			// Render new row
+			this.render();
+			
+			// Show "Submit/cancel button" and disable all the fields from being editing
+			//$("#tree_observations > tbody > tr:first > td:first").html("");
+			
+			// Show edit content, hide display content, add date_picker		
+			$("#tree_observations > tbody > tr:first .edit_cell").show();
+			$("#tree_observations > tbody > tr:first .display_cell").hide();
+			$("#tree_observations > tbody > tr:first .edit_cell.date_select :input" ).datepicker();
+					
+		},
+		saveObservation: function(event) {
+			alert("Save this observation");
 		},
 		editValue: function(event){
 			$(event.target).css("color", "red"); //event attaching test
