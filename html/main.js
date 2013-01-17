@@ -212,7 +212,6 @@ $(document).ready(function(){
 			_id: '',
 			tree_id: 0,
 			sub_tree_id: 0,
-			quadrant: 0,
 			angle: 0,
 			distance: 0,
 			diameter: {},
