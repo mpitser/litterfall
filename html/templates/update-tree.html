@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -9,13 +8,15 @@
     <meta name="author" content="">
 
     <!-- Le styles -->
-    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="../css/bootstrap.css" rel="stylesheet">
+    <link href="../css/tables.css" rel="stylesheet">
+
     <style>
       body {
         padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
       }
     </style>
-    <link href="css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="../../css/bootstrap-responsive.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -31,42 +32,15 @@
   </head>
 
   <body>
-	<div class="container">
 
-      <h1>Update Data Records</h1>
-      <p>Fill out the form below to begin updating the data records</p>
-	<div class="row">
-		<form>
-	
-	<div class="span4">
-		<div>
-		<h3>Site</h3>
-		<select id="site-select" name="site">
-		</select>
+    <div class="container">
+      <h1>Updating Data Records <small><%= site %>, Plot <%= plot %></small></h1>
+		<h2>Tree: <%= treeId %></h2>
+		<div id="treeEditView">
+				
+			
 		</div>
-
-	<div><h3>Plot</h3>
-		<select id="plot-select" name="plot">
-		  <option>1</option>
-		  <option>2</option>
-		</select>
-	</div>
-	</div>
-	<div class="span4">
-		<div>
-			<h3>Collection Type</h3>
-			<select id="type-select" name="type-select">
-				<option value="trees">Tree Data</option>
-		  		<option value="litterfall">Litterfall</option>	  		
-			</select>
-		</div>
-		<div style="margin:25px 0px;">
-  			<button id="get-plot" class="btn btn-large btn-primary" type="button">Continue ></button>
-		</div>
-	</div>
     </div> <!-- /container -->
-
-   
 
   </body>
 </html>
