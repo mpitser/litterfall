@@ -192,7 +192,7 @@ def main():
 	
 	method = os.environ['REQUEST_METHOD']
 	
-	print 'Content-Type: application/json\n'
+	#print 'Content-Type: application/json\n'
 	
 	if method == 'POST' or method == 'PUT':
 		form = cgi.FieldStorage()
@@ -203,7 +203,7 @@ def main():
 			data = json.dumps(data, default=json_util.default, separators=(',', ':'))
 			print data
 		else:
-			print '\nStatus:406\n'
+			print 'Status:406\n'
 			
 			
 	elif method == 'GET':

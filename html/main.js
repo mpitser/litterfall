@@ -131,7 +131,7 @@ $(document).ready(function(){
 					<button class="btn-cancel-observation btn btn-mini btn-danger" type="button">Cancel</button>\
 				</td>\
 				<td class="editable"><span class="display_cell date_select"><%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %></span><span class="edit_cell date_select"><input type="text" value="<%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %>"/>\
-				<input type="hidden" class="formatted_date" value="<%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %>"></span></td>\
+				<input type="hidden" class="formatted_date" value="<%= date %>"></span></td>\
 				<td class="editable"><span class="display_cell observers"><%= (tree.diameter[date].observers || []).join(", ") %></span><span class="edit_cell observers"><input type="text" value="<%= (tree.diameter[date].observers || []).join(", ") %>"></span></td>\
 				<td class="editable"><span class="display_cell diameter"><%= tree.diameter[date].value %></span><span class="edit_cell diameter"><input type="text" value="<%= tree.diameter[date].value %>"></span></td>\
 				<td class="editable"><span class="display_cell notes"><%= tree.diameter[date].notes %></span><span class="edit_cell notes"><input type="text" value="<%= tree.diameter[date].notes %>"></span></span></td>\
@@ -158,6 +158,7 @@ $(document).ready(function(){
 		events: {
 
 			'click .btn-new-observation': 'newObservation',	
+			'click .edit-existing': 'editObservation',
 			'click td.editable': 'editValue',
 			'click .btn-save-observation': 'saveObservation',
 			'click .btn-cancel-observation': 'render'
@@ -171,13 +172,12 @@ $(document).ready(function(){
 			if (diameters[newDateKey] == undefined){ //prevent overwriting of dates
 				diameters[newDateKey] = {
 					value: 'n/a',
-					note: ""
+					notes: ""
 				};
 				this.model.set({"diameter": diameters});
 			}
 
-			// Render new row
-			this.render();
+			this.render();			// Render new row
 			
 			// Disable all the fields from being editing
 			$("#tree_observations .btn.display_cell").hide();
@@ -185,19 +185,29 @@ $(document).ready(function(){
 			// Show edit content, hide display content, show "Submit/cancel button", add date_picker		
 			$("#tree_observations > tbody > tr:first .edit_cell").show();
 			$("#tree_observations > tbody > tr:first .display_cell").hide();
-			$("#tree_observations > tbody > tr:first .edit_cell.date_select :input" ).datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date"});
-			$("#tree_observations > tbody > tr:first .edit_cell.date_select :input" ).datepicker("setDate", today ); // Makes sure alt field is populated
-					
+			$("#tree_observations > tbody > tr:first .edit_cell.date_select :input" ).datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date"});	
+		},
+		
+		editObservation: function(event) {
+			// User wants to edit an existing observation.  
+			
+			row_to_edit = $(event.target).parents("tr");		// Get the row of edit button
+			
+			// Show edit content, hide display content, show "Submit/cancel button", add date_picker		
+			row_to_edit.find(" .edit_cell").show();
+			row_to_edit.find(".display_cell").hide();
+			row_to_edit.find(".edit_cell.date_select :input" ).datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date"});
 		},
 		
 		saveObservation: function(event) {
-			
-			
+			// User added or edited an observation.  Save it to the server.	
 			var newDateKey = $("#tree_observations > tbody > tr .edit_cell .formatted_date").val();
-			var newValue = $("#tree_observations > tbody > tr .edit_cell.diameter :input").val();
+			var newValue = parseFloat($("#tree_observations > tbody > tr .edit_cell.diameter :input").val());
 			var newObservers = $("#tree_observations > tbody > tr .edit_cell.observers :input").val();
 			var newNotes = $("#tree_observations > tbody > tr .edit_cell.notes :input").val();
 			
+			// ** NEED TO INSERT VALIDATION CODE HERE **
+						
 			//must clone object to update it
 			var diameters = _.clone(this.model.get('diameter')); 
 			diameters[newDateKey] = {
@@ -206,13 +216,14 @@ $(document).ready(function(){
 					//observers: newObservers
 				};
 			this.model.set({"diameter": diameters});
-			alert("Save this observation " + newDateKey + newValue + newObservers + newNotes);
+			console.log("Saving observation: \nDate:" + newDateKey + "\nDiameter: " + newValue + "\nObservers: " + newObservers + "\nNotes: " + newNotes);
 			this.model.save();			
 		},
 		
 		editValue: function(event){
 			$(event.target).css("color", "red"); //event attaching test
 		},
+		
 		updateTree: function(){
 			//goto update tree page
 			var subId = this.model.get("sub_tree_id");
