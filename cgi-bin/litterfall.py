@@ -6,11 +6,11 @@ import json, cgi, os, ConfigParser, unicodedata
 # for debug purpose
 import cgitb; cgitb.enable()
 
-#############################################################################
-# this is python script that takes in query parameters from					#
-# js, queries database for data and returns to js in JSON format			#
-# in addition, it can validate the data before saving it to the database	#
-#############################################################################
+#############################################################################################
+# this is python script that takes in query parameters from	js, queries database for data	#
+# and returns to js in JSON format. in addition, it can validate the data before saving it  #
+# to the database																			#
+#############################################################################################
 
 # some global variables
 sites_predef = ["beech","floodplains","Knoll","norway","Oaks","swamp","TBNO","TOH"]
