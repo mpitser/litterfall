@@ -130,7 +130,8 @@ $(document).ready(function(){
 					<div class="edit_cell btn-group"><button class="btn-save-observation btn btn-mini btn-success" type="button">Submit</button>\
 					<button class="btn-cancel-observation btn btn-mini btn-danger" type="button">Cancel</button>\
 				</td>\
-				<td class="editable"><span class="display_cell date_select"><%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %></span><span class="edit_cell date_select"><input type="text" value="<%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %>"/></span></td>\
+				<td class="editable"><span class="display_cell date_select"><%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %></span><span class="edit_cell date_select"><input type="text" value="<%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %>"/>\
+				<input type="hidden" class="formatted_date" value="<%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %>"></span></td>\
 				<td class="editable"><span class="display_cell observers"><%= (tree.diameter[date].observers || []).join(", ") %></span><span class="edit_cell observers"><input type="text" value="<%= (tree.diameter[date].observers || []).join(", ") %>"></span></td>\
 				<td class="editable"><span class="display_cell diameter"><%= tree.diameter[date].value %></span><span class="edit_cell diameter"><input type="text" value="<%= tree.diameter[date].value %>"></span></td>\
 				<td class="editable"><span class="display_cell notes"><%= tree.diameter[date].notes %></span><span class="edit_cell notes"><input type="text" value="<%= tree.diameter[date].notes %>"></span></span></td>\
@@ -153,12 +154,14 @@ $(document).ready(function(){
 			thisTree.datesDesc = _.keys(thisTree.diameter).sort().reverse();
 			this.$el.html(_.template(this.template, {tree: thisTree}));
 		},
+		
 		events: {
 			'click .btn-new-observation': 'newObservation',	
 			'click td.editable': 'editValue',
 			'click .btn-save-observation': 'saveObservation',
 			'click .btn-cancel-observation': 'render'
 		},
+		
 		newObservation: function(){
 			//add a new blank row to the observation table
 			var diameters = _.clone(this.model.get('diameter')); //must clone object to update it
@@ -181,25 +184,31 @@ $(document).ready(function(){
 			// Show edit content, hide display content, show "Submit/cancel button", add date_picker		
 			$("#tree_observations > tbody > tr:first .edit_cell").show();
 			$("#tree_observations > tbody > tr:first .display_cell").hide();
-			$("#tree_observations > tbody > tr:first .edit_cell.date_select :input" ).datepicker();
+			$("#tree_observations > tbody > tr:first .edit_cell.date_select :input" ).datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date"});
+			$("#tree_observations > tbody > tr:first .edit_cell.date_select :input" ).datepicker("setDate", today ); // Makes sure alt field is populated
 					
 		},
+		
 		saveObservation: function(event) {
-			alert("Save this observation");
 			
-			var diameters = _.clone(this.model.get('diameter')); //must clone object to update it
-			var today = new Date();
-			var newDateKey = [today.getFullYear(),((today.getMonth() < 9) ? 0 : ""),(today.getMonth() + 1),((today.getDate() < 10) ? 0 : ""),today.getDate()].join(""); //yes it generates the date in YYYYMMDD format
-			if (diameters[newDateKey] == undefined){ //prevent overwriting of dates
-				diameters[newDateKey] = {
-					value: 'n/a',
-					note: ""
+			
+			var newDateKey = $("#tree_observations > tbody > tr .edit_cell .formatted_date").val();
+			var newValue = $("#tree_observations > tbody > tr .edit_cell.diameter :input").val();
+			var newObservers = $("#tree_observations > tbody > tr .edit_cell.observers :input").val();
+			var newNotes = $("#tree_observations > tbody > tr .edit_cell.notes :input").val();
+			
+			//must clone object to update it
+			var diameters = _.clone(this.model.get('diameter')); 
+			diameters[newDateKey] = {
+					value: newValue,
+					notes: newNotes,
+					//observers: newObservers
 				};
-				this.model.set({"diameter": diameters});
-			}
-			
-			this.model.save();
+			this.model.set({"diameter": diameters});
+			alert("Save this observation " + newDateKey + newValue + newObservers + newNotes);
+			this.model.save();			
 		},
+		
 		editValue: function(event){
 			$(event.target).css("color", "red"); //event attaching test
 		},
