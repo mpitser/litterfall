@@ -133,7 +133,6 @@ def checkdict(diameter_dict, dtype):
 def validate(obs, data):
 	# data is dictionary, with unicode
 	# e.g. {u'sub_tree_id': 0, u'plot': 1, u'full_tree_id': 1, u'angle': 86,...}
-	#print isinstance(str(data['site']), str)
 		
 	fields = {'collection_type':{'type': str, 'value': ['tree'], 'high':0, 'low':0}, 
 			  'site':{'type': str, 'value': sites_predef, 'high':0, 'low':0}, 
@@ -153,9 +152,6 @@ def validate(obs, data):
 	for i in range(len(keys)):
 		key = keys[i]
 		tocheck = data[key]
-		print tocheck
-		#print key
-		#print tocheck 
 		
 		# the correct criteria
 		crit = fields[key]
@@ -166,17 +162,14 @@ def validate(obs, data):
 		
 		# different schemes for checking
 		if isinstance(tocheck, float) or isinstance(tocheck, int):
-			print 'checking number'
 			if checknum(tocheck, dtype, high, low) == False:
 				return False
 				
 		elif isinstance(tocheck, dict):
-			print 'checking dictionary'
 			if checkdict(tocheck, dtype) ==  False:
 				return False
 				
 		else:
-			print 'checking string'
 			if checkstring(tocheck, dtype, value) ==  False:
 				return False
 				
