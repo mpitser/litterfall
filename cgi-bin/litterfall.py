@@ -2,11 +2,7 @@
 from datetime import datetime
 from pymongo import MongoClient
 from bson import json_util
-import json
-import cgi
-import os
-import ConfigParser
-import unicodedata
+import json, cgi, os, ConfigParser, unicodedata
 # for debug purpose
 import cgitb; cgitb.enable()
 
@@ -63,30 +59,13 @@ def getdata(obs, site, plot, treeid, subtreeid):
 	ser_data = json.dumps(json_data, default=json_util.default, separators=(',', ':'))
 	print ser_data
 
-####
-# tree id, int
-# sub tree id, int, 0 by default
-# collection type = tree
-# site, part of the predefined existing site, str
-# plot, int
-# angle, float, check limits
-# dist, float, >0
-# diameter, value = float, >0, date = str, yr>2000, mth >0 <=12, day > 0 <=31
-# comment, str, <1kb
-# dead, True or False 
-# dbh marked, True or False
-####
-
 def checknum(tocheck, dtype, high, low):
 	if tocheck > high or tocheck < low:
 		return {'flag': False, 'msg': 'check boundary!'}
 	else:
 		return {'flag': True, 'msg': 'passed number check'}
 
-def checkstring(tocheck, dtype, value):
-	#print 'true type', dtype
-	#print 'object type is', type(tocheck)
-	
+def checkstring(tocheck, dtype, value):	
 	# need to take care of the stupid unicode stuff
 	tocheck = unicodedata.normalize('NFKD', tocheck).encode('ascii','ignore')
 		
@@ -120,6 +99,7 @@ def checkdict(diameter_dict, dtype):
 			note = content['notes']
 			value = content['value']
 						
+			# need to take care of the stupid unicode stuff
 			note = unicodedata.normalize('NFKD', note).encode('ascii','ignore')
 
 			if not isinstance(note, str):
@@ -133,6 +113,7 @@ def validate(obs, data):
 	# data is dictionary, with unicode
 	# e.g. {u'sub_tree_id': 0, u'plot': 1, u'full_tree_id': 1, u'angle': 86,...}
 		
+	# fields to check and their criteria
 	fields = {'collection_type':{'type': str, 'value': ['tree'], 'high':0, 'low':0}, 
 			  'site':{'type': str, 'value': sites_predef, 'high':0, 'low':0}, 
 			  'plot':{'type': int, 'value': '', 'high':3, 'low':0},
@@ -175,7 +156,6 @@ def validate(obs, data):
 				
 	# then all is good
 	return {'flag': True, 'msg': 'passed all checks'}
-
 		
 def main():
 	# Load config (for database info, etc)
@@ -192,8 +172,16 @@ def main():
 	obs = mongo_db.observations
 	
 	method = os.environ['REQUEST_METHOD']
-	
-	if method == 'POST' or method == 'PUT':
+
+	if method == 'GET':
+		print 'Content-Type: application/json\n'
+		query = cgi.FieldStorage()
+		plot = query.getvalue('plot')
+		site = query.getvalue('site')
+		treeid = query.getvalue('treeid')
+		subtreeid = query.getvalue('subtreeid')
+		getdata(obs, site, plot, treeid, subtreeid)	
+	elif method == 'POST' or method == 'PUT':
 		form = cgi.FieldStorage()
 		data = json.loads(form.file.read(), object_hook=json_util.object_hook)	
 		result = validate(obs, data)
@@ -207,16 +195,6 @@ def main():
 		else:
 			print 'Status:406\n'
 			print msg
-			
-			
-	elif method == 'GET':
-		print 'Content-Type: application/json\n'
-		query = cgi.FieldStorage()
-		plot = query.getvalue('plot')
-		site = query.getvalue('site')
-		treeid = query.getvalue('treeid')
-		subtreeid = query.getvalue('subtreeid')
-		getdata(obs, site, plot, treeid, subtreeid)
 		
 if __name__ == "__main__":
     main()
