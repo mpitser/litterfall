@@ -6,9 +6,9 @@ import json
 import cgi
 import os
 import ConfigParser
+import unicodedata
 # for debug purpose
 import cgitb; cgitb.enable()
-
 
 #############################################################################
 # this is python script that takes in query parameters from					#
@@ -18,7 +18,6 @@ import cgitb; cgitb.enable()
 
 # some global variables
 sites_predef = ["beech","floodplains","Knoll","norway","Oaks","swamp","TBNO","TOH"]
-plots_predef = [1, 2]
 
 def getdata(obs, site, plot, treeid, subtreeid):
 	if site == 'all':
@@ -77,82 +76,30 @@ def getdata(obs, site, plot, treeid, subtreeid):
 # dead, True or False 
 # dbh marked, True or False
 ####
-def validate(obs, data):
-	# data is dictionary, with unicode
-	# e.g. {u'sub_tree_id': 0, u'plot': 1, u'full_tree_id': 1, u'angle': 86,...}
-	#print isinstance(str(data['site']), str)
-	
-	fields = {'collection_type':{'type': str, 'value': ['tree'], 'high':0, 'low':0}, 
-			  'site':{'type': str, 'value': sites_predef, 'high':0, 'low':0}, 
-			  'plot':{'type': int, 'value': plots_predef, 'high':999, 'low':0},
-			  'tree_id':{'type': int, 'value': range(999), 'high':0, 'low':0},
-			  'sub_tree_id':{'type': int, 'value': range(-1, 999), 'high':0, 'low':0},
-			  'angle':{'type': float, 'value': '', 'high':360, 'low':-0.1}, 
-			  'distance':{'type': float, 'value': '','high':999, 'low':0}, 
-			  'diameter':{'type': dict, 'value': '', 'high':0, 'low':0},
-			  'dead':{'type': bool, 'value': [True, False], 'high':0, 'low':0}, 
-			  'dbh_marked':{'type': bool, 'value': [True, False], 'high':0, 'low':0}}
-	
-	keys = fields.keys()		  
-	
-	for i in range(len(keys)):
-		key = keys[i]
-		
-		# need to check this against the right criteria
-		tocheck = data[key]
-		print tocheck 
-		
-		# the correct criteria
-		crit = fields[key]
-		type = crit['type']
-		value = crit['value']
-		high = crit['high']
-		low = crit['low']
-		
-		if isinstance(tocheck, float):
-			checkfloat()
-		elif isinstance(tocheck, dict):
-			checkdict()
-		else:
-			checkregular()
-			'''
-			if not isinstance(tocheck, type):
-				return False
-			elif tocheck[key] not in value:
-				return False
-			elif tocheck[key] < low:
-				return False
-			elif tocheck[key] > high
-				return False
-			else: 
-				return True
-			'''
-	#data_val = obs.find(data)
-	# check if it returns multiple documents
-	#if data_val.count() > 1:
-	#	return False
-	#else:
-	#	return True
-	
-def checkfloat(tocheck, type, high, low):
-	if not isinstance(tocheck, type):
-		return False
-	elif tocheck > high or tocheck < low:
+
+def checknum(tocheck, dtype, high, low):
+	if tocheck > high or tocheck < low:
 		return False
 	else:
 		return True
 
-def checkregular(tocheck, type, value):
-	if not isinstance(tocheck, type):
+def checkstring(tocheck, dtype, value):
+	#print 'true type', dtype
+	#print 'object type is', type(tocheck)
+	
+	# need to take care of the stupid unicode stuff
+	tocheck = unicodedata.normalize('NFKD', tocheck).encode('ascii','ignore')
+		
+	if not isinstance(tocheck, dtype):
 		return False
 	elif not tocheck in value:
 		return False
 	else:
 		return True
 		
-def checkdict(diameter_dict, type):
+def checkdict(diameter_dict, dtype):
 	# check type first
-	if not isinstance(diamter_dict, type):
+	if not isinstance(diameter_dict, dtype):
 		return False
 	
 	# check all the dates
@@ -161,7 +108,80 @@ def checkdict(diameter_dict, type):
 		year = int(time[0:4])
 		month = int(time[5:7])
 		day = int(time[7:9])
-		if year
+		if year < 2000:
+			return False
+		elif month > 12 or month < 1:
+			return False
+		elif day > 31 or day < 1:
+			return False
+		else:
+			# check the note and value
+			content = diameter_dict[time]
+			note = content['notes']
+			value = content['value']
+						
+			note = unicodedata.normalize('NFKD', note).encode('ascii','ignore')
+
+			if not isinstance(note, str):
+				return False
+			elif not (isinstance(value, float) or isinstance(value, int)) and not value > 0:
+				return False
+			else:
+				return True
+	
+	
+def validate(obs, data):
+	# data is dictionary, with unicode
+	# e.g. {u'sub_tree_id': 0, u'plot': 1, u'full_tree_id': 1, u'angle': 86,...}
+	#print isinstance(str(data['site']), str)
+		
+	fields = {'collection_type':{'type': str, 'value': ['tree'], 'high':0, 'low':0}, 
+			  'site':{'type': str, 'value': sites_predef, 'high':0, 'low':0}, 
+			  'plot':{'type': int, 'value': '', 'high':3, 'low':0},
+			  'tree_id':{'type': int, 'value': '', 'high':999, 'low':0},
+			  'sub_tree_id':{'type': int, 'value': '', 'high':999, 'low':0},
+			  'angle':{'type': int, 'value': '', 'high':360, 'low':-0.1}, 
+			  'distance':{'type': float, 'value': '','high':999, 'low':0}, 
+			  'diameter':{'type': dict, 'value': '', 'high':0, 'low':0},
+			  'dead':{'type': bool, 'value': [True, False], 'high':0, 'low':0}, 
+			  'dbh_marked':{'type': bool, 'value': [True, False], 'high':0, 'low':0}}
+	
+	# get the all the keys
+	keys = fields.keys()		  
+	
+	# loop the keys and check them against all criteria 
+	for i in range(len(keys)):
+		key = keys[i]
+		tocheck = data[key]
+		print tocheck
+		#print key
+		#print tocheck 
+		
+		# the correct criteria
+		crit = fields[key]
+		dtype = crit['type']
+		value = crit['value']
+		high = crit['high']
+		low = crit['low']
+		
+		# different schemes for checking
+		if isinstance(tocheck, float) or isinstance(tocheck, int):
+			print 'checking number'
+			if checknum(tocheck, dtype, high, low) == False:
+				return False
+				
+		elif isinstance(tocheck, dict):
+			print 'checking dictionary'
+			if checkdict(tocheck, dtype) ==  False:
+				return False
+				
+		else:
+			print 'checking string'
+			if checkstring(tocheck, dtype, value) ==  False:
+				return False
+				
+	# then all is good
+	return True
 		
 def main():
 	# Load config (for database info, etc)
@@ -185,8 +205,11 @@ def main():
 		form = cgi.FieldStorage()
 		data = json.loads(form.file.read(), object_hook=json_util.object_hook)	
 		flag = validate(obs, data)
-		if len(data):
+		if flag:
 			obs.save(data)
+			print 'saved!!!'
+		else:
+			print 'not saved'
 			
 	elif method == 'GET':
 		query = cgi.FieldStorage()

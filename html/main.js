@@ -159,7 +159,7 @@ $(document).ready(function(){
 		
 		XDtestfunc: function(){
 			foo_dict = this.model.get('diameter');
-			foo_dict['88880101'] = {'notes':'test', 'value': 999};
+			foo_dict['88880101'] = {'notes':'test', 'value': 999.0};
 			this.model.set({'diameter':foo_dict});
 			//console.log(this.model.get('tree_id'));
 			this.model.save();
