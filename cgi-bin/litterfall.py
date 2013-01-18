@@ -192,8 +192,6 @@ def main():
 	
 	method = os.environ['REQUEST_METHOD']
 	
-	#print 'Content-Type: application/json\n'
-	
 	if method == 'POST' or method == 'PUT':
 		form = cgi.FieldStorage()
 		data = json.loads(form.file.read(), object_hook=json_util.object_hook)	
@@ -201,12 +199,14 @@ def main():
 		if flag:
 			obs.save(data)
 			data = json.dumps(data, default=json_util.default, separators=(',', ':'))
+			print 'Content-Type: application/json\n'
 			print data
 		else:
 			print 'Status:406\n'
 			
 			
 	elif method == 'GET':
+		print 'Content-Type: application/json\n'
 		query = cgi.FieldStorage()
 		plot = query.getvalue('plot')
 		site = query.getvalue('site')
