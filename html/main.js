@@ -158,6 +158,7 @@ $(document).ready(function(){
 		events: {
 
 			'click .btn-new-observation': 'newObservation',	
+			'click .edit-existing': 'XDtestfunc',
 			'click td.editable': 'editValue',
 			'click .btn-save-observation': 'saveObservation',
 			'click .btn-cancel-observation': 'render'
