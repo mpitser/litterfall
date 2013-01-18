@@ -172,12 +172,11 @@ $(document).ready(function(){
 			if (diameters[newDateKey] == undefined){ //prevent overwriting of dates
 				diameters[newDateKey] = {
 					value: 'n/a',
-					notes: ""
+					notes: "",
+					//observers: ""
 				};
 				this.model.set({"diameter": diameters});
 			}
-
-			this.render();			// Render new row
 			
 			// Disable all the fields from being editing
 			$("#tree_observations .btn.display_cell").hide();
@@ -189,10 +188,13 @@ $(document).ready(function(){
 		},
 		
 		editObservation: function(event) {
+		
 			// User wants to edit an existing observation.  
-			
 			row_to_edit = $(event.target).parents("tr");		// Get the row of edit button
 			
+			// Hide any existing edit modes
+			$("#tree_observations .btn.display_cell").hide();
+					
 			// Show edit content, hide display content, show "Submit/cancel button", add date_picker		
 			row_to_edit.find(" .edit_cell").show();
 			row_to_edit.find(".display_cell").hide();
@@ -201,22 +203,42 @@ $(document).ready(function(){
 		
 		saveObservation: function(event) {
 			// User added or edited an observation.  Save it to the server.	
-			var newDateKey = $("#tree_observations > tbody > tr .edit_cell .formatted_date").val();
-			var newValue = parseFloat($("#tree_observations > tbody > tr .edit_cell.diameter :input").val());
-			var newObservers = $("#tree_observations > tbody > tr .edit_cell.observers :input").val();
-			var newNotes = $("#tree_observations > tbody > tr .edit_cell.notes :input").val();
+			// Get the row that is being edited
+			row_to_save = $("#tree_observations > tbody > tr .edit_cell :visible").parents("tr");
+			
+			var newDateKey = row_to_save.find(".formatted_date").val();
+			var newValue = parseFloat(row_to_save.find(".diameter :input").val());
+			var newObservers = row_to_save.find(".observers :input").val();
+			var newNotes = row_to_save.find(".notes :input").val();
 			
 			// ** NEED TO INSERT VALIDATION CODE HERE **
 						
 			//must clone object to update it
-			var diameters = _.clone(this.model.get('diameter')); 
+			var diameters = _.clone(this.model.get('diameter'));
+			
+			// Find the existing date key by figuring out the index of the row being edited and matching it up with the index of the 
+			// observations (sorted by date key in reverse)
+			var indexOfObservation = $("#tree_observations tbody tr").index(row_to_save);
+			var existingDateKey = _.keys(diameters).sort().reverse()[indexOfObservation];
+			
+			// Remove the existing date key/object.  Since _.clone is a shallow clone, we need to remove the reference to the
+			// existing observation before removing it.
+			console.log(existingDateKey);
+			diameters[existingDateKey] = new Object();
+			delete diameters[existingDateKey];
+			
+			// Add in the new data
 			diameters[newDateKey] = {
 					value: newValue,
 					notes: newNotes,
 					//observers: newObservers
 				};
+			
+			// Set the diameter to be the new list of observations and save the object	
+			
+			//** May need to check to see if no change 
+			
 			this.model.set({"diameter": diameters});
-			console.log("Saving observation: \nDate:" + newDateKey + "\nDiameter: " + newValue + "\nObservers: " + newObservers + "\nNotes: " + newNotes);
 			this.model.save();			
 		},
 		
@@ -230,7 +252,7 @@ $(document).ready(function(){
 			var treeUrl = "/treeid/" + this.model.get("tree_id") + ((subId) ? '/' + subId : '');
 			document.location.hash = document.location.hash + treeUrl
 			//save a tree to the DB
-			//this.model.save();
+			this.model.save();
 		}
 	});
 	
