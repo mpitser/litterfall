@@ -154,16 +154,13 @@ $(document).ready(function(){
 			this.$el.html(_.template(this.template, {tree: thisTree}));
 		},
 		events: {
-<<<<<<< HEAD
-			'click .btn-new-observation': 'newObservation',
-			'click .edit-existing': 'XDtestfunc',
-			'click td.editable': 'editValue'
-=======
+
 			'click .btn-new-observation': 'newObservation',	
+			'click .edit-existing': 'XDtestfunc',
 			'click td.editable': 'editValue',
 			'click .btn-save-observation': 'saveObservation',
 			'click .btn-cancel-observation': 'render'
->>>>>>> 2fc9a189679c93fec8e2e5a82aa8997141cba76b
+
 		},
 		
 		XDtestfunc: function(){

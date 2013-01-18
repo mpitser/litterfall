@@ -207,9 +207,12 @@ def main():
 		flag = validate(obs, data)
 		if flag:
 			obs.save(data)
-			print 'saved!!!'
+			verified = obs.find(data)
+			verified = json.dumps(verified, default=json_util.default, separators=(',', ':'))
+			print verified
 		else:
-			print 'not saved'
+			print '\nStatus:406\n'
+			
 			
 	elif method == 'GET':
 		query = cgi.FieldStorage()
