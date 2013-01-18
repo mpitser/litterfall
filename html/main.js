@@ -175,10 +175,10 @@ $(document).ready(function(){
 			// Render new row
 			this.render();
 			
-			// Show "Submit/cancel button" and disable all the fields from being editing
-			//$("#tree_observations > tbody > tr:first > td:first").html("");
+			// Disable all the fields from being editing
+			$("#tree_observations .btn.display_cell").hide();
 			
-			// Show edit content, hide display content, add date_picker		
+			// Show edit content, hide display content, show "Submit/cancel button", add date_picker		
 			$("#tree_observations > tbody > tr:first .edit_cell").show();
 			$("#tree_observations > tbody > tr:first .display_cell").hide();
 			$("#tree_observations > tbody > tr:first .edit_cell.date_select :input" ).datepicker();
@@ -186,6 +186,19 @@ $(document).ready(function(){
 		},
 		saveObservation: function(event) {
 			alert("Save this observation");
+			
+			var diameters = _.clone(this.model.get('diameter')); //must clone object to update it
+			var today = new Date();
+			var newDateKey = [today.getFullYear(),((today.getMonth() < 9) ? 0 : ""),(today.getMonth() + 1),((today.getDate() < 10) ? 0 : ""),today.getDate()].join(""); //yes it generates the date in YYYYMMDD format
+			if (diameters[newDateKey] == undefined){ //prevent overwriting of dates
+				diameters[newDateKey] = {
+					value: 'n/a',
+					note: ""
+				};
+				this.model.set({"diameter": diameters});
+			}
+			
+			this.model.save();
 		},
 		editValue: function(event){
 			$(event.target).css("color", "red"); //event attaching test
@@ -231,7 +244,7 @@ $(document).ready(function(){
 			_id: '',
 			tree_id: 0,
 			sub_tree_id: 0,
-			angle: 0,
+			angle: 0.0,
 			distance: 0,
 			diameter: {},
 			species: '',
