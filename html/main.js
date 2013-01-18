@@ -148,7 +148,7 @@ $(document).ready(function(){
 			this.model.on('change:diameter', this.render, this); //diameter will change when new observation is added
 		},
 		render: function(){
-			console.log('render edit');
+			//console.log('render edit');
 			var thisTree = this.model.toJSON();
 			//get the dates in descending order
 			thisTree.datesDesc = _.keys(thisTree.diameter).sort().reverse();
@@ -156,6 +156,7 @@ $(document).ready(function(){
 		},
 		
 		events: {
+
 			'click .btn-new-observation': 'newObservation',	
 			'click td.editable': 'editValue',
 			'click .btn-save-observation': 'saveObservation',
@@ -224,7 +225,6 @@ $(document).ready(function(){
 	
 	var singleOption = Backbone.Model.extend({});								//creates empty Model (to be a site, once information is loaded)
 	
-	
 	var selectionOptions = Backbone.Collection.extend({							//creates Collection of singleOption Models (to-be locations, plots, collection type)
 		model: singleOption,
 		url: "data/sites.json",													//calls for server DB's location (plot, etc. information)
@@ -280,7 +280,7 @@ $(document).ready(function(){
 				el: $('#treeEditView'),
 				model: this
 			});
-			console.log(this.toJSON());
+			//console.log(this.toJSON());
 		},
 		parse: function(response){
 			response.full_tree_id = response.tree_id + (response.sub_tree_id * .1);
