@@ -127,7 +127,8 @@ $(document).ready(function(){
 			<tr>\
 				<td>\
 					<button class="display_cell btn btn-mini btn-primary edit-existing" type="button">Edit</button>\
-					<div class="edit_cell btn-group"><button class="btn-save_observation btn btn-mini btn-success" type="button">Submit</button><button class="btn btn-mini btn-danger" type="button">Cancel</button>\
+					<div class="edit_cell btn-group"><button class="btn-save-observation btn btn-mini btn-success" type="button">Submit</button>\
+					<button class="btn-cancel-observation btn btn-mini btn-danger" type="button">Cancel</button>\
 				</td>\
 				<td class="editable"><span class="display_cell date_select"><%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %></span><span class="edit_cell date_select"><input type="text" value="<%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %>"/></span></td>\
 				<td class="editable"><span class="display_cell observers"><%= (tree.diameter[date].observers || []).join(", ") %></span><span class="edit_cell observers"><input type="text" value="<%= (tree.diameter[date].observers || []).join(", ") %>"></span></td>\
@@ -155,7 +156,8 @@ $(document).ready(function(){
 		events: {
 			'click .btn-new-observation': 'newObservation',	
 			'click td.editable': 'editValue',
-			'click .btn-save-observation': 'saveObservation'
+			'click .btn-save-observation': 'saveObservation',
+			'click .btn-cancel-observation': 'render'
 		},
 		newObservation: function(){
 			//add a new blank row to the observation table
