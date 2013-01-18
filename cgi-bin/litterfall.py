@@ -41,7 +41,7 @@ def getdata(obs, site, plot, treeid, subtreeid):
 				# if there is a sub tree id, then append
 				findQuery['sub_tree_id'] = int(subtreeid)			
 		# get the data
-		data = obs.find(findQuery).sort("tree_id", 1)
+		data = obs.find(findQuery).sort([("angle",1)])
 		n = data.count()
 
 	# validate the return data

@@ -85,3 +85,7 @@ button a, button a:hover {color:#FFF;}
 #tree-info ul{
 margin:20px 40px;	
 }
+
+.edit_cell {
+	display:none;
+}
