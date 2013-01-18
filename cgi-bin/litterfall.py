@@ -68,7 +68,7 @@ def getdata(obs, site, plot, treeid, subtreeid):
 # sub tree id, int, 0 by default
 # collection type = tree
 # site, part of the predefined existing site, str
-# plot, part of the predefined plots, int
+# plot, int
 # angle, float, check limits
 # dist, float, >0
 # diameter, value = float, >0, date = str, yr>2000, mth >0 <=12, day > 0 <=31
@@ -79,9 +79,9 @@ def getdata(obs, site, plot, treeid, subtreeid):
 
 def checknum(tocheck, dtype, high, low):
 	if tocheck > high or tocheck < low:
-		return False
+		return {'flag': False, 'msg': 'check boundary!'}
 	else:
-		return True
+		return {'flag': True, 'msg': 'passed number check'}
 
 def checkstring(tocheck, dtype, value):
 	#print 'true type', dtype
@@ -91,16 +91,16 @@ def checkstring(tocheck, dtype, value):
 	tocheck = unicodedata.normalize('NFKD', tocheck).encode('ascii','ignore')
 		
 	if not isinstance(tocheck, dtype):
-		return False
+		return {'flag': False, 'msg': 'wrong data type!'}	
 	elif not tocheck in value:
-		return False
+		return {'flag': False, 'msg': 'wrong value!'}	
 	else:
-		return True
+		return {'flag': True, 'msg': 'passed string check'}
 		
 def checkdict(diameter_dict, dtype):
 	# check type first
 	if not isinstance(diameter_dict, dtype):
-		return False
+		return {'flag': False, 'msg': 'wrong data type!'}	
 	
 	# check all the dates
 	times = diameter_dict.keys()
@@ -109,11 +109,11 @@ def checkdict(diameter_dict, dtype):
 		month = int(time[5:7])
 		day = int(time[7:9])
 		if year < 2000:
-			return False
+			return {'flag': False, 'msg': 'wrong year!'}	
 		elif month > 12 or month < 1:
-			return False
+			return {'flag': False, 'msg': 'wrong month!'}	
 		elif day > 31 or day < 1:
-			return False
+			return {'flag': False, 'msg': 'wrong day!'}	
 		else:
 			# check the note and value
 			content = diameter_dict[time]
@@ -123,12 +123,11 @@ def checkdict(diameter_dict, dtype):
 			note = unicodedata.normalize('NFKD', note).encode('ascii','ignore')
 
 			if not isinstance(note, str):
-				return False
+				return {'flag': False, 'msg': 'wrong notes type!'}	
 			elif not (isinstance(value, float) or isinstance(value, int)) or not value > 0:
-				return False
+				return {'flag': False, 'msg': 'wrong diameter type or value!'}	
 			else:
-				return True
-	
+				return {'flag': True, 'msg': 'passed dictionary check'}
 	
 def validate(obs, data):
 	# data is dictionary, with unicode
@@ -162,19 +161,21 @@ def validate(obs, data):
 		
 		# different schemes for checking
 		if isinstance(tocheck, float) or isinstance(tocheck, int):
-			if checknum(tocheck, dtype, high, low) == False:
-				return False
-				
+			result = checknum(tocheck, dtype, high, low)
+			if result['flag'] == False:
+				return result			
 		elif isinstance(tocheck, dict):
-			if checkdict(tocheck, dtype) ==  False:
-				return False
-				
+			result = checkdict(tocheck, dtype)
+			if result['flag'] ==  False:
+				return result				
 		else:
-			if checkstring(tocheck, dtype, value) ==  False:
-				return False
+			result = checkstring(tocheck, dtype, value)
+			if result['flag'] ==  False:
+				return result
 				
 	# then all is good
-	return True
+	return {'flag': True, 'msg': 'passed all checks'}
+
 		
 def main():
 	# Load config (for database info, etc)
@@ -195,7 +196,9 @@ def main():
 	if method == 'POST' or method == 'PUT':
 		form = cgi.FieldStorage()
 		data = json.loads(form.file.read(), object_hook=json_util.object_hook)	
-		flag = validate(obs, data)
+		result = validate(obs, data)
+		flag = result['flag']
+		msg = result['msg']
 		if flag:
 			obs.save(data)
 			data = json.dumps(data, default=json_util.default, separators=(',', ':'))
@@ -203,6 +206,7 @@ def main():
 			print data
 		else:
 			print 'Status:406\n'
+			print msg
 			
 			
 	elif method == 'GET':
