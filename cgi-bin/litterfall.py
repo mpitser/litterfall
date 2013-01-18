@@ -124,7 +124,7 @@ def checkdict(diameter_dict, dtype):
 
 			if not isinstance(note, str):
 				return False
-			elif not (isinstance(value, float) or isinstance(value, int)) and not value > 0:
+			elif not (isinstance(value, float) or isinstance(value, int)) or not value > 0:
 				return False
 			else:
 				return True
@@ -207,9 +207,8 @@ def main():
 		flag = validate(obs, data)
 		if flag:
 			obs.save(data)
-			verified = obs.find(data)
-			verified = json.dumps(verified, default=json_util.default, separators=(',', ':'))
-			print verified
+			data = json.dumps(data, default=json_util.default, separators=(',', ':'))
+			print data
 		else:
 			print '\nStatus:406\n'
 			
