@@ -165,7 +165,6 @@ $(document).ready(function(){
 
 			'click .btn-new-observation': 'newObservation',	
 			'click .edit-existing': 'editObservation',
-			'click td.editable': 'editValue',
 			'click .btn-save-observation': 'saveObservation',
 			'click .btn-cancel-observation': 'render'
 		},
@@ -246,10 +245,6 @@ $(document).ready(function(){
 			
 			this.model.set({"diameter": diameters});
 			this.model.save();			
-		},
-		
-		editValue: function(event){
-			$(event.target).css("color", "red"); //event attaching test
 		},
 		
 		updateTree: function(){

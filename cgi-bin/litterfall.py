@@ -23,6 +23,11 @@ def getdata(obs, site, plot, treeid, subtreeid):
 			data[j] = data[j].encode('ascii','ignore')
 		data.sort(key=str.lower)
 		n = len(data)
+	elif site == 'allSpecies':
+		# Get a list of all the unique species of trees in the database
+		data = obs.find({'collection_type':'tree'}, {'fields':'species'}).distinct('species')
+		data.sort()	# Use Python's built-in sort to alphabetize the species listing
+		n = len(data)
 	else:
 		# then the query is about a particular site and plot
 		findQuery = {
