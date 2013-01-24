@@ -290,7 +290,7 @@ $(document).ready(function(){
 			angle: 0.0,
 			distance: 0,
 			diameter: {},
-			species: '',
+			species: 'Unknown',
 			species_certainty: 0,
 			dead: true,
 			dbh_marked: false,
@@ -444,6 +444,18 @@ $(document).ready(function(){
 
 			//DBH Tooltip 
 			updateFunctions();
+			
+			
+			// Load species options ** NEED TO SET THIS TO CURRENTLY SELECTED SPECIES (IF KNOWN) **
+			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allSpecies', function(data)
+			{
+				$.each(data, function(index, value) {
+					$(".edit-tree-info.species select").append($("<option></option>").attr("value",value).text(value));
+				
+				});
+			
+			});
+			
 		});
     });
     
