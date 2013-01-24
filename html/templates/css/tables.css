@@ -86,6 +86,8 @@ button a, button a:hover {color:#FFF;}
 margin:20px 40px;	
 }
 
-.edit_cell {
+.edit_cell, .edit-tree-info {
 	display:none;
 }
+.site-name, .plot-number{
+display:none;}

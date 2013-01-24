@@ -15,6 +15,8 @@ $(document).ready(function(){
         routes: {
             "update": "updateObservation", //inits the add record "wizard", leads to the edit pages
             "update/trees/site/:location/plot/:plot": "editPlot",
+            "update/trees/site/:location/plot/:plot/treeid/new": "newTree",
+            "update/trees/site/:location/plot/:plot/treeid/:treeid/subtreeid/new": "newSubTree",
             "update/trees/site/:location/plot/:plot/treeid/:treeid(/subtreeid/:subTreeId)": "editTree",
             "*actions": "defaultRoute" // Backbone will try match the route above first
         }
@@ -82,8 +84,7 @@ $(document).ready(function(){
 			this.options.targetEl.append(this.el);								   //appends the tree's row element to table
 		},
 		events: {
-			'click .update-btn': 'updateTree',									//if update button is clicked, runs updateTree function
-			'click .add-new-tree': 'updateTree',	
+			'click .update-btn': 'updateTree'								//if update button is clicked, runs updateTree function
 		},
 		updateTree: function(){
 			//goto update tree page
@@ -100,10 +101,14 @@ $(document).ready(function(){
 		tagName: 'div',
 		template: '\
 		<div id="tree-info">\
+			<button class="btn btn-success btn-mini edit-tree-info-btn">Edit Tree Info</button>\
+			<div class="edit-tree-info btn-group"><button class="btn-save-tree-info btn btn-mini btn-success" type="button">Submit</button>\
+			<button class="btn-cancel-tree-info btn btn-mini btn-danger" type="button">Cancel</button>\
+			</div>\
 			<ul>\
-				<li>Species: <%= tree.species %><i class="icon-edit"></i></li>\
-				<li>Angle Degrees: <%= tree.angle %><i class="icon-edit"></i></li>\
-				<li>Distance Meters: <%= tree.distance %><i class="icon-edit"></i></li>\
+				<li>Species: <span class="display-tree-info species"><%= tree.species %></span><span class="edit-tree-info species"><select></select></span></li>\
+				<li>Angle Degrees: <span class="display-tree-info angle"><%= tree.angle %></span><span class="edit-tree-info angle"><input value="<%= tree.angle %>"></input></span></li>\
+				<li>Distance Meters: <span class="display-tree-info distance"><%= tree.distance %></span><span class="edit-tree-info distance"><input value="<%= tree.distance %>"></input></span></li>\
 			</ul>\
 		</div>\
 		<div class="button-row">\
@@ -300,7 +305,10 @@ $(document).ready(function(){
 		},
 		initialize: function(){
 			if (this.get('editView')){
-				this.on('change:_id', this.editViewInitialize, this);
+				this.on('change', this.editViewInitialize, this);
+			}
+			else{
+			this.editViewInitialize();
 			}
 		},
 		plotViewInitialize: function(){
@@ -386,7 +394,10 @@ $(document).ready(function(){
 			thisPlot.fetch();
 			
 			$('.add-new-tree').click(function(){
-				thisPlot.add(new Tree());
+				var plotNumber = $(".plot-number").text();
+				var siteName = $(".site-name").text();
+				console.log(plotNumber+ " "+siteName);
+				app_router.navigate('update/trees/site/'+siteName+'/plot/'+plotNumber+'/treeid/new',{trigger:true});
 			});
 			
 		});
@@ -420,6 +431,27 @@ $(document).ready(function(){
 			updateFunctions();
 		});
     });
+    
+     //Add new tree view
+    app_router.on('route:newTree', function(site, plot) {						//reloads page based on selected location (site) and plot
+    	var  templateFile = 'update-tree.html';
+		require(['lib/text!templates/' + templateFile + '!strip'], function(templateHTML){			//<WHAT DOES THIS FUNCTION DO?> [ ] (some sort of require wrapper)
+			
+			$('#main').html(_.template(templateHTML, {
+				site: decodeURI(site), 
+				plot: plot,
+				treeId: "New",
+				subTreeId: "0"
+			}));
+			
+
+			var thisTree = new Tree();
+
+			//DBH Tooltip 
+			updateFunctions();
+		});
+    });
+    
     // Start Backbone history a necessary step for bookmarkable URL's; enables user to click BACK without navigating to entirely different domain
     Backbone.history.start();
 	
@@ -431,11 +463,24 @@ $(document).ready(function(){
 function updateFunctions(){
 	$('.dbh').tooltip({trigger:'hover'})
 	$('.dropdown-toggle').dropdown()
-	
+	$('.edit-tree-info-btn').click(function(){
+		$('.edit-tree-info-btn').toggle();
+		$('.display-tree-info').toggle();
+		$('.edit-tree-info').toggle();
+
+	});
+	$('.btn-cancel-tree-info').click(function(){
+		$('.edit-tree-info-btn').toggle();
+		$('.display-tree-info').toggle();
+		$('.edit-tree-info').toggle();
+
+	});
 }
+
 // End Bootstrap and template related jQuery
 
 // Start Active Nav Tracking
+
 $(function(){
   $(".nav a").click(function(){
     $(this).parent().addClass('active'). // <li>
