@@ -2,43 +2,97 @@
 <html>
   <head>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta charset="utf-8">
     <style type="text/css">
       html { height: 100% }
       body { height: 100%; margin: 0; padding: 0 }
       #map_canvas { height: 100% }
     </style>
     <script type="text/javascript"
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCvHZX2niyfAZtimsNIgOSLlwKvylTQwIY&sensor=true">
-    </script>
-    
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCvHZX2niyfAZtimsNIgOSLlwKvylTQwIY&sensor=true"></script>
     <script src="lib/jquery.min.js"></script>
     
+
+    <!--
+    Include the maps javascript with sensor=true because this code is using a
+    sensor (a GPS locator) to determine the user's location.
+    See: https://developers.google.com/apis/maps/documentation/javascript/basics#SpecifyingSensor
+    -->
+   
     <script type="text/javascript">
-      function initialize() {
+      var map;
+      
+      function initialize(){
         
-	  function detectBrowser() {
-	  var useragent = navigator.userAgent;
-	  var mapdiv = document.getElementById("map_canvas");
-	
-	
-	  if (useragent.indexOf('iPhone') != -1 || useragent.indexOf('Android') != -1 ) {
-		mapdiv.style.width = '100%';
-		mapdiv.style.height = '100%';
-	  	} else {
-		mapdiv.style.width = '600px';
-		mapdiv.style.height = '800px';
-	  	}
-	  }
-        
+        //detects user's browser
+		function detectBrowser() {
+		var useragent = navigator.userAgent;
+		var mapdiv = document.getElementById("map_canvas");
+		
+		if (useragent.indexOf('iPhone') != -1 || useragent.indexOf('Android') != -1 ) {
+			mapdiv.style.width = '100%';
+			mapdiv.style.height = '100%';
+			} else {
+			mapdiv.style.width = '600px';
+			mapdiv.style.height = '800px';
+			}
+		}
         
         var mapOptions = {
-          center: new google.maps.LatLng(39.903445, -75.358998),
-          zoom: 20,
+          center: new google.maps.LatLng(39.905473, -75.359108),
+          zoom: 18,
           mapTypeId: google.maps.MapTypeId.HYBRID
         };
-        var map = new google.maps.Map(document.getElementById("map_canvas"),
+        map = new google.maps.Map(document.getElementById("map_canvas"),
             mapOptions);
+            
+            
+/*      
+      	// Try HTML5 geolocation
+        function tryGeo(){
+			if(navigator.geolocation) {
+			    navigator.geolocation.getCurrentPosition(function(position) {
+					var pos = new google.maps.LatLng(position.coords.latitude,
+												 position.coords.longitude);
+	
+					var infowindow = new google.maps.InfoWindow({
+				  		map: map,
+				  		position: pos,
+				  		content: 'You are [near] here!'
+					});
+	
+					map.setCenter(pos);
+			  }, 
+			  function() {
+			  	  	handleNoGeolocation(true);
+			  });
+			} else {
+			  // Browser doesn't support Geolocation
+			  	handleNoGeolocation(false);
+			}
+		  }
+	  };
+
+      function handleNoGeolocation(errorFlag) {
+		  if (errorFlag) {
+		      var content = 'Error: The Geolocation service failed.';
+		  } else {
+		      var content = 'Error: Your browser doesn\'t support geolocation.';
+		  }
+		
+		  var options = {
+		      map: map,
+		      position: new google.maps.LatLng(60, 105),
+		      content: content
+		  };
+		
+		  var infowindow = new google.maps.InfoWindow(options);
+		  map.setCenter(options.position);
+      }
+*/
+
         
+        /* Sample plot drawing and marker
         var plotBounds = [
 		new google.maps.LatLng(39.903479, -75.359067),
 		new google.maps.LatLng(39.903393, -75.359051),
@@ -61,110 +115,215 @@
         	map: map,
         	title: "Litterfall Catcher 1"
         });     
+        */
         
-       	var R = 6371000;              //radius of earth in meters
-        plotCenterPoint = new google.maps.LatLng(39.903445, -75.358998);
+        //radius of earth in meters
+       	var R = 6371000;             
         
-        //NOTE: Get plot data
-        $.getJSON("http://ec2-50-19-28-191.compute-1.amazonaws.com/cgi-bin/litterfall.py?site=Oaks&plot=2", function(data) {
-        //alert(data);
+        //gpsMaster dictionary contains GPS coordinate arrays for all plots
+        var gpsMaster = {
+        	site: {
+        		beech: "beech", 
+        		floodplains: "floodplains", 
+        		Knoll:"Knoll", 
+        		norway:"norway", 
+        		Oaks:"Oaks", 
+        		swamp:"swamp", 
+        		TBNO:"TBNO", 
+        		TOH:"TOH"
+        	},       	
+        	plot: {
+				Plot1 : 1,
+				Plot2 : 2
+        	},        	        	
+        	//GPS coordinates for each plot
+        	/*Index format: 
+        		0 = plotCenterLat, 
+        		1 = plotCenterlng,
+        		2 = plotNElat,
+        		3 = plotNElng,
+        		4 = plotSElat,
+        		5 = plotSElng,
+        		6 = plotSWlat,
+        		7 = plotSWlng,
+        		8 = plotNWlat,
+        		9 = plotNWlng
+        	*/
+        	gpsCords: {       	
+        		"beechPlot1cords": [39.90828, -75.35810, 39.90810, -75.35826, 39.90799, -75.35816, 39.90794, -75.35809, 39.90818, -75.35822], 
+				"beechPlot2cords": [39.90803, -75.35827, 39.90847, -75.35824, 39.90828, -75.35810, 39.90823, -75.35793, 39.90843, -75.35796], 
+				"floodplainsPlot1cords": [39.90405, -75.35973, 39.90401, -75.35950, 39.90398, -75.35983, 39.90411, -75.35993, 39.90423, -75.35961], 
+				"floodplainsPlot2cords": [39.90375, -75.35993, 39.90370, -75.35987, 39.90367, -75.36009, 39.90382, -75.36021, 39.90387, -75.35998],
+				"KnollPlot1cords": [39.90347, -75.36188, 39.90336, -75.36201, 39.90352, -75.36206, 39.90358, -75.36181, 39.90341, -75.36172], 
+				"KnollPlot2cords": [39.90355, -75.36174, 39.90347, -75.36183, 39.90371, -75.36180, 39.90363, -75.36160, 39.90342, -75.36157],
+				"norwayPlot1cords": [39.90429, -75.36071, 39.90454, -75.36099, 39.90425, -75.36087, 39.90425, -75.36058, 39.90448, -75.36063],
+				"norwayPlot2cords": [39.90451, -75.36109, 39.90462, -75.36121, 39.90462, -75.36093, 39.90439, -75.36085, 39.90446, -75.36122],
+				"OaksPlot1cords": [39.90331, -75.35903, 39.90318, -75.35914, 39.90340, -75.35918, 39.90348, -75.35896, 39.90322, -75.35885], 
+				"OaksPlot2cords": [39.90318, -75.35870, 39.90316, -75.35882, 39.90325, -75.35883, 39.90332, -75.35862, 39.90308, -75.35854],
+				"swampPlot1cords": [39.90379, -75.36164, 39.90376, -75.36179, 39.90392, -75.36176, 39.90388, -75.36153, 39.90372, -75.36144], 
+				"swampPlot2cords": [39.90366, -75.36213, 39.90363, -75.36234, 39.90379, -75.36227, 39.90380, -75.36206, 39.90361, -75.36201],
+				"TBNOPlot1cords": [39.90568, -75.35726, 39.90577, -75.35709, 39.90558, -75.35706, 39.90549, -75.35738, 39.90569, -75.35730], 
+				"TBNOPlot2cords": [39.90592, -75.35713, 39.90606, -75.35704, 39.90590, -75.35703, 39.90582, -75.35713, 39.90604, -75.35719],
+				"TOHPlot1cords": [39.90685, -75.358261, 39.90694, -75.35841, 39.90673, -75.35838, 39.90670, -75.35808, 39.90693, -75.35813],
+				"TOHPlot2cords": [39.9069, -75.358561, 39.90691, -75.35876, 39.90673, -75.35859, 39.90672, -75.35839, 39.90700, -75.35842],
+   			} // closes gpsCords dictionary
+   		} //closes gpsMaster dictionary
         
-			trees = [];
-			
-			$.each(data, function(index, tree) {
-				var d = tree.distance;
-				var brng = tree.angle * (Math.PI/180);
+        var testMarker;
+        var curString = "";
+        var htmlString = "";
+        var markers = [];
+        var newTree;
+        var treeMarker;
+        var plotURL;
+        var htmlString = "";
+        var plotBounds = [];
+        //var counter = 0;
+        
+		for (gpsSite in gpsMaster.site){
+			for (gpsPlot in gpsMaster.plot){
 				
-				//calculate most recent diameter for tree
-				recentDate = "";
-				for (date in tree.diameter){                      //loop through the list of existing dates and store the most recent
-					if (date > recentDate){					  //Date format is YYYYMMDD (reformated in template html above)
-						recentDate = date;
-					}
-				}
+				//Plot the center of each plot		
+				curString = String(gpsSite) + String(gpsPlot) + "cords";
+				curPlotMIDlat = gpsMaster.gpsCords[curString][0];
+				curPlotMIDlng = gpsMaster.gpsCords[curString][1]
+				testMarker = new google.maps.Marker({
+				  position: new google.maps.LatLng(curPlotMIDlat, curPlotMIDlng),                    //plot.lat, plot.lng
+				  animation: google.maps.Animation.DROP,
+				  map: map,
+				  icon: "icons/" + gpsSite + String(gpsMaster.plot[gpsPlot]) + ".tif",
+				  title: String(gpsSite) + " " + String(gpsMaster.plot[gpsPlot]),
+				})
 				
-				diameter = tree.diameter[recentDate].value;    //gets diameter from most recent measurement
-				
-				latToRad = (plotCenterPoint.lat() * Math.PI/180);
-				lngToRad = (plotCenterPoint.lng() * Math.PI/180);
-				
-				// calculation to align with GoogleMaps: http://www.movable-type.co.uk/scripts/latlong.html        
-				var treeLat = Math.asin(Math.sin(latToRad)*Math.cos(d/R) + Math.cos(latToRad)*Math.sin(d/R)*Math.cos(brng) );
-				var treeLng = lngToRad + Math.atan2(Math.sin(brng)*Math.sin(d/R)*Math.cos(latToRad), Math.cos(d/R)-Math.sin(latToRad)*Math.sin(treeLat));
-				
-				//centerLat = 39.903445;
-				//centerLong = -75.358998;
-				
-				tree.lat = treeLat * 180/Math.PI;
-				tree.lng = treeLng * 180/Math.PI;
-				
-				tree.url = "http://ec2-50-19-28-191.compute-1.amazonaws.com/#update/trees/" + (tree.site) + "/" + String(tree.plot)	
-			
-				var treeOptions = {
-					strokeColor: "#FF0000",
-					strokeOpacity: 0.8,
-					strokeWeight: .5,
-					fillColor: "#FF0000",
-					fillOpacity: 100,
-					map: map,
-					center: new google.maps.LatLng(tree.lat, tree.lng),  
-					radius: diameter/50,
-					clickable: true
-				};
-				trees[index] = new google.maps.Circle(treeOptions);
-				
-				var markers = [];
-				
-				
-			//	Labels tree information				
-				markers[index] = new google.maps.Marker({
-					position: new google.maps.LatLng(tree.lat, tree.lng),
-					animation: google.maps.Animation.DROP,
-					map: map,
-					title: "Tree " + String(tree.tree_id) + "." + String(tree.sub_tree_id),
-					//visible: false
+				//all clicks zoom to TOH 2
+				google.maps.event.addListener(testMarker, 'click', function(){
+					map.setZoom(20);
+					map.setCenter(testMarker.getPosition());
 				});
 				
-			//waits for click, links to edit page
-				google.maps.event.addListener(markers[index], 'click', function(){
-					//alert('go to ' + tree.url);
-					window.location.href = tree.url;
-					
-				//We could also (potentially) include historical or other tree information in a pop-up box that appears 
-				//when a user clicks on the scpecific marker for a tree
-				});
-        	 });
-        });
-        
-        
-        
-        /*
-        var d = 7.2;
-    	var brng = 45 * (Math.PI/180);
-    	
-    	latToRad = (plotCenterPoint.lat() * Math.PI/180);
-    	lngToRad = (plotCenterPoint.lng() * Math.PI/180);
-        
-        // calculation to align with GoogleMaps: http://www.movable-type.co.uk/scripts/latlong.html        
-        var treeLat = Math.asin(Math.sin(latToRad)*Math.cos(d/R) + Math.cos(latToRad)*Math.sin(d/R)*Math.cos(brng) );
-        var treeLng = lngToRad + Math.atan2(Math.sin(brng)*Math.sin(d/R)*Math.cos(latToRad), Math.cos(d/R)-Math.sin(latToRad)*Math.sin(treeLat));
-        
-        //centerLat = 39.903445;
-        //centerLong = -75.358998;
-        
-		var populationOptions = {
-		strokeColor: "#FF0000",
-		strokeOpacity: 0.8,
-		strokeWeight: .5,
-		fillColor: "#FF0000",
-		fillOpacity: 100,
-		map: map,
-		center: new google.maps.LatLng(treeLat * 180/Math.PI, treeLng * 180/Math.PI),  
-		radius: 1
-    };
-    cityCircle = new google.maps.Circle(populationOptions);
-    */
-      }  
+				// Sample plot drawing and marker
+				var plotBounds = [	
+					new google.maps.LatLng(gpsMaster.gpsCords[curString][2], gpsMaster.gpsCords[curString][3]),
+					new google.maps.LatLng(gpsMaster.gpsCords[curString][4], gpsMaster.gpsCords[curString][5]),
+					new google.maps.LatLng(gpsMaster.gpsCords[curString][6], gpsMaster.gpsCords[curString][7]),
+					new google.maps.LatLng(gpsMaster.gpsCords[curString][8], gpsMaster.gpsCords[curString][9]),
+					new google.maps.LatLng(gpsMaster.gpsCords[curString][2], gpsMaster.gpsCords[curString][3])
+				];
+				
+				plot = new google.maps.Polyline({
+					  strokeColor: "blue",
+					  strokeOpacity: 0.8,
+					  strokeWeight: 2,
+					  map: map,
+					  path: plotBounds
+				  });
+				
+				//Url for loading Update Information Page for given plot
+				plotURL = "http://ec2-50-19-28-191.compute-1.amazonaws.com/#update/trees/site/" + gpsSite + "/plot/" + gpsMaster.plot[gpsPlot];	
+        		
+                //Accesses data base for given plot
+				htmlString = "http://ec2-50-19-28-191.compute-1.amazonaws.com/cgi-bin/litterfall.py?site=" + gpsSite + "&plot=" + gpsMaster.plot[gpsPlot];        		
+        		
+				//plots trees in a given plot
+				$.ajax({
+					type: "GET",
+					url: htmlString,
+					dataType: "json",
+					async: false,      //may need to change
+					success: function(data, textStatus, jqXHR) {
+						//trees = [];
+						$.each(data, function(index, tree){
+							var d = tree.distance;
+							var brng = tree.angle * (Math.PI/180);
+							
+							//calculate most recent diameter for tree
+							recentDate = "";
+							for (date in tree.diameter){                      //loop through the list of existing dates and store the most recent
+								if (date > recentDate){					  //Date format is YYYYMMDD (reformated in template html above)
+									recentDate = date;
+								}
+							}
+							
+							diameter = tree.diameter[recentDate].value;    //gets diameter from most recent measurement
+							
+							//converts tree's coordinates to Radians for further calculations
+							latToRad = (curPlotMIDlat * Math.PI/180);
+							lngToRad = (curPlotMIDlng * Math.PI/180);
+														
+							// calculation to align with GoogleMaps: http://www.movable-type.co.uk/scripts/latlong.html        
+							var treeLat = Math.asin(Math.sin(latToRad)*Math.cos(d/R) + Math.cos(latToRad)*Math.sin(d/R)*Math.cos(brng));
+							var treeLng = lngToRad + Math.atan2(Math.sin(brng)*Math.sin(d/R)*Math.cos(latToRad), Math.cos(d/R)-Math.sin(latToRad)*Math.sin(treeLat));
+							
+							//centerLat = 39.903445;
+							//centerLong = -75.358998;
+							
+							tree.lat = treeLat * 180/Math.PI;
+							tree.lng = treeLng * 180/Math.PI;
+							console.log(curPlotMIDlat + ", " + curPlotMIDlng);
+							console.log(tree.lat + ", " + tree.lng);
+							
+							tree.url = "http://ec2-50-19-28-191.compute-1.amazonaws.com/" + "?tree=" + tree.tree_id + "." + tree.sub_tree_id + "#update/trees/site/" + (tree.site) + "/plot/" + String(tree.plot);	
+						
+							var treeOptions = {
+								strokeColor: "#FF0000",
+								strokeOpacity: 0.8,
+								strokeWeight: .5,
+								fillColor: "#FF0000",
+								fillOpacity: 100,
+								map: map,
+								center: new google.maps.LatLng(tree.lat, tree.lng),  
+								radius: diameter/50,
+								clickable: true
+							};
+							
+							//creates circle representing most recent diameter of tree
+							newTree = new google.maps.Circle(treeOptions);
+							
+							
+							/* this comment elimnates markers from the map
+							//creates Label/marker for tree
+							treeMarker = new google.maps.Marker({
+								position: new google.maps.LatLng(tree.lat, tree.lng),
+								animation: google.maps.Animation.DROP,
+								map: map,
+								title: "Tree " + String(tree.tree_id) + "." + String(tree.sub_tree_id),
+							});
+							*/
+							
+							//when user hovers over tree circle, displays tree site, plot, tree_id, and tree_sub_id info.
+							/*
+							google.maps.event.addListener(newTree, 'mouseover', function(event) {
+								var thisCircle = this;								
+								var infowindow = new google.maps.InfoWindow({
+									content: "Tree: :" 
+									});
+								infowindow.open(thisCircle.map, thisCircle.getCenter());
+								
+								this.setOptions({fillColor: "blue"});
+							});
+							*/
+							
+							//waits for user to click, then opens tree update page
+							google.maps.event.addListener(newTree, 'click', function(){
+								window.location.href = tree.url;
+							});
+						}); //ends $.each function
+					} //ends success function
+				}); //ends $.ajax function;
+
+				
+				google.maps.event.addListener(testMarker, 'dblclick', function(){
+					window.location.href = plotURL;
+				});        	
+		
+			} //ends by-plot for loop
+		} // ends by-site for loop
+	}; // ends initialize function
+		 
+
+	//NOTE: We could also (potentially) include historical or other tree information in a pop-up box that appears 
+	//when a user clicks on the scpecific marker for a tree
+    
     </script>
   </head>
   <body onload="initialize()">

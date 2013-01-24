@@ -15,7 +15,7 @@ $(document).ready(function(){
         routes: {
             "update": "updateObservation", //inits the add record "wizard", leads to the edit pages
             "update/trees/site/:location/plot/:plot": "editPlot",
-            "update/trees/site/:location/plot/:plot/treeid/:treeid(/:subTreeId)": "editTree",
+            "update/trees/site/:location/plot/:plot/treeid/:treeid(/subtreeid/:subTreeId)": "editTree",
             "*actions": "defaultRoute" // Backbone will try match the route above first
         }
 	});
@@ -88,7 +88,7 @@ $(document).ready(function(){
 		updateTree: function(){
 			//goto update tree page
 			var subId = this.model.get("sub_tree_id");
-			var treeUrl = "/treeid/" + this.model.get("tree_id") + ((subId) ? '/' + subId : '');
+			var treeUrl = "/treeid/" + this.model.get("tree_id") + ((subId) ? '/subtreeid/' + subId : '');
 			document.location.hash = document.location.hash + treeUrl
 			//save a tree to the DB
 			//this.model.save();
@@ -109,7 +109,7 @@ $(document).ready(function(){
 		<div class="button-row">\
 			<button class="btn-new-observation btn btn-mini btn-success pull-left" type="button">+ New Entry</button>\
 		</div>\
-		<table class="table-striped">\
+		<table id="tree_observations" class="table-striped">\
 			<thead>\
 				<tr>\
 					<th></th>\
@@ -127,12 +127,15 @@ $(document).ready(function(){
 			<% _.each(tree.datesDesc, function(date){ %>\
 			<tr>\
 				<td>\
-					<button class="btn btn-mini btn-primary edit-existing" type="button">Edit</button>\
+					<button class="display_cell btn btn-mini btn-primary edit-existing" type="button">Edit</button>\
+					<div class="edit_cell btn-group"><button class="btn-save-observation btn btn-mini btn-success" type="button">Submit</button>\
+					<button class="btn-cancel-observation btn btn-mini btn-danger" type="button">Cancel</button>\
 				</td>\
-				<td class="editable"><%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %></td>\
-				<td class="editable"><%= (tree.diameter[date].observers || []).join(", ") %></td>\
-				<td class="editable"><%= tree.diameter[date].value %></td>\
-				<td class="editable"><%= tree.diameter[date].notes %></td>\
+				<td class="editable"><span class="display_cell date_select"><%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %></span><span class="edit_cell date_select"><input type="text" value="<%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %>"/>\
+				<input type="hidden" class="formatted_date" value="<%= date %>"></span></td>\
+				<td class="editable"><span class="display_cell observers"><%= (tree.diameter[date].observers || []).join(", ") %></span><span class="edit_cell observers"><input type="text" value="<%= (tree.diameter[date].observers || []).join(", ") %>"></span></td>\
+				<td class="editable"><span class="display_cell diameter"><%= tree.diameter[date].value %></span><span class="edit_cell diameter"><input type="text" value="<%= tree.diameter[date].value %>"></span></td>\
+				<td class="editable"><span class="display_cell notes"><%= tree.diameter[date].notes %></span><span class="edit_cell notes"><input type="text" value="<%= tree.diameter[date].notes %>"></span></span></td>\
 			</tr>\
 			<% }); %>\
 			</tbody>\
@@ -146,16 +149,22 @@ $(document).ready(function(){
 			this.model.on('change:diameter', this.render, this); //diameter will change when new observation is added
 		},
 		render: function(){
-			console.log('render edit');
+			//console.log('render edit');
 			var thisTree = this.model.toJSON();
 			//get the dates in descending order
 			thisTree.datesDesc = _.keys(thisTree.diameter).sort().reverse();
 			this.$el.html(_.template(this.template, {tree: thisTree}));
 		},
+		
 		events: {
+
 			'click .btn-new-observation': 'newObservation',	
-			'click td.editable': 'editValue'
+			'click .edit-existing': 'editObservation',
+			'click td.editable': 'editValue',
+			'click .btn-save-observation': 'saveObservation',
+			'click .btn-cancel-observation': 'render'
 		},
+		
 		newObservation: function(){
 			//add a new blank row to the observation table
 			var diameters = _.clone(this.model.get('diameter')); //must clone object to update it
@@ -164,26 +173,91 @@ $(document).ready(function(){
 			if (diameters[newDateKey] == undefined){ //prevent overwriting of dates
 				diameters[newDateKey] = {
 					value: 'n/a',
-					note: ""
+					notes: "",
+					//observers: ""
 				};
 				this.model.set({"diameter": diameters});
 			}
+			
+			// Disable all the fields from being editing
+			$("#tree_observations .btn.display_cell").hide();
+			
+			// Show edit content, hide display content, show "Submit/cancel button", add date_picker		
+			$("#tree_observations > tbody > tr:first .edit_cell").show();
+			$("#tree_observations > tbody > tr:first .display_cell").hide();
+			$("#tree_observations > tbody > tr:first .edit_cell.date_select :input" ).datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date"});	
 		},
+		
+		editObservation: function(event) {
+		
+			// User wants to edit an existing observation.  
+			row_to_edit = $(event.target).parents("tr");		// Get the row of edit button
+			
+			// Hide any existing edit modes
+			$("#tree_observations .btn.display_cell").hide();
+					
+			// Show edit content, hide display content, show "Submit/cancel button", add date_picker		
+			row_to_edit.find(" .edit_cell").show();
+			row_to_edit.find(".display_cell").hide();
+			row_to_edit.find(".edit_cell.date_select :input" ).datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date"});
+		},
+		
+		saveObservation: function(event) {
+			// User added or edited an observation.  Save it to the server.	
+			// Get the row that is being edited
+			row_to_save = $("#tree_observations > tbody > tr .edit_cell :visible").parents("tr");
+			
+			var newDateKey = row_to_save.find(".formatted_date").val();
+			var newValue = parseFloat(row_to_save.find(".diameter :input").val());
+			var newObservers = row_to_save.find(".observers :input").val();
+			var newNotes = row_to_save.find(".notes :input").val();
+			
+			// ** NEED TO INSERT VALIDATION CODE HERE **
+						
+			//must clone object to update it
+			var diameters = _.clone(this.model.get('diameter'));
+			
+			// Find the existing date key by figuring out the index of the row being edited and matching it up with the index of the 
+			// observations (sorted by date key in reverse)
+			var indexOfObservation = $("#tree_observations tbody tr").index(row_to_save);
+			var existingDateKey = _.keys(diameters).sort().reverse()[indexOfObservation];
+			
+			// Remove the existing date key/object.  Since _.clone is a shallow clone, we need to remove the reference to the
+			// existing observation before removing it.
+			console.log(existingDateKey);
+			diameters[existingDateKey] = new Object();
+			delete diameters[existingDateKey];
+			
+			// Add in the new data
+			diameters[newDateKey] = {
+					value: newValue,
+					notes: newNotes,
+					//observers: newObservers
+				};
+			
+			// Set the diameter to be the new list of observations and save the object	
+			
+			//** May need to check to see if no change 
+			
+			this.model.set({"diameter": diameters});
+			this.model.save();			
+		},
+		
 		editValue: function(event){
 			$(event.target).css("color", "red"); //event attaching test
 		},
+		
 		updateTree: function(){
 			//goto update tree page
 			var subId = this.model.get("sub_tree_id");
 			var treeUrl = "/treeid/" + this.model.get("tree_id") + ((subId) ? '/' + subId : '');
 			document.location.hash = document.location.hash + treeUrl
 			//save a tree to the DB
-			//this.model.save();
+			this.model.save();
 		}
 	});
 	
 	var singleOption = Backbone.Model.extend({});								//creates empty Model (to be a site, once information is loaded)
-	
 	
 	var selectionOptions = Backbone.Collection.extend({							//creates Collection of singleOption Models (to-be locations, plots, collection type)
 		model: singleOption,
@@ -213,8 +287,7 @@ $(document).ready(function(){
 			_id: '',
 			tree_id: 0,
 			sub_tree_id: 0,
-			quadrant: 0,
-			angle: 0,
+			angle: 0.0,
 			distance: 0,
 			diameter: {},
 			species: '',
@@ -241,7 +314,7 @@ $(document).ready(function(){
 				el: $('#treeEditView'),
 				model: this
 			});
-			console.log(this.toJSON());
+			//console.log(this.toJSON());
 		},
 		parse: function(response){
 			response.full_tree_id = response.tree_id + (response.sub_tree_id * .1);
