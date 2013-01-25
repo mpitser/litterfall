@@ -90,9 +90,7 @@ $(document).ready(function(){
 			//goto update tree page
 			var subId = this.model.get("sub_tree_id");
 			var treeUrl = "/treeid/" + this.model.get("tree_id") + ((subId) ? '/subtreeid/' + subId : '');
-			document.location.hash = document.location.hash + treeUrl
-			//save a tree to the DB
-			//this.model.save();
+			app_router.navigate(document.location.hash + treeUrl, {trigger: true});
 		}
 	});
 	
@@ -151,7 +149,7 @@ $(document).ready(function(){
 		',
 		initialize: function(){
 			this.render();
-			this.model.on('change:diameter', this.render, this); //diameter will change when new observation is added
+			this.model.on('change', this.render, this); //re-render when the model is saved (new observation, or an edit)
 		},
 		render: function(){
 			//console.log('render edit');
@@ -159,16 +157,49 @@ $(document).ready(function(){
 			//get the dates in descending order
 			thisTree.datesDesc = _.keys(thisTree.diameter).sort().reverse();
 			this.$el.html(_.template(this.template, {tree: thisTree}));
+			this.postRender();
 		},
-		
+		postRender: function(){
+			//add any methods/functions that need to be call after redendering the Tree edit view
+			this.populateSpecies();
+		},
+		populateSpecies: function(){
+			var treeSpecies = this.model.get('species');
+			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allSpecies', function(data) {
+				$.each(data, function(index, value) {
+					$("#tree-info .species select").append($("<option></option>").attr("value",value).text(value));
+					$("#tree-info .species option[value='" + treeSpecies + "']").attr('selected','selected');
+				});
+			
+			});
+		},
 		events: {
-
 			'click .btn-new-observation': 'newObservation',	
 			'click .edit-existing': 'editObservation',
 			'click .btn-save-observation': 'saveObservation',
-			'click .btn-cancel-observation': 'render'
+			'click .btn-cancel-observation': 'render',
+			'click .edit-tree-info-btn': 'editTreeInfo',
+			'click .btn-cancel-tree-info': 'cancelEditTreeInfo',
+			'click .btn-save-tree-info': 'saveTreeInfo'
 		},
-		
+		editTreeInfo: function(){
+			$('.edit-tree-info-btn').toggle();
+			$('.display-tree-info').toggle();
+			$('.edit-tree-info').toggle();
+		},
+		cancelEditTreeInfo: function(){
+			$('.edit-tree-info-btn').toggle();
+			$('.display-tree-info').toggle();
+			$('.edit-tree-info').toggle();
+		},
+		saveTreeInfo: function(){
+			this.model.set({
+				'species': $("#tree-info .species select").val(),
+				'angle': $("#tree-info .angle input").val(),
+				'distance': $("#tree-info .distance input").val()
+			});
+			this.model.save();
+		},
 		newObservation: function(){
 			//add a new blank row to the observation table
 			var diameters = _.clone(this.model.get('diameter')); //must clone object to update it
@@ -245,15 +276,6 @@ $(document).ready(function(){
 			
 			this.model.set({"diameter": diameters});
 			this.model.save();			
-		},
-		
-		updateTree: function(){
-			//goto update tree page
-			var subId = this.model.get("sub_tree_id");
-			var treeUrl = "/treeid/" + this.model.get("tree_id") + ((subId) ? '/' + subId : '');
-			document.location.hash = document.location.hash + treeUrl
-			//save a tree to the DB
-			this.model.save();
 		}
 	});
 	
@@ -299,12 +321,7 @@ $(document).ready(function(){
 			lng: 0
 		},
 		initialize: function(){
-			if (this.get('editView')){
-				this.on('change', this.editViewInitialize, this);
-			}
-			else{
 			this.editViewInitialize();
-			}
 		},
 		plotViewInitialize: function(){
 			var plotRow = new plotRowView({
@@ -317,7 +334,6 @@ $(document).ready(function(){
 				el: $('#treeEditView'),
 				model: this
 			});
-			//console.log(this.toJSON());
 		},
 		parse: function(response){
 			response.full_tree_id = response.tree_id + (response.sub_tree_id * .1);
@@ -418,7 +434,7 @@ $(document).ready(function(){
 			}));
 			
 
-			var thisTree = new Tree({editView: true});
+			var thisTree = new Tree();
 			thisTree.url = app.config.cgiDir + 'litterfall.py?site=' + site + '&plot=' + plot + '&treeid=' + treeId + '&subtreeid=' + subTreeId;
 			thisTree.fetch();
 
@@ -444,18 +460,6 @@ $(document).ready(function(){
 
 			//DBH Tooltip 
 			updateFunctions();
-			
-			
-			// Load species options ** NEED TO SET THIS TO CURRENTLY SELECTED SPECIES (IF KNOWN) **
-			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allSpecies', function(data)
-			{
-				$.each(data, function(index, value) {
-					$(".edit-tree-info.species select").append($("<option></option>").attr("value",value).text(value));
-				
-				});
-			
-			});
-			
 		});
     });
     
@@ -468,20 +472,8 @@ $(document).ready(function(){
 // Start Bootstrap and template related jQuery
 	
 function updateFunctions(){
-	$('.dbh').tooltip({trigger:'hover'})
-	$('.dropdown-toggle').dropdown()
-	$('.edit-tree-info-btn').click(function(){
-		$('.edit-tree-info-btn').toggle();
-		$('.display-tree-info').toggle();
-		$('.edit-tree-info').toggle();
-
-	});
-	$('.btn-cancel-tree-info').click(function(){
-		$('.edit-tree-info-btn').toggle();
-		$('.display-tree-info').toggle();
-		$('.edit-tree-info').toggle();
-
-	});
+	$('.dbh').tooltip({trigger:'hover'});
+	$('.dropdown-toggle').dropdown();
 }
 
 // End Bootstrap and template related jQuery
