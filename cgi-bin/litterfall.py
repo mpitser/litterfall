@@ -148,14 +148,17 @@ def validate(obs, data):
 		# different schemes for checking
 		if isinstance(tocheck, float) or isinstance(tocheck, int):
 			result = checknum(tocheck, dtype, high, low)
+			result['key'] = key
 			if result['flag'] == False:
 				return result			
 		elif isinstance(tocheck, dict):
 			result = checkdict(tocheck, dtype)
+			result['key'] = key
 			if result['flag'] ==  False:
 				return result				
 		else:
 			result = checkstring(tocheck, dtype, value)
+			result['key'] = key
 			if result['flag'] ==  False:
 				return result
 				
@@ -199,7 +202,7 @@ def main():
 			print data
 		else:
 			print 'Status:406\n'
-			print msg
+			print result['key'] + '->' + msg
 		
 if __name__ == "__main__":
     main()
