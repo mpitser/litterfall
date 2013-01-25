@@ -195,8 +195,8 @@ $(document).ready(function(){
 		saveTreeInfo: function(){
 			this.model.set({
 				'species': $("#tree-info .species select").val(),
-				'angle': $("#tree-info .angle input").val(),
-				'distance': $("#tree-info .distance input").val()
+				'angle': parseInt($("#tree-info .angle input").val(), 10),
+				'distance': parseFloat($("#tree-info .distance input").val(), 10)
 			});
 			this.model.save();
 		},
@@ -322,6 +322,11 @@ $(document).ready(function(){
 		},
 		initialize: function(){
 			this.editViewInitialize();
+			this.on('invalid', this.showError);
+		},
+		showError: function(){
+			//TODO show the validation error that is set in the validate method
+			console.log(this.validationError);
 		},
 		plotViewInitialize: function(){
 			var plotRow = new plotRowView({
@@ -338,6 +343,13 @@ $(document).ready(function(){
 		parse: function(response){
 			response.full_tree_id = response.tree_id + (response.sub_tree_id * .1);
 			return response;
+		},
+		validate: function(attrs, options){
+			//this is where we validate the model's data
+			var isInt = [];
+			var isFloat = [];
+			console.log(attrs);
+			console.log(options);
 		}
 	});
 	
