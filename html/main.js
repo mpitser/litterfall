@@ -220,7 +220,7 @@ $(document).ready(function(){
 			// Show edit content, hide display content, show "Submit/cancel button", add date_picker		
 			$("#tree_observations > tbody > tr:first .edit_cell").show();
 			$("#tree_observations > tbody > tr:first .display_cell").hide();
-			$("#tree_observations > tbody > tr:first .edit_cell.date_select :input" ).datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date"});	
+			$("#tree_observations > tbody > tr:first .edit_cell.date_select :input" ).datepicker({ altFormat: "yyyymmdd" , altField: "#tree_observations > tbody > tr .formatted_date" , maxDate: 0});	
 		},
 		
 		editObservation: function(event) {
@@ -234,7 +234,7 @@ $(document).ready(function(){
 			// Show edit content, hide display content, show "Submit/cancel button", add date_picker		
 			row_to_edit.find(" .edit_cell").show();
 			row_to_edit.find(".display_cell").hide();
-			row_to_edit.find(".edit_cell.date_select :input" ).datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date"});
+			row_to_edit.find(".edit_cell.date_select :input" ).datepicker({ altFormat: "yyyymmdd" , altField: "#tree_observations > tbody > tr .formatted_date" , maxDate: 0});
 		},
 		
 		saveObservation: function(event) {
@@ -252,6 +252,8 @@ $(document).ready(function(){
 			var newNotes = row_to_save.find(".notes :input").val();
 			
 			// ** NEED TO INSERT VALIDATION CODE HERE **
+			//var todaysDate = new Date();
+			//console.log(todaysDate);
 						
 			//must clone object to update it
 			var diameters = _.clone(this.model.get('diameter'));
