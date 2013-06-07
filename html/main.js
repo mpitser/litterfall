@@ -180,7 +180,8 @@ $(document).ready(function(){
 			'click .btn-cancel-observation': 'render',
 			'click .edit-tree-info-btn': 'editTreeInfo',
 			'click .btn-cancel-tree-info': 'cancelEditTreeInfo',
-			'click .btn-save-tree-info': 'saveTreeInfo'
+			'click .btn-save-tree-info': 'saveTreeInfo',
+			'blur .edit_cell': 'validateField'
 		},
 		editTreeInfo: function(){
 			$('.edit-tree-info-btn').toggle();
@@ -234,7 +235,7 @@ $(document).ready(function(){
 			// Show edit content, hide display content, show "Submit/cancel button", add date_picker		
 			row_to_edit.find(" .edit_cell").show();
 			row_to_edit.find(".display_cell").hide();
-			row_to_edit.find(".edit_cell.date_select :input" ).datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date" , maxDate: 0});
+			row_to_edit.find(".edit_cell.date_select :input" ).datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date" , maxDate: 0 });
 		},
 		
 		saveObservation: function(event) {
@@ -252,8 +253,9 @@ $(document).ready(function(){
 			var newNotes = row_to_save.find(".notes :input").val();
 			
 			// ** NEED TO INSERT VALIDATION CODE HERE **
+			// (^ xd wrote this ^), but we just added a function to handle validation when any editable field goes out of focus
+			// validation of diameter data a user intends to save should live there.
 			
-						
 			//must clone object to update it
 			var diameters = _.clone(this.model.get('diameter'));
 			
@@ -264,7 +266,7 @@ $(document).ready(function(){
 			
 			// Remove the existing date key/object.  Since _.clone is a shallow clone, we need to remove the reference to the
 			// existing observation before removing it.
-			console.log(existingDateKey);
+			//console.log(existingDateKey);
 			diameters[existingDateKey] = new Object();
 			delete diameters[existingDateKey];
 			
@@ -281,6 +283,48 @@ $(document).ready(function(){
 			
 			this.model.set({"diameter": diameters});
 			this.model.save();			
+		},
+		
+		validateField: function(event){
+			console.log("event");	
+			//console.log(event);
+			
+			//console.log(event.currentTarget);
+			//console.log(event.currentTarget.className);
+			
+			var fieldToValidate = event.currentTarget.className;
+			var currentRow = $("#tree_observations > tbody > tr .edit_cell :visible").parents("tr");
+			
+			/* if field left was date */
+			if (fieldToValidate == "edit_cell date_select"){
+				//do date validation
+				console.log("date validation");
+				var dateEntered = currentRow.find(".formatted_date").val();
+				console.log(dateEntered);
+				console.log($("#tree_observations > tbody > tr .edit_cell.date_select"));
+				// needs to be correct format if manually entered
+				//can't be a duplicate
+			} else if (fieldToValidate == "edit_cell observers"){
+				//do observers validation
+				console.log("observers validation");
+				var obsEntered = currentRow.find(".observers :input").val().split(",");
+				console.log(obsEntered);
+				// dropdown list?
+			} else if (fieldToValidate == "edit_cell diameter"){
+				//do diameter validation
+				console.log("diameter validation");
+				var diamEntered = parseFloat(currentRow.find(".diameter :input").val());
+				console.log(diamEntered);
+				// needs to be int/float
+				// validation about growth (more than 10% and alert to make sure?)
+			} else {
+				// field left was comments, which don't need to be validated (and should be allowed to be empty!)
+				return;
+			}
+			
+			/*validation that no field was left empty, and other across-the-board validation */
+			// must go below if-else to keep comment box from getting this validation
+			// if nothing is changed, allow them to exit the edit entry view by either submit or cancel
 		}
 	});
 	
@@ -353,8 +397,23 @@ $(document).ready(function(){
 			//this is where we validate the model's data
 			var isInt = [];
 			var isFloat = [];
+			
+			//console.log("");
+			//console.log("attrs");
 			console.log(attrs);
+			
+			//console.log("");
+			//console.log("options");
 			console.log(options);
+			
+			//console.log("");
+			//console.log(attrs.diameter);
+			/*var dateEntered = null;
+			for (existingDateEntry in attrs.diameter) {
+				if (dateEntered == existingDateEntry) {
+					console.log("already in database");
+				}
+			}*/	
 		}
 	});
 	
