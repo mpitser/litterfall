@@ -136,7 +136,7 @@ $(document).ready(function(){
 				</td>\
 				<td class="editable"><span class="display_cell date_select"><%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %></span><span class="edit_cell date_select"><input type="text" value="<%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %>"/>\
 				<input type="hidden" class="formatted_date" value="<%= date %>"></span></td>\
-				<td class="editable"><span class="display_cell observers"><%= (tree.diameter[date].observers || []).join(", ") %></span><span class="edit_cell observers"><input type="text" value="<%= (tree.diameter[date].observers || []).join(", ") %>"></span></td>\
+				<td class="editable"><span class="display_cell observers"><%= tree.diameter[date].observers %></span><span class="edit_cell observers"><input type="text" value="<%= tree.diameter[date].observers %>"></span></td>\
 				<td class="editable"><span class="display_cell diameter"><%= tree.diameter[date].value %></span><span class="edit_cell diameter"><input type="text" value="<%= tree.diameter[date].value %>"></span></td>\
 				<td class="editable"><span class="display_cell notes"><%= tree.diameter[date].notes %></span><span class="edit_cell notes"><input type="text" value="<%= tree.diameter[date].notes %>"></span></span></td>\
 			</tr>\
@@ -209,7 +209,7 @@ $(document).ready(function(){
 				diameters[newDateKey] = {
 					value: 'n/a',
 					notes: "",
-					//observers: ""
+					observers: ""
 				};
 				this.model.set({"diameter": diameters});
 			}
@@ -244,7 +244,11 @@ $(document).ready(function(){
 			
 			var newDateKey = row_to_save.find(".formatted_date").val();
 			var newValue = parseFloat(row_to_save.find(".diameter :input").val());
-			var newObservers = row_to_save.find(".observers :input").val();
+			// convert observers from string to array
+			var newObservers = row_to_save.find(".observers :input").val().split(",");
+			for (var i=0; i<newObservers.length; i++){
+				newObservers[i] = newObservers[i].trim(" ");
+			}
 			var newNotes = row_to_save.find(".notes :input").val();
 			
 			// ** NEED TO INSERT VALIDATION CODE HERE **
@@ -267,7 +271,7 @@ $(document).ready(function(){
 			diameters[newDateKey] = {
 					value: newValue,
 					notes: newNotes,
-					//observers: newObservers
+					observers: newObservers
 				};
 			
 			// Set the diameter to be the new list of observations and save the object	
