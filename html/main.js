@@ -177,11 +177,11 @@ $(document).ready(function(){
 			'click .btn-new-observation': 'newObservation',	
 			'click .edit-existing': 'editObservation',
 			'click .btn-save-observation': 'saveObservation',
-			'click .btn-cancel-observation': 'render',
+			'click .btn-cancel-observation': 'cancelEditObservation',
 			'click .edit-tree-info-btn': 'editTreeInfo',
 			'click .btn-cancel-tree-info': 'cancelEditTreeInfo',
 			'click .btn-save-tree-info': 'saveTreeInfo',
-			'blur .edit_cell': 'validateField'
+			'change .edit_cell': 'validateField'
 		},
 		editTreeInfo: function(){
 			$('.edit-tree-info-btn').toggle();
@@ -235,8 +235,13 @@ $(document).ready(function(){
 			// Show edit content, hide display content, show "Submit/cancel button", add date_picker		
 			row_to_edit.find(" .edit_cell").show();
 			row_to_edit.find(".display_cell").hide();
-			console.log(this);
 			row_to_edit.find(".edit_cell.date_select :input" ).datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date" , maxDate: 0 });
+		},
+		
+		cancelEditObservation: function() {
+			// user wants to cancel any edits made, or is canceling after adding a new entry
+			this.model.fetch(); // retrieves recent data
+			this.render();      // NOTE: this is sort of a hack to exit the editing view
 		},
 		
 		saveObservation: function(event) {
@@ -253,9 +258,16 @@ $(document).ready(function(){
 			}
 			var newNotes = row_to_save.find(".notes :input").val();
 			
+			// manually call specific validate functions again
+			// TODO: see if there is a more efficient way to do this
+			if (! this.validateDate(row_to_save)){
+				console.log("didn't save");
+				return; // before actually saving anything
+			}
+			
 			// ** NEED TO INSERT VALIDATION CODE HERE **
-			// (^ xd wrote this ^), but we just added a function to handle validation when any editable field goes out of focus
-			// validation of diameter data a user intends to save should live there.
+			// (^ xd wrote this ^), but we just added a function (validateField(event)) to handle validation when any editable field is changed
+			// validation should all be housed there
 			
 			//must clone object to update it
 			var diameters = _.clone(this.model.get('diameter'));
@@ -283,22 +295,20 @@ $(document).ready(function(){
 			//** May need to check to see if no change 
 			
 			this.model.set({"diameter": diameters});
-			this.model.save();			
+			var ret = this.model.save(null, {error: function(model, response, options){alert("There was an error with the database.  Please alert the instructor of this issue.")}, 
+									         success: function(model, response, options){console.log("success")}});	
+			// NOTE: another hack to make sure that the display view is rendered instead of the edit view
+			//(otherwise the edit view hangs there when nothing is changed)
+			this.render();		
 		},
 		
 		validateField: function(event){
-			console.log("event");	
-			//console.log(event);
-			
-			//console.log(event.currentTarget);
-			//console.log(event.currentTarget.className);
 			
 			var fieldToValidate = event.currentTarget.className;
 			var currentRow = $("#tree_observations > tbody > tr .edit_cell :visible").parents("tr");
 			
 			/* if date field lost focus */
-			if (fieldToValidate == "edit_cell date_select"){
-				//TODO: immediate feedback when correcting mistakes (use onSelect function of datepicker to redirect to validateDate)
+			if (fieldToValidate == "edit_cell date_select"){				
 				this.validateDate(currentRow);
 			/* if observers field lost focus */				
 			} else if (fieldToValidate == "edit_cell observers"){
@@ -315,37 +325,42 @@ $(document).ready(function(){
 			/*validation that no field was left empty, and other across-the-board validation */
 			// must go below if-else to keep comment box from getting this validation
 			// if nothing is changed, allow them to exit the edit entry view by either submit or cancel
+			//NOTE: maybe this needs to go inside every specific validate function since validateField isn't called during the final saveObservation validation
 		},
 		
 		validateDate: function(currentRow) {
-			console.log("date validation");
-
+			
+			// get date to validate
 			var dateEntered = currentRow.find(".formatted_date").val();
-			//var dateEnteredDP = currentRow.find(".edit_cell.date_select :input" ).datepicker( "getDate" );
-				
-			// date can't be in future
+			
+			/* make sure date isn't in future */
 			var today = new Date();
 		    var todayFormatted = today.getFullYear().toString() + 
 		    				     ((today.getMonth()+1).toString().length == 1 ? "0"+(today.getMonth()+1) : (today.getMonth()+1).toString()) + 
 		    					 ((today.getDate()+1).toString().length == 1 ? "0"+today.getDate() : today.getDate().toString());
-			
-			console.log(dateEntered);
-			//console.log(dateEnteredDP);
-			console.log(todayFormatted);
-			console.log(dateEntered > todayFormatted);
 			if (dateEntered > todayFormatted) {
 				// trigger the edit Observation button to prevent saving
 				$(".edit_cell.date_select :input" ).addClass("alert_invalid");
 				alert("Can't have date past today!");
 				console.log("date validation failed");
-				//TODO: find a better way (possibly jquery) to highlight field that was invalid
 				$(currentRow.find('.edit-existing')).trigger('click');
-				return;
-			} else {
-				$(".edit_cell.date_select :input" ).removeClass("alert_invalid");
+				return false;
+			} 
+			
+			/* make sure date isn't already added */		
+			var existingDiams = this.model.attributes.diameter;
+			for (diam in existingDiams) {
+				if (diam == dateEntered){
+					$(".edit_cell.date_select :input" ).addClass("alert_invalid");
+					alert("date already has associated entry.  Please make your edits in the existing entry or check to make sure you are entering the correct date.");				
+					return false;
+				}
 			}
-			//TODO: last else is that date field is fine, in which case, remove the highlight_invalid class
-			//console.log($("#tree_observations > tbody > tr .edit_cell.date_select"));
+
+			/* if date field passes all tests, make sure it is not highlighted anymore */
+			$(".edit_cell.date_select :input" ).removeClass("alert_invalid");
+			return true;
+			
 			// needs to be correct format if manually entered
 			//can't be a duplicate
 		},
@@ -436,22 +451,8 @@ $(document).ready(function(){
 			var isInt = [];
 			var isFloat = [];
 			
-			//console.log("");
-			//console.log("attrs");
 			console.log(attrs);
-			
-			//console.log("");
-			//console.log("options");
 			console.log(options);
-			
-			//console.log("");
-			//console.log(attrs.diameter);
-			/*var dateEntered = null;
-			for (existingDateEntry in attrs.diameter) {
-				if (dateEntered == existingDateEntry) {
-					console.log("already in database");
-				}
-			}*/	
 		}
 	});
 	
