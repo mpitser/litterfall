@@ -235,6 +235,7 @@ $(document).ready(function(){
 			// Show edit content, hide display content, show "Submit/cancel button", add date_picker		
 			row_to_edit.find(" .edit_cell").show();
 			row_to_edit.find(".display_cell").hide();
+			console.log(this);
 			row_to_edit.find(".edit_cell.date_select :input" ).datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date" , maxDate: 0 });
 		},
 		
@@ -295,36 +296,73 @@ $(document).ready(function(){
 			var fieldToValidate = event.currentTarget.className;
 			var currentRow = $("#tree_observations > tbody > tr .edit_cell :visible").parents("tr");
 			
-			/* if field left was date */
+			/* if date field lost focus */
 			if (fieldToValidate == "edit_cell date_select"){
-				//do date validation
-				console.log("date validation");
-				var dateEntered = currentRow.find(".formatted_date").val();
-				console.log(dateEntered);
-				console.log($("#tree_observations > tbody > tr .edit_cell.date_select"));
-				// needs to be correct format if manually entered
-				//can't be a duplicate
+				//TODO: immediate feedback when correcting mistakes (use onSelect function of datepicker to redirect to validateDate)
+				this.validateDate(currentRow);
+			/* if observers field lost focus */				
 			} else if (fieldToValidate == "edit_cell observers"){
-				//do observers validation
-				console.log("observers validation");
-				var obsEntered = currentRow.find(".observers :input").val().split(",");
-				console.log(obsEntered);
-				// dropdown list?
+				this.validateObservers(currentRow);
+			/* if diameter field lost focus */				
 			} else if (fieldToValidate == "edit_cell diameter"){
-				//do diameter validation
-				console.log("diameter validation");
-				var diamEntered = parseFloat(currentRow.find(".diameter :input").val());
-				console.log(diamEntered);
-				// needs to be int/float
-				// validation about growth (more than 10% and alert to make sure?)
+				this.validateDiameter(currentRow);
 			} else {
 				// field left was comments, which don't need to be validated (and should be allowed to be empty!)
 				return;
 			}
 			
+			//TODO: 
 			/*validation that no field was left empty, and other across-the-board validation */
 			// must go below if-else to keep comment box from getting this validation
 			// if nothing is changed, allow them to exit the edit entry view by either submit or cancel
+		},
+		
+		validateDate: function(currentRow) {
+			console.log("date validation");
+
+			var dateEntered = currentRow.find(".formatted_date").val();
+			//var dateEnteredDP = currentRow.find(".edit_cell.date_select :input" ).datepicker( "getDate" );
+				
+			// date can't be in future
+			var today = new Date();
+		    var todayFormatted = today.getFullYear().toString() + 
+		    				     ((today.getMonth()+1).toString().length == 1 ? "0"+(today.getMonth()+1) : (today.getMonth()+1).toString()) + 
+		    					 ((today.getDate()+1).toString().length == 1 ? "0"+today.getDate() : today.getDate().toString());
+			
+			console.log(dateEntered);
+			//console.log(dateEnteredDP);
+			console.log(todayFormatted);
+			console.log(dateEntered > todayFormatted);
+			if (dateEntered > todayFormatted) {
+				// trigger the edit Observation button to prevent saving
+				$(".edit_cell.date_select :input" ).addClass("highlight_invalid");
+				alert("Can't have date past today!");
+				console.log("date validation failed");
+				//TODO: find a better way (possibly jquery) to highlight field that was invalid
+				$(currentRow.find('.edit-existing')).trigger('click');
+				return;
+			} else {
+				$(".edit_cell.date_select :input" ).removeClass("highlight_invalid");
+			}
+			//TODO: last else is that date field is fine, in which case, remove the highlight_invalid class
+			//console.log($("#tree_observations > tbody > tr .edit_cell.date_select"));
+			// needs to be correct format if manually entered
+			//can't be a duplicate
+		},
+		
+		validateObservers: function(currentRow) {
+			console.log("observers validation");
+			var obsEntered = currentRow.find(".observers :input").val().split(",");
+			console.log(obsEntered);
+			// dropdown list?
+		},
+		
+		validateDiameter: function(currentRow) {
+			console.log("diameter validation");
+			var diamEntered = parseFloat(currentRow.find(".diameter :input").val());
+			console.log(diamEntered);
+			// needs to be int/float
+			// validation about growth (more than 10% and alert to make sure?)
 		}
 	});
 	
