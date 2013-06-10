@@ -335,14 +335,14 @@ $(document).ready(function(){
 			console.log(dateEntered > todayFormatted);
 			if (dateEntered > todayFormatted) {
 				// trigger the edit Observation button to prevent saving
-				$(".edit_cell.date_select :input" ).addClass("highlight_invalid");
+				$(".edit_cell.date_select :input" ).addClass("alert_invalid");
 				alert("Can't have date past today!");
 				console.log("date validation failed");
 				//TODO: find a better way (possibly jquery) to highlight field that was invalid
 				$(currentRow.find('.edit-existing')).trigger('click');
 				return;
 			} else {
-				$(".edit_cell.date_select :input" ).removeClass("highlight_invalid");
+				$(".edit_cell.date_select :input" ).removeClass("alert_invalid");
 			}
 			//TODO: last else is that date field is fine, in which case, remove the highlight_invalid class
 			//console.log($("#tree_observations > tbody > tr .edit_cell.date_select"));
