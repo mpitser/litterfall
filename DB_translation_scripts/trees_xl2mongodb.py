@@ -65,6 +65,7 @@ for file in args.excel_filenames:
 		observation['dead'] = bool(observation['species'] == "dead")
 		
 		observation['diameter'] = {}
+		observation['diameter']['observers'] = []
 		
 		try:
 			dia_2009 = sheet.row_values(rownum)[headers.index("2009 DBH cm")]

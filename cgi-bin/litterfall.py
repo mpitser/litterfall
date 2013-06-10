@@ -119,7 +119,7 @@ def validate(obs, data):
 	# e.g. {u'sub_tree_id': 0, u'plot': 1, u'full_tree_id': 1, u'angle': 86,...}
 		
 	# fields to check and their criteria
-	'''  VALIDATION IS DISABLED!!!!
+	# VALIDATION IS DISABLED!!!!
 	fields = {'collection_type':{'type': str, 'value': ['tree'], 'high':0, 'low':0}, 
 			  'site':{'type': str, 'value': sites_predef, 'high':0, 'low':0}, 
 			  'plot':{'type': int, 'value': '', 'high':3, 'low':0},
@@ -151,18 +151,21 @@ def validate(obs, data):
 			result = checknum(tocheck, dtype, high, low)
 			result['key'] = key
 			if result['flag'] == False:
+				print "scheme 1 flag"
 				return result			
 		elif isinstance(tocheck, dict):
 			result = checkdict(tocheck, dtype)
 			result['key'] = key
 			if result['flag'] ==  False:
+				print "scheme 2 flag"
 				return result				
 		else:
 			result = checkstring(tocheck, dtype, value)
 			result['key'] = key
 			if result['flag'] ==  False:
+				print "scheme 3 flag"
 				return result
-		'''		
+				
 	# then all is good
 	return {'flag': True, 'msg': 'passed all checks'}
 		
