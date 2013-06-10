@@ -247,7 +247,7 @@ $(document).ready(function(){
 			var newObservers = row_to_save.find(".observers :input").val().split(",");
 			var newNotes = row_to_save.find(".notes :input").val();
 			
-			for (i = 0; i < newObservers; i++) {
+			for (i = 0; i < newObservers.length; i++) {
 				newObservers[i] = newObservers[i].trim(" ");
 			}		
 			
@@ -348,13 +348,13 @@ $(document).ready(function(){
 			response.full_tree_id = response.tree_id + (response.sub_tree_id * .1);
 			return response;
 		},
-		/*validate: function(attrs, options){
+		validate: function(attrs, options){
 			//this is where we validate the model's data
 			var isInt = [];
 			var isFloat = [];
 			console.log(attrs);
 			console.log(options);
-		}*/
+		}
 	});
 	
 	//Declare the plot collection, contains tree objects
@@ -473,6 +473,25 @@ $(document).ready(function(){
 			
 
 			var thisTree = new Tree();
+
+			//DBH Tooltip 
+			updateFunctions();
+		});
+    });
+    
+    app_router.on('route:newSubTree', function(site, plot, treeid) {						//reloads page based on selected location (site), plot, and parent treeid
+    	var  templateFile = 'update-tree.html';
+		require(['lib/text!templates/' + templateFile + '!strip'], function(templateHTML){			//<WHAT DOES THIS FUNCTION DO?> [ ] (some sort of require wrapper)
+			$('#main').html(_.template(templateHTML, {
+				site: decodeURI(site), 
+				plot: plot,
+				treeId: treeid,
+				subTreeId: 
+			}));
+			
+
+			var thisTree = new Tree();
+			thisTree.
 
 			//DBH Tooltip 
 			updateFunctions();
