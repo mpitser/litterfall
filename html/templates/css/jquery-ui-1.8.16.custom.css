@@ -7,6 +7,9 @@
  *
  * Portions copyright jQuery UI & Twitter Bootstrap
  */
+/* Alert user of invalid input
+----------------------------------*/
+.edit_cell .alert_invalid { background-color: yellow;}
 
 
 /* Layout helpers
