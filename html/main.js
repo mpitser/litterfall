@@ -258,16 +258,11 @@ $(document).ready(function(){
 			}
 			var newNotes = row_to_save.find(".notes :input").val();
 			
-			// manually call specific validate functions again
-			// TODO: see if there is a more efficient way to do this
-			if (! this.validateDate(row_to_save)){
+			/* final validation before saving to database */
+			if (! (this.validateDate(row_to_save) && this.validateObservers(row_to_save) && this.validateDiameter(row_to_save))){
 				console.log("didn't save");
-				return; // before actually saving anything
+				return; // user will remain in edit view until their data passes validation
 			}
-			
-			// ** NEED TO INSERT VALIDATION CODE HERE **
-			// (^ xd wrote this ^), but we just added a function (validateField(event)) to handle validation when any editable field is changed
-			// validation should all be housed there
 			
 			//must clone object to update it
 			var diameters = _.clone(this.model.get('diameter'));
@@ -296,7 +291,7 @@ $(document).ready(function(){
 			
 			this.model.set({"diameter": diameters});
 			var ret = this.model.save(null, {error: function(model, response, options){alert("There was an error with the database.  Please alert the instructor of this issue.")}, 
-									         success: function(model, response, options){console.log("success")}});	
+									         success: function(model, response, options){console.log("save to database was successful")}});	
 			// NOTE: another hack to make sure that the display view is rendered instead of the edit view
 			//(otherwise the edit view hangs there when nothing is changed)
 			this.render();		
@@ -330,7 +325,7 @@ $(document).ready(function(){
 		
 		validateDate: function(currentRow) {
 			
-			// get date to validate
+			/* get date to validate */
 			var dateEntered = currentRow.find(".formatted_date").val();
 			
 			/* make sure date isn't in future */
@@ -348,9 +343,15 @@ $(document).ready(function(){
 			} 
 			
 			/* make sure date isn't already added */		
-			var existingDiams = this.model.attributes.diameter;
-			for (diam in existingDiams) {
-				if (diam == dateEntered){
+			// get all dates listed in model for diam entries
+			var existingDiamsObject = this.model.attributes.diameter;
+			var existingDatesArray = Object.keys(existingDiamsObject).reverse();
+			// remove the date previously listed in the date field from the list of dates to check against
+			var prevDateIndex = $("#tree_observations tbody tr").index(currentRow);
+			existingDatesArray.splice(prevDateIndex, 1);
+			// alert user if the date already has an associated entry
+			for (i in existingDatesArray) {
+				if (existingDatesArray[i] == dateEntered){
 					$(".edit_cell.date_select :input" ).addClass("alert_invalid");
 					alert("date already has associated entry.  Please make your edits in the existing entry or check to make sure you are entering the correct date.");				
 					return false;
@@ -359,25 +360,51 @@ $(document).ready(function(){
 
 			/* if date field passes all tests, make sure it is not highlighted anymore */
 			$(".edit_cell.date_select :input" ).removeClass("alert_invalid");
+			console.log("date validation passed");
 			return true;
-			
-			// needs to be correct format if manually entered
-			//can't be a duplicate
 		},
 		
 		validateObservers: function(currentRow) {
-			console.log("observers validation");
+			
+			// get observers entry and format
 			var obsEntered = currentRow.find(".observers :input").val().split(",");
-			console.log(obsEntered);
-			// dropdown list?
+			for (var i=0; i<obsEntered.length; i++){
+				obsEntered[i] = obsEntered[i].trim(" ");
+			}
+			
+			// make sure an observer was entered
+			if (obsEntered[0] === "") {
+				console.log("empty list");
+				alert("Observers field may not be empty.  Please enter the observer associated to this data entry.");
+				$(".edit_cell.observers :input" ).addClass("alert_invalid");
+				return false;
+			} else { 
+				$(".edit_cell.observers :input" ).removeClass("alert_invalid");
+				console.log("observers validation passed");
+				return true;
+			}
+			// dropdown list? add a class and way for Jose Luis to add observers?
+			// find plugin for autocomplete
+			// populate list of options from mongo db
+			
 		},
 		
 		validateDiameter: function(currentRow) {
-			console.log("diameter validation");
+			
+			// get diameter entry
 			var diamEntered = parseFloat(currentRow.find(".diameter :input").val());
-			console.log(diamEntered);
-			// needs to be int/float
-			// validation about growth (more than 10% and alert to make sure?)
+			
+			// make sure the diameter is in correct format (can be parsed as float)
+			if (isNaN(diamEntered)) {
+				console.log("returned NaN");
+				alert("Your entry of " + diamEntered + " is not in the correct format.  Please enter an integer or floating point number such as 5, 6.1, 10.33");
+				$(".edit_cell.diameter :input" ).addClass("alert_invalid");
+				return false;
+			} else { 
+				$(".edit_cell.diameter :input" ).removeClass("alert_invalid");
+				console.log("diameter validation passed");
+				return true;
+			}
 		}
 	});
 	
