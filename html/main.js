@@ -292,15 +292,15 @@ $(document).ready(function(){
 			//add a new blank row to the observation table
 			var diameters = _.clone(this.model.get('diameter')); //must clone object to update it
 			var today = new Date();
-			var newDateKey = [today.getFullYear(),((today.getMonth() < 9) ? 0 : ""),(today.getMonth() + 1),((today.getDate() < 10) ? 0 : ""),today.getDate()].join(""); //yes it generates the date in YYYYMMDD format
-			if (diameters[newDateKey] == undefined){ //prevent overwriting of dates
-				diameters[newDateKey] = {
+			var todayDateKey = [today.getFullYear(),((today.getMonth() < 9) ? 0 : ""),(today.getMonth() + 1),((today.getDate() < 10) ? 0 : ""),today.getDate()].join(""); //yes it generates the date in YYYYMMDD format
+			// if today's date already has an entry, set a template dateKey using toorrow's date (which the user will be forced to change to pass validation)
+			diameters[(diameters[todayDateKey] == undefined) ? todayDateKey : (parseInt(todayDateKey) + 1)] = {
 					value: 'n/a',
 					notes: "",
 					observers: ""
-				};
-				this.model.set({"diameter": diameters});
-			}
+			};
+			this.model.set({"diameter": diameters});
+
 
 			// Disable all the fields from being editing
 			$("#tree_observations .btn.display_cell").hide();
