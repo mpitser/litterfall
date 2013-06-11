@@ -264,11 +264,11 @@ $(document).ready(function(){
 			'click .btn-new-observation': 'newObservation',	
 			'click .edit-existing': 'editObservation',
 			'click .btn-save-observation': 'saveObservation',
-			'click .btn-cancel-observation': 'render',
+			'click .btn-cancel-observation': 'cancelEditObservation',
 			'click .edit-tree-info-btn': 'editTreeInfo',
 			'click .btn-cancel-tree-info': 'cancelEditTreeInfo',
 			'click .btn-save-tree-info': 'saveTreeInfo',
-			'blur .edit_cell': 'validateField'
+			'change .edit_cell': 'validateField'
 		},
 		editTreeInfo: function(){
 			$('.edit-tree-info-btn').toggle();
@@ -324,7 +324,13 @@ $(document).ready(function(){
 			row_to_edit.find(".display_cell").hide();
 			row_to_edit.find(".edit_cell.date_select :input" ).datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date" , maxDate: 0 });
 		},
-
+		
+		cancelEditObservation: function() {
+			// user wants to cancel any edits made, or is canceling after adding a new entry
+			this.model.fetch(); // retrieves recent data
+			this.render();      // NOTE: this is sort of a hack to exit the editing view
+		},
+		
 		saveObservation: function(event) {
 			// User added or edited an observation.  Save it to the server.	
 			// Get the row that is being edited
@@ -338,11 +344,13 @@ $(document).ready(function(){
 				newObservers[i] = newObservers[i].trim(" ");
 			}
 			var newNotes = row_to_save.find(".notes :input").val();
-
-			// ** NEED TO INSERT VALIDATION CODE HERE **
-			// (^ xd wrote this ^), but we just added a function to handle validation when any editable field goes out of focus
-			// validation of diameter data a user intends to save should live there.
-
+			
+			/* final validation before saving to database */
+			if (! (this.validateDate(row_to_save) && this.validateObservers(row_to_save) && this.validateDiameter(row_to_save))){
+				console.log("didn't save");
+				return; // user will remain in edit view until their data passes validation
+			}
+			
 			//must clone object to update it
 			var diameters = _.clone(this.model.get('diameter'));
 
@@ -369,49 +377,121 @@ $(document).ready(function(){
 			//** May need to check to see if no change 
 
 			this.model.set({"diameter": diameters});
-			this.model.save();			
+			var ret = this.model.save(null, {error: function(model, response, options){alert("There was an error with the database.  Please alert the instructor of this issue.")}, 
+									         success: function(model, response, options){console.log("save to database was successful")}});	
+			// NOTE: another hack to make sure that the display view is rendered instead of the edit view
+			//(otherwise the edit view hangs there when nothing is changed)
+			this.render();		
 		},
 
 		validateField: function(event){
-			console.log("event");	
-			//console.log(event);
-
-			//console.log(event.currentTarget);
-			//console.log(event.currentTarget.className);
-
+			
 			var fieldToValidate = event.currentTarget.className;
 			var currentRow = $("#tree_observations > tbody > tr .edit_cell :visible").parents("tr");
-
-			/* if field left was date */
-			if (fieldToValidate == "edit_cell date_select"){
-				//do date validation
-				console.log("date validation");
-				var dateEntered = currentRow.find(".formatted_date").val();
-				console.log(dateEntered);
-				console.log($("#tree_observations > tbody > tr .edit_cell.date_select"));
-				// needs to be correct format if manually entered
-				//can't be a duplicate
+			
+			/* if date field lost focus */
+			if (fieldToValidate == "edit_cell date_select"){				
+				this.validateDate(currentRow);
+			/* if observers field lost focus */				
 			} else if (fieldToValidate == "edit_cell observers"){
-				//do observers validation
-				console.log("observers validation");
-				var obsEntered = currentRow.find(".observers :input").val().split(",");
-				console.log(obsEntered);
-				// dropdown list?
+				this.validateObservers(currentRow);
+			/* if diameter field lost focus */				
 			} else if (fieldToValidate == "edit_cell diameter"){
-				//do diameter validation
-				console.log("diameter validation");
-				var diamEntered = parseFloat(currentRow.find(".diameter :input").val());
-				console.log(diamEntered);
-				// needs to be int/float
-				// validation about growth (more than 10% and alert to make sure?)
+				this.validateDiameter(currentRow);
 			} else {
 				// field left was comments, which don't need to be validated (and should be allowed to be empty!)
 				return;
 			}
-
+			
+			//TODO: 
 			/*validation that no field was left empty, and other across-the-board validation */
 			// must go below if-else to keep comment box from getting this validation
 			// if nothing is changed, allow them to exit the edit entry view by either submit or cancel
+			//NOTE: maybe this needs to go inside every specific validate function since validateField isn't called during the final saveObservation validation
+		},
+		
+		validateDate: function(currentRow) {
+			
+			/* get date to validate */
+			var dateEntered = currentRow.find(".formatted_date").val();
+			
+			/* make sure date isn't in future */
+			var today = new Date();
+		    var todayFormatted = today.getFullYear().toString() + 
+		    				     ((today.getMonth()+1).toString().length == 1 ? "0"+(today.getMonth()+1) : (today.getMonth()+1).toString()) + 
+		    					 ((today.getDate()+1).toString().length == 1 ? "0"+today.getDate() : today.getDate().toString());
+			if (dateEntered > todayFormatted) {
+				// trigger the edit Observation button to prevent saving
+				$(".edit_cell.date_select :input" ).addClass("alert_invalid");
+				alert("Can't have date past today!");
+				console.log("date validation failed");
+				$(currentRow.find('.edit-existing')).trigger('click');
+				return false;
+			} 
+			
+			/* make sure date isn't already added */		
+			// get all dates listed in model for diam entries
+			var existingDiamsObject = this.model.attributes.diameter;
+			var existingDatesArray = Object.keys(existingDiamsObject).reverse();
+			// remove the date previously listed in the date field from the list of dates to check against
+			var prevDateIndex = $("#tree_observations tbody tr").index(currentRow);
+			existingDatesArray.splice(prevDateIndex, 1);
+			// alert user if the date already has an associated entry
+			for (i in existingDatesArray) {
+				if (existingDatesArray[i] == dateEntered){
+					$(".edit_cell.date_select :input" ).addClass("alert_invalid");
+					alert("date already has associated entry.  Please make your edits in the existing entry or check to make sure you are entering the correct date.");				
+					return false;
+				}
+			}
+
+			/* if date field passes all tests, make sure it is not highlighted anymore */
+			$(".edit_cell.date_select :input" ).removeClass("alert_invalid");
+			console.log("date validation passed");
+			return true;
+		},
+		
+		validateObservers: function(currentRow) {
+			
+			// get observers entry and format
+			var obsEntered = currentRow.find(".observers :input").val().split(",");
+			for (var i=0; i<obsEntered.length; i++){
+				obsEntered[i] = obsEntered[i].trim(" ");
+			}
+			
+			// make sure an observer was entered
+			if (obsEntered[0] === "") {
+				console.log("empty list");
+				alert("Observers field may not be empty.  Please enter the observer associated to this data entry.");
+				$(".edit_cell.observers :input" ).addClass("alert_invalid");
+				return false;
+			} else { 
+				$(".edit_cell.observers :input" ).removeClass("alert_invalid");
+				console.log("observers validation passed");
+				return true;
+			}
+			// dropdown list? add a class and way for Jose Luis to add observers?
+			// find plugin for autocomplete
+			// populate list of options from mongo db
+			
+		},
+		
+		validateDiameter: function(currentRow) {
+			
+			// get diameter entry
+			var diamEntered = parseFloat(currentRow.find(".diameter :input").val());
+			
+			// make sure the diameter is in correct format (can be parsed as float)
+			if (isNaN(diamEntered)) {
+				console.log("returned NaN");
+				alert("Your entry of " + diamEntered + " is not in the correct format.  Please enter an integer or floating point number such as 5, 6.1, 10.33");
+				$(".edit_cell.diameter :input" ).addClass("alert_invalid");
+				return false;
+			} else { 
+				$(".edit_cell.diameter :input" ).removeClass("alert_invalid");
+				console.log("diameter validation passed");
+				return true;
+			}
 		}
 	});
 
@@ -470,7 +550,6 @@ $(document).ready(function(){
 				targetEl: $("#plot-table"),
 				model: this
 			});
-			//console.log(this);
 		},
 		editViewInitialize: function(){
 			var editForm = new treeEditView({
@@ -490,19 +569,7 @@ $(document).ready(function(){
 			//console.log("");
 			//console.log("attrs");
 			console.log(attrs);
-
-			//console.log("");
-			//console.log("options");
 			console.log(options);
-
-			//console.log("");
-			//console.log(attrs.diameter);
-			/*var dateEntered = null;
-			for (existingDateEntry in attrs.diameter) {
-				if (dateEntered == existingDateEntry) {
-					console.log("already in database");
-				}
-			}*/	
 		}
 	});
 
