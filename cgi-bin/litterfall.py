@@ -28,6 +28,11 @@ def getdata(obs, site, plot, treeid, subtreeid):
 		data = obs.find({'collection_type':'tree'}, {'fields':'species'}).distinct('species')
 		data.sort()	# Use Python's built-in sort to alphabetize the species listing
 		n = len(data)
+	elif treeid == 'maxID':
+		# Return max existing tree id at site and plot
+		data = obs.find({'collection_type':'tree', 'plot': int(plot), 'site': site}, {'fields':'tree_id'}).distinct('tree_id')
+		data.sort()
+		n = -1
 	else:
 		# then the query is about a particular site and plot
 		findQuery = {
@@ -51,6 +56,11 @@ def getdata(obs, site, plot, treeid, subtreeid):
 	# then return nothing
 	if  treeid != None and n > 1:
 		json_data = None
+	elif n == -1:
+		#return maxID
+		json_data = data[-1]
+	elif treeid == 'allIDs':
+		json_data = data
 	elif n == 1:
 		# return one single tree
 		json_data = data[0]
@@ -120,6 +130,7 @@ def validate(obs, data):
 		
 	# fields to check and their criteria
 	# VALIDATION IS DISABLED!!!!
+	'''
 	fields = {'collection_type':{'type': str, 'value': ['tree'], 'high':0, 'low':0}, 
 			  'site':{'type': str, 'value': sites_predef, 'high':0, 'low':0}, 
 			  'plot':{'type': int, 'value': '', 'high':3, 'low':0},
@@ -167,6 +178,7 @@ def validate(obs, data):
 				return result
 				
 	# then all is good
+	'''
 	return {'flag': True, 'msg': 'passed all checks'}
 		
 def main():
