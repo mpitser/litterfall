@@ -28,6 +28,12 @@ def getdata(obs, site, plot, treeid, subtreeid):
 		data = obs.find({'collection_type':'tree'}, {'fields':'species'}).distinct('species')
 		data.sort()	# Use Python's built-in sort to alphabetize the species listing
 		n = len(data)
+	elif site == 'allObservers':
+		# get all diameter fields from database
+		# from each diam field, get all observers (within date range eventually)
+		data = obs.find({'collection_type':'tree'}, {'fields':'diameter'}).distinct('diameter')
+		data.sort()
+		n = -2;
 	elif treeid == 'maxID':
 		# Return max existing tree id at site and plot
 		data = obs.find({'collection_type':'tree', 'plot': int(plot), 'site': site}, {'fields':'tree_id'}).distinct('tree_id')
@@ -59,6 +65,9 @@ def getdata(obs, site, plot, treeid, subtreeid):
 	elif n == -1:
 		#return maxID
 		json_data = data[-1]
+	elif n == -2:
+		#return diameter objects
+		json_data = data
 	elif treeid == 'allIDs':
 		json_data = data
 	elif n == 1:
