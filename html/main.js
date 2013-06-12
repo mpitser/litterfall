@@ -661,13 +661,13 @@ $(document).ready(function(){
 			console.log(attrs);
 			console.log(options);
 		},
-<<<<<<< HEAD
+
 		newSubTreeRowViewInitialize: function() {
 			var subTreeRow = new newSubTreeRowView({
 				//targetEl: $('#plot-table'),
 				model: this
 			});
-=======
+		},
 		
 		findAllObservers: function(){
 			// finds the observers that have been entered in any of a tree's diameter entries
@@ -696,7 +696,6 @@ $(document).ready(function(){
 				}
 			}
 			return allObservers;
->>>>>>> 08ea4a2a1f0333aa35f38ff27ac28c196102f9d5
 		}
 		
 	});
