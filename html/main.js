@@ -402,6 +402,8 @@ $(document).ready(function(){
 			$("#tree_observations > tbody > tr:first .edit_cell").show();
 			$("#tree_observations > tbody > tr:first .display_cell").hide();
 			$("#tree_observations > tbody > tr:first .edit_cell.date_select :input" ).datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date" , maxDate: 0 , changeYear: true , changeMonth: true , constrainInput: true});	
+			var existingObs = this.model.findAllObservers();
+			$("#tree_observations > tbody > tr:first .edit_cell.observers :input").autocomplete({source: existingObs});
 		},
 
 		editObservation: function(event) {
