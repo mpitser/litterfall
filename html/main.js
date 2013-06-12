@@ -77,7 +77,7 @@ $(document).ready(function(){
 				thisTree.thisDiameter = thisTree.diameter[thisTree.thisDate].value;    //gets diameter from most recent measurement
 				thisTree.thisComment = thisTree.diameter[thisTree.thisDate].notes;     //gets comments from most recent measurement
 			}
-			console.log(thisTree)
+			//console.log(thisTree)
 			//$el --> gets the jQuery object for this view's element 
 			//*.attr('id', thisTree._id.$oid) --> sets 'id' to MongoDB value for tree's ID
 			//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
@@ -293,7 +293,7 @@ $(document).ready(function(){
 			var diameters = _.clone(this.model.get('diameter')); //must clone object to update it
 			var today = new Date();
 			var todayDateKey = [today.getFullYear(),((today.getMonth() < 9) ? 0 : ""),(today.getMonth() + 1),((today.getDate() < 10) ? 0 : ""),today.getDate()].join(""); //yes it generates the date in YYYYMMDD format
-			// if today's date already has an entry, set a template dateKey using toorrow's date (which the user will be forced to change to pass validation)
+			// if today's date already has an entry, set a template dateKey using tomorrow's date (which the user will be forced to change to pass validation)
 			diameters[(diameters[todayDateKey] == undefined) ? todayDateKey : (parseInt(todayDateKey) + 1)] = {
 					value: 'n/a',
 					notes: "",
@@ -308,7 +308,7 @@ $(document).ready(function(){
 			// Show edit content, hide display content, show "Submit/cancel button", add date_picker		
 			$("#tree_observations > tbody > tr:first .edit_cell").show();
 			$("#tree_observations > tbody > tr:first .display_cell").hide();
-			$("#tree_observations > tbody > tr:first .edit_cell.date_select :input" ).datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date" , maxDate: 0 , changeYear: true , changeMonth: true});	
+			$("#tree_observations > tbody > tr:first .edit_cell.date_select :input" ).datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date" , maxDate: 0 , changeYear: true , changeMonth: true , constrainInput: true});	
 		},
 
 		editObservation: function(event) {
@@ -322,7 +322,12 @@ $(document).ready(function(){
 			// Show edit content, hide display content, show "Submit/cancel button", add date_picker		
 			row_to_edit.find(" .edit_cell").show();
 			row_to_edit.find(".display_cell").hide();
-			row_to_edit.find(".edit_cell.date_select :input" ).datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date" , maxDate: 0, changeYear: true , changeMonth: true });
+			row_to_edit.find(".edit_cell.date_select :input").datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date" , maxDate: 0, changeYear: true , changeMonth: true , constrainInput: true });
+			//var existingObservers = ["Mallory", "Jocelyn"];
+			
+			// get all observers existing in database, feed them into an autocomplete for the observers field
+			var existingObs = this.model.findAllObservers();
+			row_to_edit.find(".edit_cell.observers :input").autocomplete({source: existingObs});
 		},
 		
 		cancelEditObservation: function() {
@@ -403,11 +408,6 @@ $(document).ready(function(){
 				return;
 			}
 			
-			//TODO: 
-			/*validation that no field was left empty, and other across-the-board validation */
-			// must go below if-else to keep comment box from getting this validation
-			// if nothing is changed, allow them to exit the edit entry view by either submit or cancel
-			//NOTE: maybe this needs to go inside every specific validate function since validateField isn't called during the final saveObservation validation
 		},
 		
 		validateDate: function(currentRow) {
@@ -457,7 +457,7 @@ $(document).ready(function(){
 			var obsEntered = currentRow.find(".observers :input").val().split(",");
 			for (var i=0; i<obsEntered.length; i++){
 				obsEntered[i] = obsEntered[i].trim(" ");
-			}
+			}	
 			
 			// make sure an observer was entered
 			if (obsEntered[0] === "") {
@@ -470,9 +470,6 @@ $(document).ready(function(){
 				console.log("observers validation passed");
 				return true;
 			}
-			// dropdown list? add a class and way for Jose Luis to add observers?
-			// find plugin for autocomplete
-			// populate list of options from mongo db
 			
 		},
 		
@@ -570,7 +567,37 @@ $(document).ready(function(){
 			//console.log("attrs");
 			console.log(attrs);
 			console.log(options);
+		},
+		
+		findAllObservers: function(){
+			// finds the observers that have been entered in any of a tree's diameter entries
+			
+			var allObservers = [];
+			
+			var dateEntries = this.attributes.diameter;  // diameter entries by date to loop through to find observers
+			var newObservers;							 // observers array listed in a date entry
+			var newObserver;							 // one observer of array
+			var alreadyThere = false;					 // change if the observer in question is already in allObservers
+			
+			for (i in dateEntries){
+				newObservers = dateEntries[i].observers;
+				if (newObservers !== undefined){		 // not all dateEntries have an observers array..
+					for (j in newObservers) {
+						newObserver = newObservers[j];
+						for (k in allObservers) {		 // check observer against all observers already in tree's observers list
+							if ((allObservers[k] === newObserver) || (allObservers[i] === "")) {
+								alreadyThere = true;
+							}						
+						}
+						if (! alreadyThere){			
+							allObservers.push(newObserver);
+						}
+					}
+				}
+			}
+			return allObservers;
 		}
+		
 	});
 
 	//Declare the plot collection, contains tree objects
@@ -580,6 +607,8 @@ $(document).ready(function(){
   		initialize: function(){
   			 this.on('reset', this.renderTrees); 
   			 this.on('add', this.renderTrees); 
+  			 //this.on('reset', this.findAllObservers); 
+  			 //this.on('add', this.findAllObservers); 
   			 //this.on('change', this.renderTrees);
   		},
   		renderTrees: function(){
