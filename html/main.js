@@ -223,6 +223,7 @@ $(document).ready(function(){
 			
 			//delete all the other ones so user can't add multiple subtrees at once
 			$(".sub-tree-row-goaway").remove();
+			$(".tree-row-goaway").remove();
 			this.$el.addClass("sub-tree-row-goaway");
 			//insert the new tree row to the table next to its fellow subtrees
 			$('#' + thisTree._id.$oid).after(this.el);
