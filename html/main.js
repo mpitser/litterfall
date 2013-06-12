@@ -314,10 +314,10 @@ $(document).ready(function(){
 					<div class="edit_cell btn-group"><button class="btn-save-observation btn btn-mini btn-success" type="button">Submit</button>\
 					<button class="btn-cancel-observation btn btn-mini btn-danger" type="button">Cancel</button>\
 				</td>\
-				<td class="editable"><span class="display_cell date_select"><%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %></span><span class="edit_cell date_select"><input type="text" value="<%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %>"/>\
+				<td class="editable"><span class="display_cell date_select"><%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %></span><span class="edit_cell date_select"><input title="Enter a date in mm/dd/yyyy format.  It may not already have an associated diameter entry or be in the future." type="text" value="<%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %>"/>\
 				<input type="hidden" class="formatted_date" value="<%= date %>"></span></td>\
-				<td class="editable"><span class="display_cell observers"><%= tree.diameter[date].observers %></span><span class="edit_cell observers"><input type="text" value="<%= tree.diameter[date].observers %>"></span></td>\
-				<td class="editable"><span class="display_cell diameter"><%= tree.diameter[date].value %></span><span class="edit_cell diameter"><input type="text" value="<%= tree.diameter[date].value %>"></span></td>\
+				<td class="editable"><span class="display_cell observers"><%= tree.diameter[date].observers %></span><span class="edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= tree.diameter[date].observers %>"></span></td>\
+				<td class="editable"><span class="display_cell diameter"><%= tree.diameter[date].value %></span><span class="edit_cell diameter"><input title = "Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= tree.diameter[date].value %>"></span></td>\
 				<td class="editable"><span class="display_cell notes"><%= tree.diameter[date].notes %></span><span class="edit_cell notes"><input type="text" value="<%= tree.diameter[date].notes %>"></span></span></td>\
 			</tr>\
 			<% }); %>\
@@ -418,11 +418,11 @@ $(document).ready(function(){
 			row_to_edit.find(" .edit_cell").show();
 			row_to_edit.find(".display_cell").hide();
 			row_to_edit.find(".edit_cell.date_select :input").datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date" , maxDate: 0, changeYear: true , changeMonth: true , constrainInput: true });
-			//var existingObservers = ["Mallory", "Jocelyn"];
-			
+					
 			// get all observers existing in database, feed them into an autocomplete for the observers field
 			var existingObs = this.model.findAllObservers();
 			row_to_edit.find(".edit_cell.observers :input").autocomplete({source: existingObs});
+			
 		},
 		
 		cancelEditObservation: function() {
@@ -534,14 +534,17 @@ $(document).ready(function(){
 			// alert user if the date already has an associated entry
 			for (i in existingDatesArray) {
 				if (existingDatesArray[i] == dateEntered){
+					// show user a tooltip about the proper entry
+					$(".edit_cell.date_select :input").tooltip();   // NOTE: the text shown on the tooltip is listed as the title attribute of the template for TreeEditView.
+					$(".edit_cell.date_select :input" ).tooltip("show");
 					$(".edit_cell.date_select :input" ).addClass("alert_invalid");
-					alert("date already has associated entry.  Please make your edits in the existing entry or check to make sure you are entering the correct date.");				
 					return false;
 				}
 			}
 
 			/* if date field passes all tests, make sure it is not highlighted anymore */
 			$(".edit_cell.date_select :input" ).removeClass("alert_invalid");
+			$(".edit_cell.date_select :input" ).tooltip("destroy");
 			console.log("date validation passed");
 			return true;
 		},
@@ -557,11 +560,13 @@ $(document).ready(function(){
 			// make sure an observer was entered
 			if (obsEntered[0] === "") {
 				console.log("empty list");
-				alert("Observers field may not be empty.  Please enter the observer associated to this data entry.");
+				$(".edit_cell.observers :input").tooltip(); // NOTE: the text shown on the tooltip is listed as the title attribute of the template for TreeEditView.
+				$(".edit_cell.observers :input" ).tooltip("show");
 				$(".edit_cell.observers :input" ).addClass("alert_invalid");
 				return false;
 			} else { 
 				$(".edit_cell.observers :input" ).removeClass("alert_invalid");
+				$(".edit_cell.observers :input" ).tooltip("destroy");
 				console.log("observers validation passed");
 				return true;
 			}
@@ -576,11 +581,13 @@ $(document).ready(function(){
 			// make sure the diameter is in correct format (can be parsed as float)
 			if (isNaN(diamEntered)) {
 				console.log("returned NaN");
-				alert("Your entry of " + diamEntered + " is not in the correct format.  Please enter an integer or floating point number such as 5, 6.1, 10.33");
-				$(".edit_cell.diameter :input" ).addClass("alert_invalid");
+				$(".edit_cell.diameter :input").tooltip(); // NOTE: the text shown on the tooltip is listed as the title attribute of the template for TreeEditView.
+				$(".edit_cell.diameter :input").tooltip("show");				
+				$(".edit_cell.diameter :input").addClass("alert_invalid");
 				return false;
 			} else { 
 				$(".edit_cell.diameter :input" ).removeClass("alert_invalid");
+				$(".edit_cell.diameter :input" ).tooltip("destroy");
 				console.log("diameter validation passed");
 				return true;
 			}
