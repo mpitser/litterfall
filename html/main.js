@@ -15,7 +15,7 @@ $(document).ready(function(){
         routes: {
             "update": "updateObservation", //inits the add record "wizard", leads to the edit pages
             "update/trees/site/:location/plot/:plot": "editPlot",
-            "update/trees/site/:location/plot/:plot/treeid/new": "newTree",
+          //  "update/trees/site/:location/plot/:plot/treeid/new": "newTree",
             "update/trees/site/:location/plot/:plot/treeid/:treeid/subtreeid/new": "newSubTree",
             "update/trees/site/:location/plot/:plot/treeid/:treeid(/subtreeid/:subTreeId)": "editTree",
             "*actions": "defaultRoute" // Backbone will try match the route above first
@@ -97,6 +97,7 @@ $(document).ready(function(){
 	
 	});
 	
+	// Adding new row for inserting a new tree
 	var newTreeRowView = Backbone.View.extend({
 		tagName: 'tr',
 		template: '\
@@ -125,16 +126,20 @@ $(document).ready(function(){
 		},
 		render: function(){
 			//caling the template
-			console.log("newTreeRowView.render()");
 			this.$el.html(this.template);
-			console.log("Template done!");
+			//prepend the new tree row to the table
+			$(".tree-row-goaway").remove();
+			$(".sub-tree-row-goaway").remove();
+			this.$el.addClass("tree-row-goaway");
 			this.options.targetEl.prepend(this.el);
+			
 			this.postRender();
 		},
 		postRender: function() {
 			this.populateSpecies();
 		},
 		populateSpecies: function(){
+			// creates list of all distinct species to fill dropdown menu
 			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allSpecies', function(data) {
 			console.log(data);
 				$.each(data, function(index, value) {
@@ -157,8 +162,7 @@ $(document).ready(function(){
 			$.getJSON(app.config.cgiDir + 'litterfall.py?site=' + siteName + '&plot=' + plotNumber + '&treeid=maxID', function(data) {
 				maxID = data;
 				var newTree = new Tree();
-				//newTree.clear();
-				newTree.url = app.config.cgiDir + 'litterfall.py'; //?site=' + siteName + '&plot=' + plotNumber + '&treeid=' + (maxID+1) + '&subtreeid=0';
+				newTree.url = app.config.cgiDir + 'litterfall.py';
 				newTree.set({
 					"plot": parseInt(plotNumber),
 					"site": siteName,
@@ -173,9 +177,97 @@ $(document).ready(function(){
 				// save a new tree
 				newTree.save();
 				// catching error?
+				//redirects to treeEditView page for the new tree
 				app_router.navigate(document.location.hash + "/treeid/" + (maxID+1), {trigger: true});
 			});
 		},
+		deleteRow: function() {
+			this.$el.remove();
+		}
+	});
+	
+	// Adding new row for inserting a new SUBtree
+	var newSubTreeRowView = Backbone.View.extend({
+		tagName: 'tr',
+		template: '\
+			<td>\
+				<div class="new-tree btn-group"><button class="btn-save-new-subtree btn btn-mini btn-success" type="button">Submit</button>\
+				<button class="btn-cancel-new-subtree btn btn-mini btn-danger" type="button">Cancel</button>\
+				</div>\
+			</td>\
+			<td>\
+			\
+			</td>\
+			<td>\
+				<%= tree.species %>\
+			</td>\
+			<td>\
+				<%= tree.angle %>\
+			</td>\
+			<td>\
+				<%= tree.distance %>\
+			</td>\
+			<td>\
+			</td>\
+			<td>\
+		</td>',
+		initialize: function() {
+			this.render();
+		},
+		render: function(){
+		
+			var thisTree = this.model.toJSON();
+			//console.log("What's thisTree?");
+			//console.log(thisTree);
+			this.$el.html(_.template(this.template, {tree: thisTree}));
+			
+			//delete all the other ones so user can't add multiple subtrees at once
+			$(".sub-tree-row-goaway").remove();
+			this.$el.addClass("sub-tree-row-goaway");
+			//insert the new tree row to the table next to its fellow subtrees
+			$('#' + thisTree._id.$oid).after(this.el);
+			//$("html, body").animate({scrollTop: this.el.css("top")});
+			
+			//this.postRender();
+		},
+	
+		events: {
+			'click .btn-save-new-subtree': 'saveSubtree',
+			'click .btn-cancel-new-subtree': 'deleteRow'
+		},
+		saveSubtree: function() {
+			var newSubTree = new Tree();
+			//calculates sub_tree_id for the newSubTree based on the model
+			// this.model is the tree with the highest sub_tree_id for the given tree_id
+			subTreeID = this.model.get("sub_tree_id") + 1;
+			// change parent tree to reflect that it is now also a subtree
+			if (subTreeID == 1) {
+				this.model.set("sub_tree_id", 1);
+				this.model.save();
+				subTreeID = 2;
+			}
+			//console.log(subTreeID);
+			newSubTree.url = app.config.cgiDir + 'litterfall.py';
+			// sets newSubTree's information to match the parent tree's information
+			newSubTree.set({
+				"plot": parseInt($(".plot-number").text()),
+				"site": $(".site-name").text(),
+				"tree_id": this.model.get("tree_id"),
+				"sub_tree_id": subTreeID,
+				"species": this.model.get("species"),
+				"angle": this.model.get("angle"),
+				"distance": this.model.get("distance"),
+				"diameter": {},
+				"dead": false
+			});
+			
+			//console.log(newSubTree);
+			//save newSubTree to server
+			newSubTree.save();
+			//redirect to page where user can add entries for the newSubTree
+			app_router.navigate(document.location.hash + "/treeid/" + newSubTree.get("tree_id") + "/subtreeid/" + subTreeID, {trigger: true});			
+		}, 
+		
 		deleteRow: function() {
 			this.$el.remove();
 		}
@@ -570,6 +662,12 @@ $(document).ready(function(){
 			//console.log("attrs");
 			console.log(attrs);
 			console.log(options);
+		},
+		newSubTreeRowViewInitialize: function() {
+			var subTreeRow = new newSubTreeRowView({
+				//targetEl: $('#plot-table'),
+				model: this
+			});
 		}
 	});
 
@@ -611,28 +709,86 @@ $(document).ready(function(){
 			
 			// Get all the ids
 			var ids = [];
+			var maxSubtrees = [];
+			
 			this.each(function(tree){
 				// Check if tree_id is already in the array
-				if (ids.length == 0 || ids[ids.length - 1] != tree.get("tree_id")) {
-					ids.push(tree.get("tree_id"));
+				/*
+				if (numSubtrees.length < tree.get("tree_id") || tree.get("subtree_id") > numSubtrees[tree.get("tree_id")]) {
+					numSubtrees[tree.get("tree_id")] = tree.get("subtree_id");
+				}*/
+				var treeid = tree.get("tree_id");
+				var subtreeid = tree.get("sub_tree_id");
+				if (maxSubtrees[treeid] === undefined) {
+					maxSubtrees[treeid] = subtreeid;
+				} else {
+					if (maxSubtrees[treeid] < subtreeid) {
+						maxSubtrees[treeid] = subtreeid;
+					}
+				}
+				if (ids.length == 0 || ids[ids.length - 1] != treeid) {
+					ids.push(treeid);
 				}
 			});
 			
+			console.log("maxSubtrees");
+			console.log(maxSubtrees[5]);
+			//console.log(maxSubtrees.toString());
+			//console.log("maxSubtrees ends");
+			
 			// Sort the array IDs
-			console.log("Type: " + typeof ids[0]);
 			ids.sort(function(a,b){return a - b;});
+			
+			var treeCollection = this;
 			
 			// populate tree IDs
 			for (var i = 0; i < ids.length; i++) {
-				$(".dropdown-menu").append( $("<li></li>").append( $("<a></a>").attr("href", "").text(ids[i]) ) );
+				var id = ids[i];
+				$(".dropdown-menu").append( 
+					$("<li></li>").append( 
+						$("<a></a>").text(id).append(
+							$("<span></span>").text(id + (maxSubtrees[id] * .1) ).css("display","none")
+						)
+					)
+				);
+				
 			}
 			
+			$(".dropdown-menu li a").click(function(){
+							
+				console.log("What's this?");
+				console.log(treeCollection);
+				console.log(maxSubtrees);
+				
+				var aTag = $(this);
+				
+				var parentTree = treeCollection.find(function(tree) {
+					
+					//console.log(tree.get("full_tree_id") + " == " + $(this).children("span").html());
+					console.log(aTag.children("span"));
+					return tree.get("full_tree_id") == parseFloat(aTag.children("span").text());
+				});
+				
+				
+				console.log("parentTree: ");
+				console.log(parentTree);
+				
+				//console.log(parentTrees[parentTrees.length - 1]);
+				parentTree.newSubTreeRowViewInitialize();
+			});
+			
+			
+			
+			
+			
+			
 		},
-  		newTreeRowViewInitialize: function(){
+		
+		newTreeRowViewInitialize: function(){
   			console.log("newTreeRowViewInitialize");
 			var newTreeRow = new newTreeRowView({
 				targetEl: $("#plot-table"),
-				model: Tree
+				model: this.model
 			});
 		}
   	});
@@ -732,6 +888,17 @@ $(document).ready(function(){
 			updateFunctions();
 		});
     });
+    
+    // Add new sub-tree
+    /*
+    app_router.on('route:newSubTree', function(site, plot, treeId) {
+    	var templateFile = 'update-tree.html';
+    	// create a new tree object in the database
+    	// connect the newly created object to a tree model here
+    	// emulate the edit tree view
+    }*/
+    
+    //
     
      //Add new tree view
      /*
