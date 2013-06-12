@@ -344,14 +344,10 @@ $(document).ready(function(){
 			this.populateSpecies();
 		},
 		populateSpecies: function(){
-			var treeSpecies = this.model.get('species');
-			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allSpecies', function(data) {
-				$.each(data, function(index, value) {
-					$("#tree-info .species select").append($("<option></option>").attr("value",value).text(value));
-					$("#tree-info .species option[value='" + treeSpecies + "']").attr('selected','selected');
-				});
+			var treeSpecies = this.model.get('diameter');
+			//console.log(treeSpecies);
+			
 
-			});
 		},
 		events: {
 			'click .btn-new-observation': 'newObservation',	
@@ -420,9 +416,9 @@ $(document).ready(function(){
 			row_to_edit.find(".edit_cell.date_select :input").datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date" , maxDate: 0, changeYear: true , changeMonth: true , constrainInput: true });
 					
 			// get all observers existing in database, feed them into an autocomplete for the observers field
-			var existingObs = this.model.findAllObservers();
-			row_to_edit.find(".edit_cell.observers :input").autocomplete({source: existingObs});
-			
+			var allDistinctObservers = this.populateObserversArray(allDistinctObservers);
+			row_to_edit.find(".edit_cell.observers :input").autocomplete({source: allDistinctObservers});			
+
 		},
 		
 		cancelEditObservation: function() {
@@ -591,6 +587,44 @@ $(document).ready(function(){
 				console.log("diameter validation passed");
 				return true;
 			}
+		},
+		
+		populateObserversArray: function(observersArray) {
+			//finds all observers that have been previously entered into the database
+			var curObservers;
+			var curObserver;
+			observersArray = [];
+			var alreadyThere = false;
+			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allObservers', function(data) {
+				for (i in data){
+					for (j in data[i]){
+						if (data[i][j].observers !== undefined) {
+							if (data[i][j].observers[0] !== undefined) {
+								if (data[i][j].observers[0].trim(" ") !== ""){
+									curObservers = data[i][j].observers;
+									for (k in curObservers) {
+										curObserver = curObservers[k];
+										for (j in observersArray) {
+											if (curObserver === observersArray[j]) {
+												alreadyThere = true;
+												break;
+											} else {
+												alreadyThere = false;
+											}
+										}
+										if (alreadyThere === false) {
+											observersArray.push(curObserver);
+										}
+									}
+								}
+							}
+						}
+					}
+					
+				}
+			});
+			observersArray.sort();
+			return observersArray;
 		}
 	});
 
@@ -676,35 +710,6 @@ $(document).ready(function(){
 				//targetEl: $('#plot-table'),
 				model: this
 			});
-		},
-		
-		findAllObservers: function(){
-			// finds the observers that have been entered in any of a tree's diameter entries
-			
-			var allObservers = [];
-			
-			var dateEntries = this.attributes.diameter;  // diameter entries by date to loop through to find observers
-			var newObservers;							 // observers array listed in a date entry
-			var newObserver;							 // one observer of array
-			var alreadyThere = false;					 // change if the observer in question is already in allObservers
-			
-			for (i in dateEntries){
-				newObservers = dateEntries[i].observers;
-				if (newObservers !== undefined){		 // not all dateEntries have an observers array..
-					for (j in newObservers) {
-						newObserver = newObservers[j];
-						for (k in allObservers) {		 // check observer against all observers already in tree's observers list
-							if ((allObservers[k] === newObserver) || (allObservers[i] === "")) {
-								alreadyThere = true;
-							}						
-						}
-						if (! alreadyThere){			
-							allObservers.push(newObserver);
-						}
-					}
-				}
-			}
-			return allObservers;
 		}
 		
 	});
