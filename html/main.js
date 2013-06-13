@@ -292,7 +292,7 @@ $(document).ready(function(){
 		<div class="button-row">\
 			<button class="btn-new-observation btn btn-mini btn-success pull-left" type="button">+ New Entry</button>\
 		</div>\
-		<table id="tree_observations" class="table-striped">\
+		<table id="tree_observations" class="table-striped tablesorter">\
 			<thead>\
 				<tr>\
 					<th></th>\
@@ -338,6 +338,7 @@ $(document).ready(function(){
 			thisTree.datesDesc = _.keys(thisTree.diameter).sort().reverse();
 			this.$el.html(_.template(this.template, {tree: thisTree}));
 			this.postRender();
+			$("#tree_observations").tablesorter({headers: { 0: { sorter: false}}}); 
 		},
 		postRender: function(){
 			//add any methods/functions that need to be call after redendering the Tree edit view
