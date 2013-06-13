@@ -595,7 +595,8 @@ $(document).ready(function(){
 			var curObserver;
 			observersArray = [];
 			var alreadyThere = false;
-			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allObservers', function(data) {
+			// get all diameter objects and loop through to find each distinct observer entry
+			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allDiameters', function(data) {
 				for (i in data){
 					for (j in data[i]){
 						if (data[i][j].observers !== undefined) {
