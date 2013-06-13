@@ -73,11 +73,11 @@ $(document).ready(function(){
 					thisTree.thisDate = date;
 				}
 			}
-			if (thisTree.diameter.length > 0){
+			if (Object.keys(thisTree.diameter).length > 0){
 				thisTree.thisDiameter = thisTree.diameter[thisTree.thisDate].value;    //gets diameter from most recent measurement
 				thisTree.thisComment = thisTree.diameter[thisTree.thisDate].notes;     //gets comments from most recent measurement
 			}
-			//console.log(thisTree)
+			
 			//$el --> gets the jQuery object for this view's element 
 			//*.attr('id', thisTree._id.$oid) --> sets 'id' to MongoDB value for tree's ID
 			//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
