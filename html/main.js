@@ -738,6 +738,8 @@ $(document).ready(function(){
   			}, this);
   			// populate the tree
   			this.populateTreeIDs();
+  			// add tablesorter jquery plugin (no sorting for first column)
+  			$("#plot-table").tablesorter({headers: { 0: { sorter: false}}}); 
   		},
   		addTree: function(){
   			this.newTreeRowViewInitialize();
