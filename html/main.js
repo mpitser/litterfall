@@ -595,33 +595,39 @@ $(document).ready(function(){
 			var curObserver;
 			observersArray = [];
 			var alreadyThere = false;
+			var curDates;
+			var dateThreshold = (new Date()).getFullYear() - 4; // only autocomplete with observers who have entered data in last 4 years
 			// get all diameter objects and loop through to find each distinct observer entry
 			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allDiameters', function(data) {
 				for (i in data){
-					for (j in data[i]){
-						if (data[i][j].observers !== undefined) {
-							if (data[i][j].observers[0] !== undefined) {
-								if (data[i][j].observers[0].trim(" ") !== ""){
-									curObservers = data[i][j].observers;
-									for (k in curObservers) {
-										curObserver = curObservers[k];
-										for (j in observersArray) {
-											if (curObserver === observersArray[j]) {
-												alreadyThere = true;
-												break;
-											} else {
-												alreadyThere = false;
+					for (date in data[i]){
+						// only get observers if the entry has observers listed
+						if (data[i][date].observers !== undefined) {
+							// only take observers from last 4 years
+							if (date.substr(0,4) >= dateThreshold) {
+								if (data[i][date].observers[0] !== undefined) {
+									if (data[i][date].observers[0].trim(" ") !== ""){
+										curObservers = data[i][date].observers;
+										// check each observer listed in an entry against each observer already in comprehensive array
+										for (k in curObservers) {
+											curObserver = curObservers[k];
+											for (date in observersArray) {
+												if (curObserver === observersArray[date]) {
+													alreadyThere = true;
+													break;
+												} else {
+													alreadyThere = false;
+												}
 											}
-										}
-										if (alreadyThere === false) {
-											observersArray.push(curObserver);
+											if (alreadyThere === false) {
+												observersArray.push(curObserver);
+											}
 										}
 									}
 								}
 							}
 						}
 					}
-					
 				}
 			});
 			observersArray.sort();
