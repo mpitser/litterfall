@@ -16,7 +16,7 @@ $(document).ready(function(){
             "update": "updateObservation", //inits the add record "wizard", leads to the edit pages
             "update/trees/site/:location/plot/:plot": "editPlot",
           //  "update/trees/site/:location/plot/:plot/treeid/new": "newTree",
-          //  "update/trees/site/:location/plot/:plot/treeid/:treeid/subtreeid/new": "newSubTree",
+            "update/trees/site/:location/plot/:plot/treeid/:treeid/subtreeid/new": "newSubTree",
             "update/trees/site/:location/plot/:plot/treeid/:treeid(/subtreeid/:subTreeId)": "editTree",
             "*actions": "defaultRoute" // Backbone will try match the route above first
         }
@@ -74,11 +74,10 @@ $(document).ready(function(){
 				}
 			}
 			if (thisTree.diameter.length > 0){
-				console.log(thisTree.thisDiameter);
 				thisTree.thisDiameter = thisTree.diameter[thisTree.thisDate].value;    //gets diameter from most recent measurement
 				thisTree.thisComment = thisTree.diameter[thisTree.thisDate].notes;     //gets comments from most recent measurement
 			}
-			console.log(thisTree)
+			//console.log(thisTree)
 			//$el --> gets the jQuery object for this view's element 
 			//*.attr('id', thisTree._id.$oid) --> sets 'id' to MongoDB value for tree's ID
 			//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
@@ -95,9 +94,9 @@ $(document).ready(function(){
 			var treeUrl = "/treeid/" + this.model.get("tree_id") + ((subId) ? '/subtreeid/' + subId : '');
 			app_router.navigate(document.location.hash + treeUrl, {trigger: true});
 		}
-	
+
 	});
-	
+
 	// Adding new row for inserting a new tree
 	var newTreeRowView = Backbone.View.extend({
 		tagName: 'tr',
@@ -133,7 +132,7 @@ $(document).ready(function(){
 			$(".sub-tree-row-goaway").remove();
 			this.$el.addClass("tree-row-goaway");
 			this.options.targetEl.prepend(this.el);
-			
+
 			this.postRender();
 		},
 		postRender: function() {
@@ -159,12 +158,11 @@ $(document).ready(function(){
 			var plotNumber = $(".plot-number").text();
 			var siteName = $(".site-name").text();
 			var maxID = -1;
-			
+
 			$.getJSON(app.config.cgiDir + 'litterfall.py?site=' + siteName + '&plot=' + plotNumber + '&treeid=maxID', function(data) {
 				maxID = data;
 				var newTree = new Tree();
 				newTree.url = app.config.cgiDir + 'litterfall.py';
-				console.log($("#plot-table .species select").val());
 				newTree.set({
 					"plot": parseInt(plotNumber),
 					"site": siteName,
@@ -175,7 +173,7 @@ $(document).ready(function(){
 					'diameter': {},
 					'dead': false
 				});
-		
+
 				// save a new tree
 				newTree.save();
 				// catching error?
@@ -187,7 +185,7 @@ $(document).ready(function(){
 			this.$el.remove();
 		}
 	});
-	
+
 	// Adding new row for inserting a new SUBtree
 	var newSubTreeRowView = Backbone.View.extend({
 		tagName: 'tr',
@@ -217,12 +215,12 @@ $(document).ready(function(){
 			this.render();
 		},
 		render: function(){
-		
+
 			var thisTree = this.model.toJSON();
 			//console.log("What's thisTree?");
 			//console.log(thisTree);
 			this.$el.html(_.template(this.template, {tree: thisTree}));
-			
+
 			//delete all the other ones so user can't add multiple subtrees at once
 			$(".sub-tree-row-goaway").remove();
 			$(".tree-row-goaway").remove();
@@ -230,10 +228,10 @@ $(document).ready(function(){
 			//insert the new tree row to the table next to its fellow subtrees
 			$('#' + thisTree._id.$oid).after(this.el);
 			//$("html, body").animate({scrollTop: this.el.css("top")});
-			
+
 			//this.postRender();
 		},
-	
+
 		events: {
 			'click .btn-save-new-subtree': 'saveSubtree',
 			'click .btn-cancel-new-subtree': 'deleteRow'
@@ -263,14 +261,14 @@ $(document).ready(function(){
 				"diameter": {},
 				"dead": false
 			});
-			
+
 			//console.log(newSubTree);
 			//save newSubTree to server
 			newSubTree.save();
 			//redirect to page where user can add entries for the newSubTree
 			app_router.navigate(document.location.hash + "/treeid/" + newSubTree.get("tree_id") + "/subtreeid/" + subTreeID, {trigger: true});			
 		}, 
-		
+
 		deleteRow: function() {
 			this.$el.remove();
 		}
@@ -285,7 +283,6 @@ $(document).ready(function(){
 			<div class="edit-tree-info btn-group"><button class="btn-save-tree-info btn btn-mini btn-success" type="button">Submit</button>\
 			<button class="btn-cancel-tree-info btn btn-mini btn-danger" type="button">Cancel</button>\
 			</div>\
-			<p class="subtree-warning edit-tree-info">Note: Changing the species will change the species for all subtrees of this tree.</p>\
 			<ul>\
 				<li>Species: <span class="display-tree-info species"><%= tree.species %></span><span class="edit-tree-info species"><select></select></span></li>\
 				<li>Angle Degrees: <span class="display-tree-info angle"><%= tree.angle %></span><span class="edit-tree-info angle"><input value="<%= tree.angle %>"></input></span></li>\
@@ -317,10 +314,10 @@ $(document).ready(function(){
 					<div class="edit_cell btn-group"><button class="btn-save-observation btn btn-mini btn-success" type="button">Submit</button>\
 					<button class="btn-cancel-observation btn btn-mini btn-danger" type="button">Cancel</button>\
 				</td>\
-				<td class="editable"><span class="display_cell date_select"><%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %></span><span class="edit_cell date_select"><input type="text" value="<%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %>"/>\
+				<td class="editable"><span class="display_cell date_select"><%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %></span><span class="edit_cell date_select"><input title="Enter a date in mm/dd/yyyy format.  It may not already have an associated diameter entry or be in the future." type="text" value="<%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %>"/>\
 				<input type="hidden" class="formatted_date" value="<%= date %>"></span></td>\
-				<td class="editable"><span class="display_cell observers"><%= tree.diameter[date].observers %></span><span class="edit_cell observers"><input type="text" value="<%= tree.diameter[date].observers %>"></span></td>\
-				<td class="editable"><span class="display_cell diameter"><%= tree.diameter[date].value %></span><span class="edit_cell diameter"><input type="text" value="<%= tree.diameter[date].value %>"></span></td>\
+				<td class="editable"><span class="display_cell observers"><%= tree.diameter[date].observers %></span><span class="edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= tree.diameter[date].observers %>"></span></td>\
+				<td class="editable"><span class="display_cell diameter"><%= tree.diameter[date].value %></span><span class="edit_cell diameter"><input title = "Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= tree.diameter[date].value %>"></span></td>\
 				<td class="editable"><span class="display_cell notes"><%= tree.diameter[date].notes %></span><span class="edit_cell notes"><input type="text" value="<%= tree.diameter[date].notes %>"></span></span></td>\
 			</tr>\
 			<% }); %>\
@@ -347,14 +344,10 @@ $(document).ready(function(){
 			this.populateSpecies();
 		},
 		populateSpecies: function(){
-			var treeSpecies = this.model.get('species');
-			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allSpecies', function(data) {
-				$.each(data, function(index, value) {
-					$("#tree-info .species select").append($("<option></option>").attr("value",value).text(value));
-					$("#tree-info .species option[value='" + treeSpecies + "']").attr('selected','selected');
-				});
+			var treeSpecies = this.model.get('diameter');
+			//console.log(treeSpecies);
 
-			});
+
 		},
 		events: {
 			'click .btn-new-observation': 'newObservation',	
@@ -377,52 +370,26 @@ $(document).ready(function(){
 			$('.edit-tree-info').toggle();
 		},
 		saveTreeInfo: function(){
-			var plotNumber = this.model.get("plot");
-			var siteName = this.model.get("site");
-			var newSpecies = $("#tree-info .species select").val();
-			console.log(newSpecies);
-			if (this.model.get("sub_tree_id") != 0) {
-				//$('.btn-save-tree-info')
-				//add code to ask user whether to apply to all subtrees
-				//find all trees with matching tree_id, set their species
-				//save those to the database
-				console.log("finding sister trees...");
-				$.getJSON(app.config.cgiDir + 'litterfall.py?site=' + siteName + '&plot=' + plotNumber + '&treeid=' + this.model.get('tree_id') + '&subtreeid=all', function(data) {
-					console.log(data);
-					$.each(data, function(index, value) {
-						var tree = _.clone(value);
-						console.log(tree);
-						console.log(this);
-						tree.model.set('species', newSpecies);
-						console.log(tree);
-						$(tree.model).save();
-					});
-				});
-			}
-			console.log("Species");
-			console.log($("#tree-info .species select").val());
-			console.log("/Species");
 			this.model.set({
 				'species': $("#tree-info .species select").val(),
 				'angle': parseInt($("#tree-info .angle input").val(), 10),
 				'distance': parseFloat($("#tree-info .distance input").val(), 10)
 			});
-			
 			this.model.save();
 		},
 		newObservation: function(){
 			//add a new blank row to the observation table
 			var diameters = _.clone(this.model.get('diameter')); //must clone object to update it
 			var today = new Date();
-			var newDateKey = [today.getFullYear(),((today.getMonth() < 9) ? 0 : ""),(today.getMonth() + 1),((today.getDate() < 10) ? 0 : ""),today.getDate()].join(""); //yes it generates the date in YYYYMMDD format
-			if (diameters[newDateKey] == undefined){ //prevent overwriting of dates
-				diameters[newDateKey] = {
+			var todayDateKey = [today.getFullYear(),((today.getMonth() < 9) ? 0 : ""),(today.getMonth() + 1),((today.getDate() < 10) ? 0 : ""),today.getDate()].join(""); //yes it generates the date in YYYYMMDD format
+			// if today's date already has an entry, set a template dateKey using tomorrow's date (which the user will be forced to change to pass validation)
+			diameters[(diameters[todayDateKey] == undefined) ? todayDateKey : (parseInt(todayDateKey) + 1)] = {
 					value: 'n/a',
 					notes: "",
 					observers: ""
-				};
-				this.model.set({"diameter": diameters});
-			}
+			};
+			this.model.set({"diameter": diameters});
+
 
 			// Disable all the fields from being editing
 			$("#tree_observations .btn.display_cell").hide();
@@ -430,7 +397,9 @@ $(document).ready(function(){
 			// Show edit content, hide display content, show "Submit/cancel button", add date_picker		
 			$("#tree_observations > tbody > tr:first .edit_cell").show();
 			$("#tree_observations > tbody > tr:first .display_cell").hide();
-			$("#tree_observations > tbody > tr:first .edit_cell.date_select :input" ).datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date" , maxDate: 0});	
+			$("#tree_observations > tbody > tr:first .edit_cell.date_select :input" ).datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date" , maxDate: 0 , changeYear: true , changeMonth: true , constrainInput: true});	
+			var existingObs = this.model.findAllObservers();
+			$("#tree_observations > tbody > tr:first .edit_cell.observers :input").autocomplete({source: existingObs});
 		},
 
 		editObservation: function(event) {
@@ -444,15 +413,20 @@ $(document).ready(function(){
 			// Show edit content, hide display content, show "Submit/cancel button", add date_picker		
 			row_to_edit.find(" .edit_cell").show();
 			row_to_edit.find(".display_cell").hide();
-			row_to_edit.find(".edit_cell.date_select :input" ).datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date" , maxDate: 0 });
+			row_to_edit.find(".edit_cell.date_select :input").datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date" , maxDate: 0, changeYear: true , changeMonth: true , constrainInput: true });
+
+			// get all observers existing in database, feed them into an autocomplete for the observers field
+			var allDistinctObservers = this.populateObserversArray(allDistinctObservers);
+			row_to_edit.find(".edit_cell.observers :input").autocomplete({source: allDistinctObservers});			
+
 		},
-		
+
 		cancelEditObservation: function() {
 			// user wants to cancel any edits made, or is canceling after adding a new entry
 			this.model.fetch(); // retrieves recent data
 			this.render();      // NOTE: this is sort of a hack to exit the editing view
 		},
-		
+
 		saveObservation: function(event) {
 			// User added or edited an observation.  Save it to the server.	
 			// Get the row that is being edited
@@ -466,13 +440,13 @@ $(document).ready(function(){
 				newObservers[i] = newObservers[i].trim(" ");
 			}
 			var newNotes = row_to_save.find(".notes :input").val();
-			
+
 			/* final validation before saving to database */
 			if (! (this.validateDate(row_to_save) && this.validateObservers(row_to_save) && this.validateDiameter(row_to_save))){
 				console.log("didn't save");
 				return; // user will remain in edit view until their data passes validation
 			}
-			
+
 			//must clone object to update it
 			var diameters = _.clone(this.model.get('diameter'));
 
@@ -507,10 +481,10 @@ $(document).ready(function(){
 		},
 
 		validateField: function(event){
-			
+
 			var fieldToValidate = event.currentTarget.className;
 			var currentRow = $("#tree_observations > tbody > tr .edit_cell :visible").parents("tr");
-			
+
 			/* if date field lost focus */
 			if (fieldToValidate == "edit_cell date_select"){				
 				this.validateDate(currentRow);
@@ -524,19 +498,14 @@ $(document).ready(function(){
 				// field left was comments, which don't need to be validated (and should be allowed to be empty!)
 				return;
 			}
-			
-			//TODO: 
-			/*validation that no field was left empty, and other across-the-board validation */
-			// must go below if-else to keep comment box from getting this validation
-			// if nothing is changed, allow them to exit the edit entry view by either submit or cancel
-			//NOTE: maybe this needs to go inside every specific validate function since validateField isn't called during the final saveObservation validation
+
 		},
-		
+
 		validateDate: function(currentRow) {
-			
+
 			/* get date to validate */
 			var dateEntered = currentRow.find(".formatted_date").val();
-			
+
 			/* make sure date isn't in future */
 			var today = new Date();
 		    var todayFormatted = today.getFullYear().toString() + 
@@ -550,7 +519,7 @@ $(document).ready(function(){
 				$(currentRow.find('.edit-existing')).trigger('click');
 				return false;
 			} 
-			
+
 			/* make sure date isn't already added */		
 			// get all dates listed in model for diam entries
 			var existingDiamsObject = this.model.attributes.diameter;
@@ -561,59 +530,108 @@ $(document).ready(function(){
 			// alert user if the date already has an associated entry
 			for (i in existingDatesArray) {
 				if (existingDatesArray[i] == dateEntered){
+					// show user a tooltip about the proper entry
+					$(".edit_cell.date_select :input").tooltip();   // NOTE: the text shown on the tooltip is listed as the title attribute of the template for TreeEditView.
+					$(".edit_cell.date_select :input" ).tooltip("show");
 					$(".edit_cell.date_select :input" ).addClass("alert_invalid");
-					alert("date already has associated entry.  Please make your edits in the existing entry or check to make sure you are entering the correct date.");				
 					return false;
 				}
 			}
 
 			/* if date field passes all tests, make sure it is not highlighted anymore */
 			$(".edit_cell.date_select :input" ).removeClass("alert_invalid");
+			$(".edit_cell.date_select :input" ).tooltip("destroy");
 			console.log("date validation passed");
 			return true;
 		},
-		
+
 		validateObservers: function(currentRow) {
-			
+
 			// get observers entry and format
 			var obsEntered = currentRow.find(".observers :input").val().split(",");
 			for (var i=0; i<obsEntered.length; i++){
 				obsEntered[i] = obsEntered[i].trim(" ");
-			}
-			
+			}	
+
 			// make sure an observer was entered
 			if (obsEntered[0] === "") {
 				console.log("empty list");
-				alert("Observers field may not be empty.  Please enter the observer associated to this data entry.");
+				$(".edit_cell.observers :input").tooltip(); // NOTE: the text shown on the tooltip is listed as the title attribute of the template for TreeEditView.
+				$(".edit_cell.observers :input" ).tooltip("show");
 				$(".edit_cell.observers :input" ).addClass("alert_invalid");
 				return false;
 			} else { 
 				$(".edit_cell.observers :input" ).removeClass("alert_invalid");
+				$(".edit_cell.observers :input" ).tooltip("destroy");
 				console.log("observers validation passed");
 				return true;
 			}
-			// dropdown list? add a class and way for Jose Luis to add observers?
-			// find plugin for autocomplete
-			// populate list of options from mongo db
-			
+
 		},
-		
+
 		validateDiameter: function(currentRow) {
-			
+
 			// get diameter entry
 			var diamEntered = parseFloat(currentRow.find(".diameter :input").val());
-			
+
 			// make sure the diameter is in correct format (can be parsed as float)
 			if (isNaN(diamEntered)) {
 				console.log("returned NaN");
-				alert("Your entry of " + diamEntered + " is not in the correct format.  Please enter an integer or floating point number such as 5, 6.1, 10.33");
-				$(".edit_cell.diameter :input" ).addClass("alert_invalid");
+				$(".edit_cell.diameter :input").tooltip(); // NOTE: the text shown on the tooltip is listed as the title attribute of the template for TreeEditView.
+				$(".edit_cell.diameter :input").tooltip("show");				
+				$(".edit_cell.diameter :input").addClass("alert_invalid");
 				return false;
 			} else { 
 				$(".edit_cell.diameter :input" ).removeClass("alert_invalid");
+				$(".edit_cell.diameter :input" ).tooltip("destroy");
 				console.log("diameter validation passed");
 				return true;
 			}
+		},
+
+		populateObserversArray: function(observersArray) {
+			//finds all observers that have been previously entered into the database
+			var curObservers;
+			var curObserver;
+			observersArray = [];
+			var alreadyThere = false;
+			var curDates;
+			var dateThreshold = (new Date()).getFullYear() - 4; // only autocomplete with observers who have entered data in last 4 years
+			// get all diameter objects and loop through to find each distinct observer entry
+			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allDiameters', function(data) {
+				for (i in data){
+					for (date in data[i]){
+						// only get observers if the entry has observers listed
+						if (data[i][date].observers !== undefined) {
+							// only take observers from last 4 years
+							if (date.substr(0,4) >= dateThreshold) {
+								if (data[i][date].observers[0] !== undefined) {
+									if (data[i][date].observers[0].trim(" ") !== ""){
+										curObservers = data[i][date].observers;
+										// check each observer listed in an entry against each observer already in comprehensive array
+										for (k in curObservers) {
+											curObserver = curObservers[k];
+											for (date in observersArray) {
+												if (curObserver === observersArray[date]) {
+													alreadyThere = true;
+													break;
+												} else {
+													alreadyThere = false;
+												}
+											}
+											if (alreadyThere === false) {
+												observersArray.push(curObserver);
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			});
+			observersArray.sort();
+			return observersArray;
 		}
 	});
 
@@ -693,12 +711,14 @@ $(document).ready(function(){
 			console.log(attrs);
 			console.log(options);
 		},
+
 		newSubTreeRowViewInitialize: function() {
 			var subTreeRow = new newSubTreeRowView({
 				//targetEl: $('#plot-table'),
 				model: this
 			});
 		}
+
 	});
 
 	//Declare the plot collection, contains tree objects
@@ -708,6 +728,8 @@ $(document).ready(function(){
   		initialize: function(){
   			 this.on('reset', this.renderTrees); 
   			 this.on('add', this.renderTrees); 
+  			 //this.on('reset', this.findAllObservers); 
+  			 //this.on('add', this.findAllObservers); 
   			 //this.on('change', this.renderTrees);
   		},
   		renderTrees: function(){
@@ -736,11 +758,11 @@ $(document).ready(function(){
 				});
 
 			});*/
-			
+
 			// Get all the ids
 			var ids = [];
 			var maxSubtrees = [];
-			
+
 			this.each(function(tree){
 				// Check if tree_id is already in the array
 				/*
@@ -760,17 +782,17 @@ $(document).ready(function(){
 					ids.push(treeid);
 				}
 			});
-			
+
 			console.log("maxSubtrees");
 			console.log(maxSubtrees[5]);
 			//console.log(maxSubtrees.toString());
 			//console.log("maxSubtrees ends");
-			
+
 			// Sort the array IDs
 			ids.sort(function(a,b){return a - b;});
-			
+
 			var treeCollection = this;
-			
+
 			// populate tree IDs
 			for (var i = 0; i < ids.length; i++) {
 				var id = ids[i];
@@ -781,39 +803,39 @@ $(document).ready(function(){
 						)
 					)
 				);
-				
+
 			}
-			
+
 			$(".dropdown-menu li a").click(function(){
-							
+
 				console.log("What's this?");
 				console.log(treeCollection);
 				console.log(maxSubtrees);
-				
+
 				var aTag = $(this);
-				
+
 				var parentTree = treeCollection.find(function(tree) {
-					
+
 					//console.log(tree.get("full_tree_id") + " == " + $(this).children("span").html());
 					console.log(aTag.children("span"));
 					return tree.get("full_tree_id") == parseFloat(aTag.children("span").text());
 				});
-				
-				
+
+
 				console.log("parentTree: ");
 				console.log(parentTree);
-				
+
 				//console.log(parentTrees[parentTrees.length - 1]);
 				parentTree.newSubTreeRowViewInitialize();
 			});
-			
-			
-			
-			
-			
-			
+
+
+
+
+
+
 		},
-		
+
 		newTreeRowViewInitialize: function(){
   			console.log("newTreeRowViewInitialize");
 			var newTreeRow = new newTreeRowView({
@@ -881,7 +903,7 @@ $(document).ready(function(){
 				console.log("New Tree Event Catched");
 				thisPlot.addTree();
 			});
-			
+
 			/*
 			$('add-new-sub-tree').click(function(){
 				thisPlot.addSubtree();
