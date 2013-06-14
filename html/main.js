@@ -13,11 +13,17 @@ $(document).ready(function(){
     //The global router declaration, handles all of the app's URLs
 	var AppRouter = Backbone.Router.extend({
         routes: {
-            "update": "updateObservation", //inits the add record "wizard", leads to the edit pages
+            //"data": "accessObservations", //inits the add record "wizard", leads to the edit pages
+            "update": "accessObservations", //inits the add record "wizard", leads to the edit pages
+            "reports": "accessObservations",
+            //"data/update": "accessObservations", //inits the add record "wizard", leads to the edit pages
+            //"data/reports": "accessObservations",
             "update/trees/site/:location/plot/:plot": "editPlot",
-          //  "update/trees/site/:location/plot/:plot/treeid/new": "newTree",
+            "reports/trees/site/:location/plot/:plot": "editPlot",
+          	//"update/trees/site/:location/plot/:plot/treeid/new": "newTree",
             "update/trees/site/:location/plot/:plot/treeid/:treeid/subtreeid/new": "newSubTree",
             "update/trees/site/:location/plot/:plot/treeid/:treeid(/subtreeid/:subTreeId)": "editTree",
+            "reports/trees/site/:location/plot/:plot/treeid/:treeid(/subtreeid/:subTreeId)": "editTree",
             "*actions": "defaultRoute" // Backbone will try match the route above first
         }
 	});
@@ -786,8 +792,8 @@ $(document).ready(function(){
 				}
 			});
 			
-			console.log("maxSubtrees");
-			console.log(maxSubtrees[5]);
+			//console.log("maxSubtrees");
+			//console.log(maxSubtrees[5]);
 			//console.log(maxSubtrees.toString());
 			//console.log("maxSubtrees ends");
 			
@@ -860,7 +866,7 @@ $(document).ready(function(){
     });
     
     //Site, plot selection
-    app_router.on('route:updateObservation', function () {											//listening for user action (for user to select location and plot)
+    app_router.on('route:accessObservations', function () {											//listening for user action (for user to select location and plot)
     	var  templateFile = 'update.html';
 		require(['lib/text!templates/' + templateFile + '!strip'], function(templateHTML){			
 			$('#main').html(templateHTML);
@@ -871,8 +877,12 @@ $(document).ready(function(){
 				collection: locationOptions
 			});
 			locationOptions.fetch();
-			$('#get-plot').click(function(){														//waits for user to select plot
+			$('#update-records').click(function(){														//waits for user to select plot
 				var getPlotUrl = "update/" + $('#type-select').val() + '/site/' + encodeURI($('#site-select').val()) + '/plot/' + $('#plot-select').val()
+				document.location.hash = getPlotUrl;
+			});
+			$('#analyze-data').click(function(){														//waits for user to select plot
+				var getPlotUrl = "reports/" + $('#type-select').val() + '/site/' + encodeURI($('#site-select').val()) + '/plot/' + $('#plot-select').val()
 				document.location.hash = getPlotUrl;
 			});
 		});
