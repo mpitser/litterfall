@@ -39,25 +39,7 @@
   <body>
      <div class="container">
       <h1>Updating Data Records <small><%= site %>, Plot <%= plot %></small></h1>
-	<div class="button-row">
-			<button class="add-new-tree btn btn-mini btn-success pull-left" type="button">+ New Tree</button>
-			<div class="btn-group">
-			<button class="btn btn-mini btn-success dropdown-toggle" type="button">+ New Sub-Tree</button>
-			  <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-			  	Choose Parent Tree...
-
-			</ul>
-		</div>
-			<form action="/SaveToExcel.php" method="post" target="_blank" style="float: right">
-				<input type="hidden" id="datatodisplay" name="datatodisplay" />
-				<input class="btn btn-mini btn-primary export" id="excel-save-top" type="button" value="Export to Excel"/>
-			</form>		
-		</div>
-<<<<<<< HEAD
-	<table class="table-striped" id="plot-table">
-=======
  	<table class="table-striped tablesorter" id="plot-table">
->>>>>>> 28fb9071cdaa50ad06df4448783abbb5e514d79d
 	<thead>
 		<tr>
 		<th></th>
@@ -85,20 +67,6 @@
 	
 	</tbody>
 	</table>
-	<div class="button-row">
-			<button class="add-new-tree btn btn-mini btn-success pull-left" type="button">+ New Tree</button>
-			<div class="btn-group">
-			<button class="btn btn-mini btn-success dropdown-toggle" type="button">+ New Sub-Tree</button>
-			  <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-			  	Choose Parent Tree...
-
-			</ul>
-		</div>
-			<form action="/SaveToExcel.php" method="post" target="_blank" style="float: right">
-				<input type="hidden" id="datatodisplay" name="datatodisplay" />
-				<input class="btn btn-mini btn-primary export" id="excel-save-bottom" type="button" value="Export to Excel"/>
-			</form>		
-		</div>
     </div> <!-- /container -->
 
    

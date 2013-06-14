@@ -13,11 +13,15 @@ $(document).ready(function(){
     //The global router declaration, handles all of the app's URLs
 	var AppRouter = Backbone.Router.extend({
         routes: {
-            "update": "updateObservation", //inits the add record "wizard", leads to the edit pages
-            "update/trees/site/:location/plot/:plot": "editPlot",
-          //  "update/trees/site/:location/plot/:plot/treeid/new": "newTree",
-            "update/trees/site/:location/plot/:plot/treeid/:treeid/subtreeid/new": "newSubTree",
-            "update/trees/site/:location/plot/:plot/treeid/:treeid(/subtreeid/:subTreeId)": "editTree",
+            "data": "accessObservations", //inits the add record "wizard", leads to the edit pages
+            "data/update": "accessObservations", //inits the add record "wizard", leads to the edit pages
+            "data/reports": "accessObservations",
+            "data/update/trees/site/:location/plot/:plot": "goToPlot",
+            "data/reports/trees/site/:location/plot/:plot": "goToPlot",
+          	//"update/trees/site/:location/plot/:plot/treeid/new": "newTree",
+            "data/update/trees/site/:location/plot/:plot/treeid/:treeid/subtreeid/new": "newSubTree",
+            "data/update/trees/site/:location/plot/:plot/treeid/:treeid(/subtreeid/:subTreeId)": "goToTree",
+            "data/reports/trees/site/:location/plot/:plot/treeid/:treeid(/subtreeid/:subTreeId)": "goToTree",
             "*actions": "defaultRoute" // Backbone will try match the route above first
         }
 	});
@@ -42,7 +46,7 @@ $(document).ready(function(){
 		tagName: 'tr',
 		template: '\
 			<td>\
-				<button class="update-btn btn btn-mini btn-primary" type="button">Update</button>\
+				<button class="btn-tree btn btn-mini btn-primary" type="button"></button>\
 			</td>\
 			<td>\
 				<%= tree.full_tree_id %>\
@@ -73,22 +77,36 @@ $(document).ready(function(){
 					thisTree.thisDate = date;
 				}
 			}
-			if (thisTree.diameter.length > 0){
+			if (Object.keys(thisTree.diameter).length > 0){
 				thisTree.thisDiameter = thisTree.diameter[thisTree.thisDate].value;    //gets diameter from most recent measurement
 				thisTree.thisComment = thisTree.diameter[thisTree.thisDate].notes;     //gets comments from most recent measurement
 			}
-			//console.log(thisTree)
+			
+			
+			// based on whether user is in analyze data mode or enter data mode, change button text and class tags
+			if (document.location.hash.search("update") === -1) {
+				$(".btn-tree").text("View more");
+				$(".btn-tree").addClass("btn-analyze");
+				$(".btn-tree").removeClass("btn-update");
+
+			} else {
+				$(".btn-tree").text("Update");
+				$(".btn-tree").addClass("btn-update");
+				$(".btn-tree").removeClass("btn-analyze");				
+			}
+			
 			//$el --> gets the jQuery object for this view's element 
 			//*.attr('id', thisTree._id.$oid) --> sets 'id' to MongoDB value for tree's ID
 			//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
 			this.$el.attr('id', thisTree._id.$oid).html(_.template(this.template, {tree: thisTree}));
-
+			
 			this.options.targetEl.append(this.el);								   //appends the tree's row element to table
 		},
 		events: {
-			'click .update-btn': 'updateTree'								//if update button is clicked, runs updateTree function
+			'click .btn-update': 'goToTree',								//if update button is clicked, runs updateTree function
+			'click .btn-analyze': 'goToTree'								//if update button is clicked, runs updateTree function
 		},
-		updateTree: function(){
+		goToTree: function(){
 			//goto update tree page
 			var subId = this.model.get("sub_tree_id");
 			var treeUrl = "/treeid/" + this.model.get("tree_id") + ((subId) ? '/subtreeid/' + subId : '');
@@ -292,10 +310,10 @@ $(document).ready(function(){
 		<div class="button-row">\
 			<button class="btn-new-observation btn btn-mini btn-success pull-left" type="button">+ New Entry</button>\
 		</div>\
-		<table id="tree_observations" class="table-striped">\
+		<table id="tree_observations" class="table-striped tablesorter">\
 			<thead>\
 				<tr>\
-					<th></th>\
+					<th class="btn-column"></th>\
 					<th>Date</th>\
 					<th>Observers</th>\
 					<th>\
@@ -309,7 +327,7 @@ $(document).ready(function(){
 			<tbody>\
 			<% _.each(tree.datesDesc, function(date){ %>\
 			<tr>\
-				<td>\
+				<td class="btn-column">\
 					<button class="display_cell btn btn-mini btn-primary edit-existing" type="button">Edit</button>\
 					<div class="edit_cell btn-group"><button class="btn-save-observation btn btn-mini btn-success" type="button">Submit</button>\
 					<button class="btn-cancel-observation btn btn-mini btn-danger" type="button">Cancel</button>\
@@ -338,6 +356,15 @@ $(document).ready(function(){
 			thisTree.datesDesc = _.keys(thisTree.diameter).sort().reverse();
 			this.$el.html(_.template(this.template, {tree: thisTree}));
 			this.postRender();
+			
+			// show or hide edit buttons/columns based on whether user is in analyze data mode or enter data mode
+			if (document.location.hash.search("update") === -1) {				
+				$(".btn").hide();
+				$(".btn-column").hide();
+				$("#tree_observations").tablesorter(); 				
+			} else {
+				$("#tree_observations").tablesorter({headers: { 0: { sorter: false}}}); 
+			}
 		},
 		postRender: function(){
 			//add any methods/functions that need to be call after redendering the Tree edit view
@@ -738,6 +765,7 @@ $(document).ready(function(){
   			}, this);
   			// populate the tree
   			this.populateTreeIDs();
+<<<<<<< HEAD
   			/*
   			$("#btnExport").click(function(e) {
 				$("#plot-table").val( $("<div>").append( $("#datatodisplay").eq(0).clone() ).html() );
@@ -771,6 +799,11 @@ $(document).ready(function(){
 			});
 		},
 		
+=======
+  			// add tablesorter jquery plugin (no sorting for first column)
+  			$("#plot-table").tablesorter({headers: { 0: { sorter: false}}}); 
+  		},
+>>>>>>> 28fb9071cdaa50ad06df4448783abbb5e514d79d
   		addTree: function(){
   			this.newTreeRowViewInitialize();	
   		},
@@ -813,9 +846,15 @@ $(document).ready(function(){
 					ids.push(treeid);
 				}
 			});
+<<<<<<< HEAD
 
 			console.log("maxSubtrees");
 			console.log(maxSubtrees[5]);
+=======
+			
+			//console.log("maxSubtrees");
+			//console.log(maxSubtrees[5]);
+>>>>>>> 28fb9071cdaa50ad06df4448783abbb5e514d79d
 			//console.log(maxSubtrees.toString());
 			//console.log("maxSubtrees ends");
 
@@ -888,7 +927,7 @@ $(document).ready(function(){
     });
     
     //Site, plot selection
-    app_router.on('route:updateObservation', function () {											//listening for user action (for user to select location and plot)
+    app_router.on('route:accessObservations', function () {											//listening for user action (for user to select location and plot)
     	var  templateFile = 'update.html';
 		require(['lib/text!templates/' + templateFile + '!strip'], function(templateHTML){			
 			$('#main').html(templateHTML);
@@ -899,16 +938,28 @@ $(document).ready(function(){
 				collection: locationOptions
 			});
 			locationOptions.fetch();
-			$('#get-plot').click(function(){														//waits for user to select plot
-				var getPlotUrl = "update/" + $('#type-select').val() + '/site/' + encodeURI($('#site-select').val()) + '/plot/' + $('#plot-select').val()
+			$('#update-records').click(function(){														//waits for user to select plot
+				var getPlotUrl = "data/update/" + $('#type-select').val() + '/site/' + encodeURI($('#site-select').val()) + '/plot/' + $('#plot-select').val()
+				document.location.hash = getPlotUrl;
+			});
+			$('#analyze-data').click(function(){														//waits for user to select plot
+				var getPlotUrl = "data/reports/" + $('#type-select').val() + '/site/' + encodeURI($('#site-select').val()) + '/plot/' + $('#plot-select').val()
 				document.location.hash = getPlotUrl;
 			});
 		});
     });
     
     //Plot view
-    app_router.on('route:editPlot', function(site, plot) {											//reloads page based on selected location (site) and plot
-    	var  templateFile = 'update2.html';
+    app_router.on('route:goToPlot', function(site, plot) {		
+    	//reloads page based on selected location (site) and plot
+
+		// load different template depending on whether we are updating or analyzing data
+		var templateFile;		
+		if (document.location.hash.search("update") === -1) { //if url does not contain 'update' (i.e. it must contain 'reports')
+			templateFile = 'reports2.html';
+		} else {											  // url contains 'update'
+			templateFile = 'update2.html';
+		}
 		require(['lib/text!templates/' + templateFile + '!strip'], function(templateHTML){			//<WHAT DOES THIS FUNCTION DO?> [ ] (some sort of require wrapper)
 			$('#main').html(_.template(templateHTML, {
 				site: decodeURI(site), 
@@ -929,7 +980,7 @@ $(document).ready(function(){
 				var plotNumber = $(".plot-number").text();
 				var siteName = $(".site-name").text();
 				console.log(plotNumber+ " "+siteName);
-				app_router.navigate('update/trees/site/'+siteName+'/plot/'+plotNumber+'/treeid/new',{trigger:true});
+				app_router.navigate('data/update/trees/site/'+siteName+'/plot/'+plotNumber+'/treeid/new',{trigger:true});
 				*/
 				console.log("New Tree Event Catched");
 				thisPlot.addTree();
@@ -945,7 +996,7 @@ $(document).ready(function(){
     });
     
     //Edit tree view
-    app_router.on('route:editTree', function(site, plot, treeId, subTreeId) {						//reloads page based on selected location (site) and plot
+    app_router.on('route:goToTree', function(site, plot, treeId, subTreeId) {						//reloads page based on selected location (site) and plot
     	var  templateFile = 'update-tree.html';
 		require(['lib/text!templates/' + templateFile + '!strip'], function(templateHTML){			//<WHAT DOES THIS FUNCTION DO?> [ ] (some sort of require wrapper)
 
