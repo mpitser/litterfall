@@ -54,7 +54,7 @@ $(document).ready(function(){
 						<span class="caret"></span>\
 					</button>\
 					<ul class="dropdown-menu">\
-						<li><a href="' + document.location.hash + '" class="delete-row">Delete</a></li>\
+						<li><a style="cursor:pointer;" class="delete-row">Delete</a></li>\
 					</ul>\
 				</div>\
 			</td>\
@@ -97,6 +97,7 @@ $(document).ready(function(){
 			//*.attr('id', thisTree._id.$oid) --> sets 'id' to MongoDB value for tree's ID
 			//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
 			this.$el.attr('id', thisTree._id.$oid).html(_.template(this.template, {tree: thisTree}));
+			this.$el.addClass("tree-cluster-" + thisTree.tree_id);
 			
 			this.options.targetEl.append(this.el);								   //appends the tree's row element to table
 			
@@ -111,6 +112,8 @@ $(document).ready(function(){
 				$(".btn-tree").addClass("btn-update");
 				$(".btn-tree").removeClass("btn-analyze");				
 			}
+			
+			return this;
 			
 			
 		},
@@ -130,10 +133,48 @@ $(document).ready(function(){
 			this.model.url = app.config.cgiDir + 'litterfall.py';
 			var result = this.model.destroy();
 			if (result !== false) {
-				var removeEl = this.$el.remove;
-				targetId = this.model.get('_id').$oid;
-				this.$el.fadeOut("slow", function() {
-					$("#"+targetId).remove();
+			
+				thisModel = this.model;
+				
+				result.done(function() { // once done
+					
+					thisTreeEl.fadeOut("slow", function() {						//function called after fadeOut is done
+						
+						// remove the row--we need this because if we just hide (using visibility:hidden) the row then the table-stripe class will not work
+						$("#"+thisModel.get('_id').$oid).remove();
+						
+						var targetTreeId = thisModel.get('tree_id');
+						
+						// update all the trees under the same tree_id
+						$(".tree-cluster-"+targetTreeId).each(function(i) {
+						
+							// only the full_tree_id would be updated
+							var updatedTree = new Tree();
+							
+							// grab the second child
+							var fullTreeIdTd = $(this).children('td').eq(1);
+							var targetFullTreeId = parseInt(parseFloat(fullTreeIdTd.text())*10);
+							console.log(targetFullTreeId);
+							
+							// get the data
+							// using oid, because that's the only way it's stable
+							updatedTree.url = app.config.cgiDir + 'litterfall.py?oid=' + $(this).attr('id');
+							updatedTree.fetch({
+								success: function() {
+									console.log(updatedTree);
+									// update it, only the full tree id, for now
+									console.log("tree_id: " + updatedTree.get('tree_id'));
+									updatedFullTreeId = updatedTree.get('tree_id') + (updatedTree.get('sub_tree_id') * .1);
+									console.log(updatedFullTreeId);
+									if (targetFullTreeId * .1 != updatedFullTreeId) {
+										fullTreeIdTd.text(updatedFullTreeId);
+									}
+							}
+							});
+							
+						});
+						
+					});
 				});
 			}
 		}
@@ -298,6 +339,8 @@ $(document).ready(function(){
 			//$("html, body").animate({scrollTop: this.el.css("top")});
 
 			//this.postRender();
+			
+			return this;
 		},
 
 		events: {
