@@ -765,12 +765,15 @@ $(document).ready(function(){
   			}, this);
   			// populate the tree
   			this.populateTreeIDs();
+  			// add tablesorter jquery plugin (no sorting for first column)
+  			$("#plot-table").tablesorter({headers: { 0: { sorter: false}}}); 
+  		
   			/*
   			$("#btnExport").click(function(e) {
 				$("#plot-table").val( $("<div>").append( $("#datatodisplay").eq(0).clone() ).html() );
     		});*/
-    		this.addActionsToTable();
-    	},
+    			this.addActionsToTable();
+    		},
 		addActionsToTable: function(){
 		/*
 			var SaveToDisk = 
@@ -798,9 +801,7 @@ $(document).ready(function(){
 			});
 		},
 		
-  			// add tablesorter jquery plugin (no sorting for first column)
-  			$("#plot-table").tablesorter({headers: { 0: { sorter: false}}}); 
-  		},
+  			
   		addTree: function(){
   			this.newTreeRowViewInitialize();	
   		},
