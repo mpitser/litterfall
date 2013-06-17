@@ -956,8 +956,10 @@ $(document).ready(function(){
 		// load different template depending on whether we are updating or analyzing data
 		var templateFile;		
 		if (document.location.hash.search("update") === -1) { //if url does not contain 'update' (i.e. it must contain 'reports')
+			console.log("should be reporting");
 			templateFile = 'reports2.html';
-		} else {											  // url contains 'update'
+		} else {		
+			console.log("should be updating");									  // url contains 'update'
 			templateFile = 'update2.html';
 		}
 		require(['lib/text!templates/' + templateFile + '!strip'], function(templateHTML){			//<WHAT DOES THIS FUNCTION DO?> [ ] (some sort of require wrapper)
