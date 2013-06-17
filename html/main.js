@@ -49,7 +49,7 @@ $(document).ready(function(){
 		template: '\
 			<td>\
 				<div class="btn-group">\
-					<button class="update-btn btn btn-mini btn-primary" type="button">Update</button>\
+					<button class="btn-tree btn btn-mini btn-primary" type="button"></button>\
 					<button class="btn btn-mini dropdown-toggle btn-primary" data-toggle="dropdown">\
 						<span class="caret"></span>\
 					</button>\
@@ -121,7 +121,6 @@ $(document).ready(function(){
 			
 		},
 		events: {
-			'click .update-btn': 'updateTree',								//if update button is clicked, runs updateTree function
 			'click .delete-row': 'deleteTree',
 			'click .btn-update': 'goToTree',								//if update button is clicked, runs updateTree function
 			'click .btn-analyze': 'goToTree'								//if update button is clicked, runs updateTree function
