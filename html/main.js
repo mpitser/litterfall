@@ -93,7 +93,14 @@ $(document).ready(function(){
 			}
 			
 			
-			// based on whether user is in analyze data mode or enter data mode, change button text and class tags
+			//$el --> gets the jQuery object for this view's element 
+			//*.attr('id', thisTree._id.$oid) --> sets 'id' to MongoDB value for tree's ID
+			//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
+			this.$el.attr('id', thisTree._id.$oid).html(_.template(this.template, {tree: thisTree}));
+			
+			this.options.targetEl.append(this.el);								   //appends the tree's row element to table
+			
+						// based on whether user is in analyze data mode or enter data mode, change button text and class tags
 			if (document.location.hash.search("update") === -1) {
 				$(".btn-tree").text("View more");
 				$(".btn-tree").addClass("btn-analyze");
@@ -104,19 +111,6 @@ $(document).ready(function(){
 				$(".btn-tree").addClass("btn-update");
 				$(".btn-tree").removeClass("btn-analyze");				
 			}
-			
-			//$el --> gets the jQuery object for this view's element 
-			//*.attr('id', thisTree._id.$oid) --> sets 'id' to MongoDB value for tree's ID
-			//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
-			this.$el.attr('id', thisTree._id.$oid).html(_.template(this.template, {tree: thisTree}));
-			
-			this.options.targetEl.append(this.el);								   //appends the tree's row element to table
-			
-			
-			var treeToDelete = this.model;
-			var thisEl = this.$el;
-			
-			console.log(this.$el.children("td:first-child").children(".btn-group").children(".dropdown-menu").children("li").children(".delete-row").html());
 			
 			
 		},
