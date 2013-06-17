@@ -765,7 +765,6 @@ $(document).ready(function(){
   			}, this);
   			// populate the tree
   			this.populateTreeIDs();
-<<<<<<< HEAD
   			/*
   			$("#btnExport").click(function(e) {
 				$("#plot-table").val( $("<div>").append( $("#datatodisplay").eq(0).clone() ).html() );
@@ -799,11 +798,9 @@ $(document).ready(function(){
 			});
 		},
 		
-=======
   			// add tablesorter jquery plugin (no sorting for first column)
   			$("#plot-table").tablesorter({headers: { 0: { sorter: false}}}); 
   		},
->>>>>>> 28fb9071cdaa50ad06df4448783abbb5e514d79d
   		addTree: function(){
   			this.newTreeRowViewInitialize();	
   		},
@@ -846,15 +843,12 @@ $(document).ready(function(){
 					ids.push(treeid);
 				}
 			});
-<<<<<<< HEAD
 
-			console.log("maxSubtrees");
-			console.log(maxSubtrees[5]);
-=======
+			//console.log("maxSubtrees");
+			//console.log(maxSubtrees[5]);
 			
 			//console.log("maxSubtrees");
 			//console.log(maxSubtrees[5]);
->>>>>>> 28fb9071cdaa50ad06df4448783abbb5e514d79d
 			//console.log(maxSubtrees.toString());
 			//console.log("maxSubtrees ends");
 
