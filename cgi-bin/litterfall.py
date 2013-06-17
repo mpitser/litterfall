@@ -210,11 +210,7 @@ class Tree:
 		
 		allSubTrees = self.obs.find(findQueryAllSubTrees)
 		
-		self.tree['error'] = {}
-		
-		self.tree['error'][0] = allSubTrees[0]['sub_tree_id']
-		
-		if allSubTrees.count() <= 1:
+		if allSubTrees.count() == 1:
 			self.obs.update({'_id': allSubTrees[0]['_id']}, {'$set': {'sub_tree_id': 0} })
 		
 		else:
