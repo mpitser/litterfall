@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -11,6 +10,10 @@
     <!-- Le styles -->
     <link href="css/bootstrap.css" rel="stylesheet">
     <link href="css/tables.css" rel="stylesheet">
+    
+    <!-- Jquery plugin for table sorting -->
+    <!--<script type="text/javascript" src="/path/to/jquery-latest.js"></script> 
+	<script type="text/javascript" src="/lib/jquery.tablesorter.js"></script> -->
 
     <style>
       body {
@@ -35,6 +38,7 @@
   <body>
      <div class="container">
       <h1>Updating Data Records <small><%= site %>, Plot <%= plot %></small></h1>
+
 		<div class="button-row">
 		<button class="add-new-tree btn btn-mini btn-success pull-left" type="button">+ New Tree</button>
 			<div class="btn-group">
@@ -46,9 +50,16 @@
 					</ul>
 				
 			</div>
+			
+			<form action="/SaveToExcel.php" method="post" target="_blank" style="float: right">
+				<input type="hidden" id="datatodisplay" name="datatodisplay" />
+				<input class="btn btn-mini btn-primary export" id="excel-save-top" type="button" value="Export to Excel"/>
+			</form>		
+			
 		</div>
 		<div class="site-name"><%= site %></div><div class="plot-number"><%= plot %></div>
- 	<table class="table-striped" id="plot-table">
+
+ 	<table class="table-striped tablesorter" id="plot-table">
 	<thead>
 		<tr>
 		<th></th>
@@ -83,8 +94,12 @@
 			  <ul class="dropdown-menu id-list" role="menu" aria-labelledby="dLabel">
 			  	Choose Parent Tree...
 
-				</ul>
-			</div>
+			</ul>
+		</div>
+			<form action="/SaveToExcel.php" method="post" target="_blank" style="float: right">
+				<input type="hidden" id="datatodisplay" name="datatodisplay" />
+				<input class="btn btn-mini btn-primary export" id="excel-save-bottom" type="button" value="Export to Excel"/>
+			</form>		
 		</div>
     </div> <!-- /container -->
 

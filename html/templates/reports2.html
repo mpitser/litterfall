@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -8,15 +9,19 @@
     <meta name="author" content="">
 
     <!-- Le styles -->
-    <link href="../css/bootstrap.css" rel="stylesheet">
-    <link href="../css/tables.css" rel="stylesheet">
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/tables.css" rel="stylesheet">
+    
+    <!-- Jquery plugin for table sorting -->
+    <!--<script type="text/javascript" src="/path/to/jquery-latest.js"></script> 
+	<script type="text/javascript" src="/lib/jquery.tablesorter.js"></script> -->
 
     <style>
       body {
         padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
       }
     </style>
-    <link href="../../css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="css/bootstrap-responsive.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -32,19 +37,38 @@
   </head>
 
   <body>
-
-    <div class="container">
-      <h1>Updating Data Records <small><%= site %>, Plot <%= plot %></small>
-      <div id="back"><button class="btn btn-mini btn-primary pull-left back" style='text-decoration: none; float: right'><a href="#data/update/trees/site/<%= site %>/plot/<%= plot %>" style="text-decoration: none">Return to Plot</a></button>
-		</div>
-		</h1>
-		<h2>Tree: <%= treeId %><%= subTreeId != 0 ?  '.' + subTreeId : '' %>
-		</h2>
-		<div id="treeEditView">
-				
-			
-		</div>
+     <div class="container">
+      <h1>Updating Data Records <small><%= site %>, Plot <%= plot %></small></h1>
+ 	<table class="table-striped tablesorter" id="plot-table">
+	<thead>
+		<tr>
+		<th></th>
+		<th>
+			Tree ID
+		</th>
+		<th>
+			Species
+		</th>
+		<th>
+			Angle Degrees
+		</th>
+		<th>
+			Distance Meters
+		</th>
+		<th>
+			Last DBH (cm) <a href="#" class="dbh" rel="tooltip" data-placement="top" data-original-title="Diameter at Breast Height"><small>info</small></a>
+		</th>
+		<th>
+			Comments
+		</th>
+	</tr>
+	</thead>
+	<tbody>
+	
+	</tbody>
+	</table>
     </div> <!-- /container -->
 
+   
   </body>
 </html>

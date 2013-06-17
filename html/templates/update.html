@@ -33,25 +33,11 @@
   <body>
 	<div class="container">
 
-      <h1>Update Data Records</h1>
-      <p>Fill out the form below to begin updating the data records</p>
+      <h1>Access Data Records</h1>
+      <p>Fill out the form below to begin accessing the data records</p>
 	<div class="row">
 		<form>
 	
-	<div class="span4">
-		<div>
-		<h3>Site</h3>
-		<select id="site-select" name="site">
-		</select>
-		</div>
-
-	<div><h3>Plot</h3>
-		<select id="plot-select" name="plot">
-		  <option>1</option>
-		  <option>2</option>
-		</select>
-	</div>
-	</div>
 	<div class="span4">
 		<div>
 			<h3>Collection Type</h3>
@@ -60,8 +46,26 @@
 		  		<option value="litterfall">Litterfall</option>	  		
 			</select>
 		</div>
+		<div>
+			<h3>Site</h3>
+			<select id="site-select" name="site">
+			</select>
+		</div>
+		<div>
+			<h3>Plot</h3>
+			<select id="plot-select" name="plot">
+			  <option>1</option>
+			  <option>2</option>
+			</select>
+		</div>
+	</div>
+	
+	<div class="span4">
+		<div style="margin:50px 0px;">
+  			<button id="update-records" class="btn btn-large btn-primary" type="button">Update records ></button>
+		</div>
 		<div style="margin:25px 0px;">
-  			<button id="get-plot" class="btn btn-large btn-primary" type="button">Continue ></button>
+			<button id="analyze-data"class="btn btn-large btn-primary" type="button">Analyze data ></button>
 		</div>
 	</div>
     </div> <!-- /container -->

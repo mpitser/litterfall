@@ -231,7 +231,7 @@ class Tree:
 
 def getdata(obs, site, plot, treeid, subtreeid):
 	if site == 'all':
-		# then return an array of distince sites
+		# then return an array of distinct sites
 		data = obs.find({'collection_type':'tree'}).distinct('site')
 		for j in range(0,len(data)):
 			data[j] = data[j].encode('ascii','ignore')
@@ -242,6 +242,12 @@ def getdata(obs, site, plot, treeid, subtreeid):
 		data = obs.find({'collection_type':'tree'}, {'fields':'species'}).distinct('species')
 		data.sort()	# Use Python's built-in sort to alphabetize the species listing
 		n = len(data)
+	elif site == 'allDiameters':
+		# get all diameter fields from database
+		# from each diam field, get all observers (within date range eventually)
+		data = obs.find({'collection_type':'tree'}, {'fields':'diameter'}).distinct('diameter')
+		data.sort()
+		n = 0; # n is not important, just helps up in decigin which data to assign to json_data
 	elif treeid == 'maxID':
 		# Return max existing tree id at site and plot
 		data = obs.find({'collection_type':'tree', 'plot': int(plot), 'site': site}, {'fields':'tree_id'}).distinct('tree_id')
@@ -257,10 +263,10 @@ def getdata(obs, site, plot, treeid, subtreeid):
 		if treeid != None:
 			# if there is a tree id, then append
 			findQuery['tree_id'] = int(treeid)
-			if subtreeid != None:
+			if subtreeid != None and subtreeid != 'all':
 				# if there is a sub tree id, then append
 				findQuery['sub_tree_id'] = int(subtreeid)			
-		# get the data
+		# get the data 
 		data = obs.find(findQuery).sort([("angle",1)])
 		n = data.count()
 
@@ -268,11 +274,14 @@ def getdata(obs, site, plot, treeid, subtreeid):
 	# if only a treeid is given and
 	# that particular tree has subtrees
 	# then return nothing
-	if  treeid != None and n > 1:
+	if  treeid != None and n > 1 and subtreeid != 'all':
 		json_data = None
 	elif n == -1:
 		#return maxID
-		json_data = data[-1]
+		json_data = data[n]
+	elif n == 0:
+		#return diameter objects
+		json_data = data
 	elif treeid == 'allIDs':
 		json_data = data
 	elif n == 1:
@@ -284,10 +293,10 @@ def getdata(obs, site, plot, treeid, subtreeid):
 		json_data = [0]*n
 		for i in range(0,n):
 			json_data[i] = data[i]
-	
+
 	ser_data = json.dumps(json_data, default=json_util.default, separators=(',', ':'))
 	print ser_data
-
+	
 def checknum(tocheck, dtype, high, low):
 	if tocheck > high or tocheck < low:
 		return {'flag': False, 'msg': 'check boundary!'}
@@ -308,7 +317,7 @@ def checkstring(tocheck, dtype, value):
 def checkdict(diameter_dict, dtype):
 	# check type first
 	if not isinstance(diameter_dict, dtype):
-		return {'flag': False, 'msg': 'wrong data type!'}	
+		return {'flag': False, 'msg': 'wrong data type!'}
 	
 	# check all the dates
 	times = diameter_dict.keys()
