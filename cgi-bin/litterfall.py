@@ -228,6 +228,12 @@ class Tree:
 				#self.tree['error'][i] = SubTree['sub_tree_id']
 				i = i + 1
 						
+def getdatafromoid(obs, oid):
+	objectId = ObjectId(oid)
+	data = obs.find({'_id': objectId})
+	json_data = data[0]
+	ser_data = json.dumps(json_data, default=json_util.default, separators=(',', ':'))
+	print ser_data
 
 def getdata(obs, site, plot, treeid, subtreeid):
 	if site == 'all':
@@ -426,18 +432,16 @@ def main():
 		print 'Content-Type: application/json\n'
 		query = cgi.FieldStorage()
 		
+		oid = query.getvalue('oid')
 		plot = query.getvalue('plot')
 		site = query.getvalue('site')
 		treeid = query.getvalue('treeid')
 		subtreeid = query.getvalue('subtreeid')
 		
-		if query.getvalue('delete') == 'yes':
-			newTree = Tree({'plot': plot, 'site': site, 'tree_id': treeid, 'sub_tree_id': subtreeid}, obs)
-			newTree.delete()
-			newTree.printJSON()
-			return
-		
-		getdata(obs, site, plot, treeid, subtreeid)	
+		if oid != None:
+			getdatafromoid(obs, oid)
+		else:
+			getdata(obs, site, plot, treeid, subtreeid)	
 	elif method == 'POST' or method == 'PUT':
 		form = cgi.FieldStorage()
 		data = json.loads(form.file.read(), object_hook=json_util.object_hook)	
