@@ -473,7 +473,7 @@ $(document).ready(function(){
 				console.log("didn't save");
 				return; // user will remain in edit view until their data passes validation
 			}
-			
+
 			//must clone object to update it
 			var diameters = _.clone(this.model.get('diameter'));
 
@@ -504,7 +504,12 @@ $(document).ready(function(){
 									         success: function(model, response, options){console.log("save to database was successful")}});	
 			// NOTE: another hack to make sure that the display view is rendered instead of the edit view
 			//(otherwise the edit view hangs there when nothing is changed)
-			this.render();		
+
+			row_to_save.find(".editable").attr("id", "current");
+			row_to_save.find("#current").addClass("alert-valid", {duration:500});
+			row_to_save.find("#current").removeClass("alert-valid", {duration:500});
+			//this.render();		
+
 		},
 
 		validateField: function(event){
