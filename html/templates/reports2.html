@@ -38,39 +38,86 @@
 
   <body>
      <div class="container">
-      <h1>Updating DATA Records <small><%= site %>, Plot <%= plot %></small></h1>
+      <h1>Updating Data Records <small><%= site %>, Plot <%= plot %></small></h1>
       
-      <h2>Date range of data: </h2>
-		<div class="dropdown">
-      	<a class="dropdown-toggle" data-toggle="dropdown" href="#">Dropdown trigger</a>
-      	<ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-   			 ...
-  		</ul>
-      	
-      	</div>
+
+      <h3>View data from:
+		<span class="dropdown"> 
+			<a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">
+				2002
+				<b class="caret"></b>
+			</a>
+      		<ul class="dropdown-menu" role="menu" aria-labelledby="dropDownMenu">
+      			<li> 2013 </li>
+      			<li> 2013 </li>
+      			<li> 2013 </li>
+  			</ul>	
+  		</span>
+  		to
+  		<span class="dropdown"> 
+  			<a class="dropdown-toggle" data-toggle="dropdown" href="#">
+  			2013
+				<b class="caret"></b>
+  			</a>
+      		<ul class="dropdown-menu" role="menu" aria-labelledby="dropDownMenu">
+      			<li> 2003 </li>
+  			</ul>
+      	</span> 
+      </h3>
+      
+      <h3>View data from last 
+		<span class="dropdown"> 
+			<a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">
+				2002
+				<b class="caret"></b>
+			</a>
+      		<ul class="dropdown-menu" role="menu" aria-labelledby="dropDownMenu">
+      			<li> 2013 </li>
+      			<li> 2013 </li>
+      			<li> 2013 </li>
+  			</ul>	
+  		</span>
+  		years
+      </h3>
+      
  	<table class="table-striped tablesorter" id="plot-table">
 	<thead>
 		<tr>
-		<th></th>
-		<th>
-			Tree ID
-		</th>
-		<th>
-			Species
-		</th>
-		<th>
-			Angle Degrees
-		</th>
-		<th>
-			Distance Meters
-		</th>
-		<th>
-			Last DBH (cm) <a href="#" class="dbh" rel="tooltip" data-placement="top" data-original-title="Diameter at Breast Height"><small>info</small></a>
-		</th>
-		<th>
-			Comments
-		</th>
-	</tr>
+			<th></th>
+			<th>
+				Tree ID
+			</th>
+			<th>
+				Species
+			</th>
+			<th>
+				Angle Degrees
+			</th>
+			<th>
+				Distance Meters
+			</th>
+			<th colspan="3">
+				DBH (cm) <a href="#" class="dbh" rel="tooltip" data-placement="top" data-original-title="Diameter at Breast Height"><small>info</small></a>
+			</th>
+
+		</tr>
+		<tr id="sub-header-dates">
+			<th class="sorter-false"></th>
+			<th class="sorter-false"></th>
+			<th class="sorter-false"></th>
+			<th class="sorter-false"></th>
+			<th class="sorter-false"></th>
+			<th class="sorter-false">
+			2013
+			</th>
+			<th class="sorter-false">
+			2012
+			</th>
+			<th class="sorter-false">
+			2011
+			</th>
+
+		</tr>
 	</thead>
 	<tbody>
 	
