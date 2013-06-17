@@ -35,18 +35,19 @@
   <body>
      <div class="container">
       <h1>Updating Data Records <small><%= site %>, Plot <%= plot %></small></h1>
-	<div class="button-row">
-			<button class="add-new-tree btn btn-mini btn-success pull-left" type="button">+ New Tree</button>
-			<div class="site-name"><%= site %></div><div class="plot-number"><%= plot %></div>
-
+		<div class="button-row">
+		<button class="add-new-tree btn btn-mini btn-success pull-left" type="button">+ New Tree</button>
 			<div class="btn-group">
-			<button class="btn btn-mini btn-success dropdown-toggle" type="button">+ New Sub-Tree</button>
-			  <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-			  	Choose Parent Tree...
-
-				</ul>
+				
+				<button class="add-new-sub-tree btn btn-mini btn-success dropdown-toggle" type="button">+ New Sub-Tree</button>
+				  <ul class="dropdown-menu id-list" role="menu" aria-labelledby="dLabel">
+					<li class="disabled"><a>Choose Parent Tree...</a></li>
+	
+					</ul>
+				
 			</div>
 		</div>
+		<div class="site-name"><%= site %></div><div class="plot-number"><%= plot %></div>
  	<table class="table-striped" id="plot-table">
 	<thead>
 		<tr>
@@ -79,7 +80,7 @@
 			<button class="add-new-tree btn btn-mini btn-success pull-left" type="button">+ New Tree</button>
 			<div class="btn-group">
 			<button class="btn btn-mini btn-success dropdown-toggle" type="button">+ New Sub-Tree</button>
-			  <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+			  <ul class="dropdown-menu id-list" role="menu" aria-labelledby="dLabel">
 			  	Choose Parent Tree...
 
 				</ul>

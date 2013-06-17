@@ -10,13 +10,14 @@ var app = {
 
 $(document).ready(function(){
 	require.config({});
+	
     //The global router declaration, handles all of the app's URLs
 	var AppRouter = Backbone.Router.extend({
         routes: {
             "update": "updateObservation", //inits the add record "wizard", leads to the edit pages
             "update/trees/site/:location/plot/:plot": "editPlot",
           //  "update/trees/site/:location/plot/:plot/treeid/new": "newTree",
-            "update/trees/site/:location/plot/:plot/treeid/:treeid/subtreeid/new": "newSubTree",
+          //  "update/trees/site/:location/plot/:plot/treeid/:treeid/subtreeid/new": "newSubTree",
             "update/trees/site/:location/plot/:plot/treeid/:treeid(/subtreeid/:subTreeId)": "editTree",
             "*actions": "defaultRoute" // Backbone will try match the route above first
         }
@@ -42,7 +43,15 @@ $(document).ready(function(){
 		tagName: 'tr',
 		template: '\
 			<td>\
-				<button class="update-btn btn btn-mini btn-primary" type="button">Update</button>\
+				<div class="btn-group">\
+					<button class="update-btn btn btn-mini btn-primary" type="button">Update</button>\
+					<button class="btn btn-mini dropdown-toggle btn-primary" data-toggle="dropdown">\
+						<span class="caret"></span>\
+					</button>\
+					<ul class="dropdown-menu">\
+						<li><a href="' + document.location.hash + '" class="delete-row">Delete</a></li>\
+					</ul>\
+				</div>\
 			</td>\
 			<td>\
 				<%= tree.full_tree_id %>\
@@ -84,15 +93,36 @@ $(document).ready(function(){
 			this.$el.attr('id', thisTree._id.$oid).html(_.template(this.template, {tree: thisTree}));
 
 			this.options.targetEl.append(this.el);								   //appends the tree's row element to table
+			
+			
+			var treeToDelete = this.model;
+			var thisEl = this.$el;
+			
+			console.log(this.$el.children("td:first-child").children(".btn-group").children(".dropdown-menu").children("li").children(".delete-row").html());
+			
+			
 		},
 		events: {
-			'click .update-btn': 'updateTree'								//if update button is clicked, runs updateTree function
+			'click .update-btn': 'updateTree',								//if update button is clicked, runs updateTree function
+			'click .delete-row': 'deleteTree',
 		},
 		updateTree: function(){
 			//goto update tree page
 			var subId = this.model.get("sub_tree_id");
 			var treeUrl = "/treeid/" + this.model.get("tree_id") + ((subId) ? '/subtreeid/' + subId : '');
 			app_router.navigate(document.location.hash + treeUrl, {trigger: true});
+		},
+		deleteTree: function(){
+			var thisTreeEl = this.$el;
+			this.model.url = app.config.cgiDir + 'litterfall.py';
+			var result = this.model.destroy();
+			if (result !== false) {
+				var removeEl = this.$el.remove;
+				targetId = this.model.get('_id').$oid;
+				this.$el.fadeOut("slow", function() {
+					$("#"+targetId).remove();
+				});
+			}
 		}
 	
 	});
@@ -157,6 +187,7 @@ $(document).ready(function(){
 			//save tree to database
 			var plotNumber = $(".plot-number").text();
 			var siteName = $(".site-name").text();
+			/*
 			var maxID = -1;
 			
 			$.getJSON(app.config.cgiDir + 'litterfall.py?site=' + siteName + '&plot=' + plotNumber + '&treeid=maxID', function(data) {
@@ -179,7 +210,31 @@ $(document).ready(function(){
 				// catching error?
 				//redirects to treeEditView page for the new tree
 				app_router.navigate(document.location.hash + "/treeid/" + (maxID+1), {trigger: true});
+			});*/
+			
+			var newTree = new Tree();
+			newTree.url = app.config.cgiDir + 'litterfall.py';
+			newTree.set({
+				"plot": parseInt(plotNumber),
+				"site": siteName,
+				"tree_id": -1,
+				'species': $("#plot-table .species select").val(),
+				'angle': parseInt($("#plot-table .angle input").val(), 10),
+				'distance': parseFloat($("#plot-table .distance input").val(), 10),
+				'diameter': {},
+				'dead': false
 			});
+			
+			var result = newTree.save();
+			if (result != false) {
+
+				result.done(function(data) {
+					//newTree.set("tree_id", data.tree_id);
+					app_router.navigate(document.location.hash + "/treeid/" + newTree.get("tree_id"), {trigger: true});
+				});
+				
+			}
+			
 		},
 		deleteRow: function() {
 			this.$el.remove();
@@ -238,6 +293,7 @@ $(document).ready(function(){
 		},
 		saveSubtree: function() {
 			var newSubTree = new Tree();
+			/*
 			//calculates sub_tree_id for the newSubTree based on the model
 			// this.model is the tree with the highest sub_tree_id for the given tree_id
 			subTreeID = this.model.get("sub_tree_id") + 1;
@@ -247,14 +303,15 @@ $(document).ready(function(){
 				this.model.save();
 				subTreeID = 2;
 			}
-			//console.log(subTreeID);
+			*/
+			
 			newSubTree.url = app.config.cgiDir + 'litterfall.py';
 			// sets newSubTree's information to match the parent tree's information
 			newSubTree.set({
 				"plot": parseInt($(".plot-number").text()),
 				"site": $(".site-name").text(),
 				"tree_id": this.model.get("tree_id"),
-				"sub_tree_id": subTreeID,
+				"sub_tree_id": -1,
 				"species": this.model.get("species"),
 				"angle": this.model.get("angle"),
 				"distance": this.model.get("distance"),
@@ -262,11 +319,17 @@ $(document).ready(function(){
 				"dead": false
 			});
 			
-			//console.log(newSubTree);
+			
 			//save newSubTree to server
-			newSubTree.save();
-			//redirect to page where user can add entries for the newSubTree
-			app_router.navigate(document.location.hash + "/treeid/" + newSubTree.get("tree_id") + "/subtreeid/" + subTreeID, {trigger: true});			
+			result = newSubTree.save();
+			if (result !== false) {
+				result.done(function(data) {
+					//redirect to page where user can add entries for the newSubTree
+					app_router.navigate(document.location.hash + "/treeid/" + newSubTree.get("tree_id") + "/subtreeid/" + newSubTree.get("sub_tree_id"), {trigger: true});
+				});
+			}
+			
+						
 		}, 
 		
 		deleteRow: function() {
@@ -338,6 +401,7 @@ $(document).ready(function(){
 			thisTree.datesDesc = _.keys(thisTree.diameter).sort().reverse();
 			this.$el.html(_.template(this.template, {tree: thisTree}));
 			this.postRender();
+			
 		},
 		postRender: function(){
 			//add any methods/functions that need to be call after redendering the Tree edit view
@@ -653,6 +717,22 @@ $(document).ready(function(){
 			response.full_tree_id = response.tree_id + (response.sub_tree_id * .1);
 			return response;
 		},
+		save: function(attrs, options) {
+			var result = Backbone.Model.prototype.save.call(this, attrs, options);
+			
+			treeModel = this;
+			result.done(function(data) {
+				
+				treeModel.set(data);
+				
+			});
+			
+			return result;
+		},
+		destroy: function() {
+			this.set('delete', true);
+			return this.save();
+		},
 		validate: function(attrs, options){
 			//this is where we validate the model's data
 			var isInt = [];
@@ -660,8 +740,8 @@ $(document).ready(function(){
 
 			//console.log("");
 			//console.log("attrs");
-			console.log(attrs);
-			console.log(options);
+			//console.log(attrs);
+			//console.log(options);
 		},
 
 		newSubTreeRowViewInitialize: function() {
@@ -764,11 +844,6 @@ $(document).ready(function(){
 				}
 			});
 			
-			console.log("maxSubtrees");
-			console.log(maxSubtrees[5]);
-			//console.log(maxSubtrees.toString());
-			//console.log("maxSubtrees ends");
-			
 			// Sort the array IDs
 			ids.sort(function(a,b){return a - b;});
 			
@@ -777,7 +852,7 @@ $(document).ready(function(){
 			// populate tree IDs
 			for (var i = 0; i < ids.length; i++) {
 				var id = ids[i];
-				$(".dropdown-menu").append( 
+				$(".id-list").append( 
 					$("<li></li>").append( 
 						$("<a></a>").text(id).append(
 							$("<span></span>").text(id + (maxSubtrees[id] * .1) ).css("display","none")
@@ -787,7 +862,7 @@ $(document).ready(function(){
 				
 			}
 			
-			$(".dropdown-menu li a").click(function(){
+			$(".id-list li a").click(function(){
 							
 				console.log("What's this?");
 				console.log(treeCollection);
@@ -797,8 +872,6 @@ $(document).ready(function(){
 				
 				var parentTree = treeCollection.find(function(tree) {
 					
-					//console.log(tree.get("full_tree_id") + " == " + $(this).children("span").html());
-					console.log(aTag.children("span"));
 					return tree.get("full_tree_id") == parseFloat(aTag.children("span").text());
 				});
 				
@@ -875,20 +948,13 @@ $(document).ready(function(){
 			thisPlot.fetch();
 
 			$('.add-new-tree').click(function(){
-				/*
-				var plotNumber = $(".plot-number").text();
-				var siteName = $(".site-name").text();
-				console.log(plotNumber+ " "+siteName);
-				app_router.navigate('update/trees/site/'+siteName+'/plot/'+plotNumber+'/treeid/new',{trigger:true});
-				*/
-				console.log("New Tree Event Catched");
 				thisPlot.addTree();
 			});
 			
-			/*
-			$('add-new-sub-tree').click(function(){
-				thisPlot.addSubtree();
-			});*/
+			// try something with the new subtree thing
+			//$('.add-new-sub-tree').removeClass('dropdown-toggle');
+			//$('.id-list').css("display", "none");
+			// $('.add-new-sub-tree').parent().removeClass("btn-group");
 
 		});
 
@@ -958,6 +1024,7 @@ $(document).ready(function(){
 		});
     });
     */
+    
     // Start Backbone history a necessary step for bookmarkable URL's; enables user to click BACK without navigating to entirely different domain
     Backbone.history.start();
 
@@ -969,6 +1036,7 @@ $(document).ready(function(){
 function updateFunctions(){
 	$('.dbh').tooltip({trigger:'hover'});
 	$('.dropdown-toggle').dropdown();
+	
 }
 
 // End Bootstrap and template related jQuery
