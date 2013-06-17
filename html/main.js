@@ -112,9 +112,9 @@ $(document).ready(function(){
 			var treeUrl = "/treeid/" + this.model.get("tree_id") + ((subId) ? '/subtreeid/' + subId : '');
 			app_router.navigate(document.location.hash + treeUrl, {trigger: true});
 		}
-	
+
 	});
-	
+
 	// Adding new row for inserting a new tree
 	var newTreeRowView = Backbone.View.extend({
 		tagName: 'tr',
@@ -150,7 +150,7 @@ $(document).ready(function(){
 			$(".sub-tree-row-goaway").remove();
 			this.$el.addClass("tree-row-goaway");
 			this.options.targetEl.prepend(this.el);
-			
+
 			this.postRender();
 		},
 		postRender: function() {
@@ -176,7 +176,7 @@ $(document).ready(function(){
 			var plotNumber = $(".plot-number").text();
 			var siteName = $(".site-name").text();
 			var maxID = -1;
-			
+
 			$.getJSON(app.config.cgiDir + 'litterfall.py?site=' + siteName + '&plot=' + plotNumber + '&treeid=maxID', function(data) {
 				maxID = data;
 				var newTree = new Tree();
@@ -191,7 +191,7 @@ $(document).ready(function(){
 					'diameter': {},
 					'dead': false
 				});
-		
+
 				// save a new tree
 				newTree.save();
 				// catching error?
@@ -203,7 +203,7 @@ $(document).ready(function(){
 			this.$el.remove();
 		}
 	});
-	
+
 	// Adding new row for inserting a new SUBtree
 	var newSubTreeRowView = Backbone.View.extend({
 		tagName: 'tr',
@@ -233,12 +233,12 @@ $(document).ready(function(){
 			this.render();
 		},
 		render: function(){
-		
+
 			var thisTree = this.model.toJSON();
 			//console.log("What's thisTree?");
 			//console.log(thisTree);
 			this.$el.html(_.template(this.template, {tree: thisTree}));
-			
+
 			//delete all the other ones so user can't add multiple subtrees at once
 			$(".sub-tree-row-goaway").remove();
 			$(".tree-row-goaway").remove();
@@ -246,10 +246,10 @@ $(document).ready(function(){
 			//insert the new tree row to the table next to its fellow subtrees
 			$('#' + thisTree._id.$oid).after(this.el);
 			//$("html, body").animate({scrollTop: this.el.css("top")});
-			
+
 			//this.postRender();
 		},
-	
+
 		events: {
 			'click .btn-save-new-subtree': 'saveSubtree',
 			'click .btn-cancel-new-subtree': 'deleteRow'
@@ -279,14 +279,14 @@ $(document).ready(function(){
 				"diameter": {},
 				"dead": false
 			});
-			
+
 			//console.log(newSubTree);
 			//save newSubTree to server
 			newSubTree.save();
 			//redirect to page where user can add entries for the newSubTree
 			app_router.navigate(document.location.hash + "/treeid/" + newSubTree.get("tree_id") + "/subtreeid/" + subTreeID, {trigger: true});			
 		}, 
-		
+
 		deleteRow: function() {
 			this.$el.remove();
 		}
@@ -373,7 +373,7 @@ $(document).ready(function(){
 		populateSpecies: function(){
 			var treeSpecies = this.model.get('diameter');
 			//console.log(treeSpecies);
-			
+
 
 		},
 		events: {
@@ -441,19 +441,19 @@ $(document).ready(function(){
 			row_to_edit.find(" .edit_cell").show();
 			row_to_edit.find(".display_cell").hide();
 			row_to_edit.find(".edit_cell.date_select :input").datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date" , maxDate: 0, changeYear: true , changeMonth: true , constrainInput: true });
-					
+
 			// get all observers existing in database, feed them into an autocomplete for the observers field
 			var allDistinctObservers = this.populateObserversArray(allDistinctObservers);
 			row_to_edit.find(".edit_cell.observers :input").autocomplete({source: allDistinctObservers});			
 
 		},
-		
+
 		cancelEditObservation: function() {
 			// user wants to cancel any edits made, or is canceling after adding a new entry
 			this.model.fetch(); // retrieves recent data
 			this.render();      // NOTE: this is sort of a hack to exit the editing view
 		},
-		
+
 		saveObservation: function(event) {
 			// User added or edited an observation.  Save it to the server.	
 			// Get the row that is being edited
@@ -467,7 +467,7 @@ $(document).ready(function(){
 				newObservers[i] = newObservers[i].trim(" ");
 			}
 			var newNotes = row_to_save.find(".notes :input").val();
-			
+
 			/* final validation before saving to database */
 			if (! (this.validateDate(row_to_save) && this.validateObservers(row_to_save) && this.validateDiameter(row_to_save))){
 				console.log("didn't save");
@@ -513,10 +513,10 @@ $(document).ready(function(){
 		},
 
 		validateField: function(event){
-			
+
 			var fieldToValidate = event.currentTarget.className;
 			var currentRow = $("#tree_observations > tbody > tr .edit_cell :visible").parents("tr");
-			
+
 			/* if date field lost focus */
 			if (fieldToValidate == "edit_cell date_select"){				
 				this.validateDate(currentRow);
@@ -530,14 +530,14 @@ $(document).ready(function(){
 				// field left was comments, which don't need to be validated (and should be allowed to be empty!)
 				return;
 			}
-			
+
 		},
-		
+
 		validateDate: function(currentRow) {
-			
+
 			/* get date to validate */
 			var dateEntered = currentRow.find(".formatted_date").val();
-			
+
 			/* make sure date isn't in future */
 			var today = new Date();
 		    var todayFormatted = today.getFullYear().toString() + 
@@ -551,7 +551,7 @@ $(document).ready(function(){
 				$(currentRow.find('.edit-existing')).trigger('click');
 				return false;
 			} 
-			
+
 			/* make sure date isn't already added */		
 			// get all dates listed in model for diam entries
 			var existingDiamsObject = this.model.attributes.diameter;
@@ -576,15 +576,15 @@ $(document).ready(function(){
 			console.log("date validation passed");
 			return true;
 		},
-		
+
 		validateObservers: function(currentRow) {
-			
+
 			// get observers entry and format
 			var obsEntered = currentRow.find(".observers :input").val().split(",");
 			for (var i=0; i<obsEntered.length; i++){
 				obsEntered[i] = obsEntered[i].trim(" ");
 			}	
-			
+
 			// make sure an observer was entered
 			if (obsEntered[0] === "") {
 				console.log("empty list");
@@ -598,14 +598,14 @@ $(document).ready(function(){
 				console.log("observers validation passed");
 				return true;
 			}
-			
+
 		},
-		
+
 		validateDiameter: function(currentRow) {
-			
+
 			// get diameter entry
 			var diamEntered = parseFloat(currentRow.find(".diameter :input").val());
-			
+
 			// make sure the diameter is in correct format (can be parsed as float)
 			if (isNaN(diamEntered)) {
 				console.log("returned NaN");
@@ -620,7 +620,7 @@ $(document).ready(function(){
 				return true;
 			}
 		},
-		
+
 		populateObserversArray: function(observersArray) {
 			//finds all observers that have been previously entered into the database
 			var curObservers;
@@ -750,7 +750,7 @@ $(document).ready(function(){
 				model: this
 			});
 		}
-		
+
 	});
 
 	//Declare the plot collection, contains tree objects
@@ -770,12 +770,47 @@ $(document).ready(function(){
   			}, this);
   			// populate the tree
   			this.populateTreeIDs();
+<<<<<<< HEAD
+  			/*
+  			$("#btnExport").click(function(e) {
+				$("#plot-table").val( $("<div>").append( $("#datatodisplay").eq(0).clone() ).html() );
+    		});*/
+    		this.addActionsToTable();
+    	},
+		addActionsToTable: function(){
+		/*
+			var SaveToDisk = 
+			"<div class='TableToolBar'>;" +
+			"<form action='/reports/SaveData/SaveToExcel.php' method='post' target='_blank' id='save-form'" +
+			"onsubmit='$(\".DataToDisplay\", this ).val( $("<div>").append( $(\"#plot-table\").eq(0).clone() ).html() )'/>;" +
+			"<input type='hidden' id='datatodisplay' name='DataToDisplay' class='DataToDisplay'>" +
+			"<input type='hidden' id='saveto' name='SaveTo' val=''>" +
+			"</form>" +
+			"<input  class='button btn-mini btn-success export' type='button' value='Export to Excel' id=excel-save'" +
+			" onclick='$(\"input:checked\").attr(\"checked\",true); $(\"#saveto\").val(\"Excel\"); $(\"#save-form\").submit();' />" +
+			"<input  class='button btn-mini btn-success export' type='button' value='Export to HTML' id='Save to HTML'" +
+			" onclick='$(\"input:checked\").attr(\"checked\",true); $(\"#saveto\").val(\"HTML\"); $(\"#save-form\").submit();' />" +
+			"<input  class='button btn-mini btn-success export' type='button' value='Export to PDF' title='Save to PDF'" +
+			" onclick='$(\"input:checked\").attr(\"checked\",true); $(\"#saveto\").val(\"PDF\"); $(\"#save-form\").submit();' />" +
+			"</div>" ;*/
+		//	$("#plot-table").prepend('.TableToolBar');
+			$(".export").click(function() {
+				$("input:checked").attr("checked",true); 
+				$("#saveto").val("Excel"); 
+				$("#save-form").submit();
+			});
+			$("#save-form").submit(function() {
+				$("#datatodisplay").val($("<div>").append($("#plot-table").eq(0).clone()).html());
+			});
+		},
+		
+=======
   			// add tablesorter jquery plugin (no sorting for first column)
   			$("#plot-table").tablesorter({headers: { 0: { sorter: false}}}); 
   		},
+>>>>>>> 28fb9071cdaa50ad06df4448783abbb5e514d79d
   		addTree: function(){
-  			this.newTreeRowViewInitialize();
-  			
+  			this.newTreeRowViewInitialize();	
   		},
   		
   		addSubtree: function(){
@@ -792,11 +827,11 @@ $(document).ready(function(){
 				});
 
 			});*/
-			
+
 			// Get all the ids
 			var ids = [];
 			var maxSubtrees = [];
-			
+
 			this.each(function(tree){
 				// Check if tree_id is already in the array
 				/*
@@ -816,17 +851,23 @@ $(document).ready(function(){
 					ids.push(treeid);
 				}
 			});
+<<<<<<< HEAD
+
+			console.log("maxSubtrees");
+			console.log(maxSubtrees[5]);
+=======
 			
 			//console.log("maxSubtrees");
 			//console.log(maxSubtrees[5]);
+>>>>>>> 28fb9071cdaa50ad06df4448783abbb5e514d79d
 			//console.log(maxSubtrees.toString());
 			//console.log("maxSubtrees ends");
-			
+
 			// Sort the array IDs
 			ids.sort(function(a,b){return a - b;});
-			
+
 			var treeCollection = this;
-			
+
 			// populate tree IDs
 			for (var i = 0; i < ids.length; i++) {
 				var id = ids[i];
@@ -837,39 +878,39 @@ $(document).ready(function(){
 						)
 					)
 				);
-				
+
 			}
-			
+
 			$(".dropdown-menu li a").click(function(){
-							
+
 				console.log("What's this?");
 				console.log(treeCollection);
 				console.log(maxSubtrees);
-				
+
 				var aTag = $(this);
-				
+
 				var parentTree = treeCollection.find(function(tree) {
-					
+
 					//console.log(tree.get("full_tree_id") + " == " + $(this).children("span").html());
 					console.log(aTag.children("span"));
 					return tree.get("full_tree_id") == parseFloat(aTag.children("span").text());
 				});
-				
-				
+
+
 				console.log("parentTree: ");
 				console.log(parentTree);
-				
+
 				//console.log(parentTrees[parentTrees.length - 1]);
 				parentTree.newSubTreeRowViewInitialize();
 			});
-			
-			
-			
-			
-			
-			
+
+
+
+
+
+
 		},
-		
+
 		newTreeRowViewInitialize: function(){
   			console.log("newTreeRowViewInitialize");
 			var newTreeRow = new newTreeRowView({
@@ -949,7 +990,7 @@ $(document).ready(function(){
 				console.log("New Tree Event Catched");
 				thisPlot.addTree();
 			});
-			
+
 			/*
 			$('add-new-sub-tree').click(function(){
 				thisPlot.addSubtree();

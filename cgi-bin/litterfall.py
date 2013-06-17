@@ -17,7 +17,7 @@ sites_predef = ["beech","floodplains","Knoll","norway","Oaks","swamp","TBNO","TO
 
 def getdata(obs, site, plot, treeid, subtreeid):
 	if site == 'all':
-		# then return an array of distince sites
+		# then return an array of distinct sites
 		data = obs.find({'collection_type':'tree'}).distinct('site')
 		for j in range(0,len(data)):
 			data[j] = data[j].encode('ascii','ignore')
@@ -49,7 +49,7 @@ def getdata(obs, site, plot, treeid, subtreeid):
 		if treeid != None:
 			# if there is a tree id, then append
 			findQuery['tree_id'] = int(treeid)
-			if subtreeid != None:
+			if subtreeid != None and subtreeid != 'all':
 				# if there is a sub tree id, then append
 				findQuery['sub_tree_id'] = int(subtreeid)			
 		# get the data 
@@ -60,7 +60,7 @@ def getdata(obs, site, plot, treeid, subtreeid):
 	# if only a treeid is given and
 	# that particular tree has subtrees
 	# then return nothing
-	if  treeid != None and n > 1:
+	if  treeid != None and n > 1 and subtreeid != 'all':
 		json_data = None
 	elif n == -1:
 		#return maxID
@@ -79,10 +79,10 @@ def getdata(obs, site, plot, treeid, subtreeid):
 		json_data = [0]*n
 		for i in range(0,n):
 			json_data[i] = data[i]
-	
+
 	ser_data = json.dumps(json_data, default=json_util.default, separators=(',', ':'))
 	print ser_data
-
+	
 def checknum(tocheck, dtype, high, low):
 	if tocheck > high or tocheck < low:
 		return {'flag': False, 'msg': 'check boundary!'}
@@ -103,7 +103,7 @@ def checkstring(tocheck, dtype, value):
 def checkdict(diameter_dict, dtype):
 	# check type first
 	if not isinstance(diameter_dict, dtype):
-		return {'flag': False, 'msg': 'wrong data type!'}	
+		return {'flag': False, 'msg': 'wrong data type!'}
 	
 	# check all the dates
 	times = diameter_dict.keys()
