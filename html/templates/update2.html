@@ -10,10 +10,6 @@
     <!-- Le styles -->
     <link href="css/bootstrap.css" rel="stylesheet">
     <link href="css/tables.css" rel="stylesheet">
-    
-    <!-- Jquery plugin for table sorting -->
-    <!--<script type="text/javascript" src="/path/to/jquery-latest.js"></script> 
-	<script type="text/javascript" src="/lib/jquery.tablesorter.js"></script> -->
 
     <style>
       body {
@@ -36,28 +32,26 @@
   </head>
 
   <body>
-     <div class="container">
-      <h1>Updating Data Records <small><%= site %>, Plot <%= plot %></small></h1>
-
-			</ul>
-		</div>
-		<input type="hidden" id="CSV"/>
-		<input type="button" class="btn btn-mini btn-primary export" value="Export Data" style="float: right"/><a href="#" class="dbh" rel="tooltip" data-placement="top" data-original-title="Once downloaded, save as a .csv file and open with MS Excel" style='float: right'><small>info</small></a>
-		</div>
-		<div class="button-row">
-		<button class="add-new-tree btn btn-mini btn-success pull-left" type="button">+ New Tree</button>
-			<div class="btn-group">
-				
-				<button class="add-new-sub-tree btn btn-mini btn-success dropdown-toggle" type="button">+ New Sub-Tree</button>
-				  <ul class="dropdown-menu id-list" role="menu" aria-labelledby="dLabel">
-					<li class="disabled"><a>Choose Parent Tree...</a></li>
+    <div class="container">
+     	<div class="site-name"><%= site %></div><div class="plot-number"><%= plot %></div>
+      	<h1>Updating Data Records <small><%= site %>, Plot <%= plot %></small></h1>
 	
+		<div class="button-row">
+			<button class="add-new-tree btn btn-mini btn-success pull-left" type="button">+ New Tree</button>
+			<div class="btn-group">
+	
+				<button class="add-new-sub-tree btn btn-mini btn-success dropdown-toggle" type="button">+ New Sub-Tree</button>
+					<ul class="dropdown-menu id-list" role="menu" aria-labelledby="dLabel">
+						<li class="disabled"><a>Choose Parent Tree...</a></li>
 					</ul>
-				
+	
 			</div>
+			<span style="display:hidden" id="CSV"></span>
+			<input type="button" class="btn btn-mini btn-primary export pull-right" value="Export Data"/>
+			<a href="#" class="dbh pull-right" rel="tooltip" data-placement="top" data-original-title="Once downloaded, save as a .csv file and open with MS Excel" style='float: right'><small>info</small></a>
 			
 		</div>
-		<div class="site-name"><%= site %></div><div class="plot-number"><%= plot %></div>
+		
 
  	<table class="table-striped tablesorter" id="plot-table">
 	<thead>
@@ -96,7 +90,8 @@
 
 			</ul>
 		</div>
-		<input type="button" class="btn btn-mini btn-primary export" value="Export Data" style="float: right"/><a href="#" class="dbh" rel="tooltip" data-placement="top" data-original-title="Once downloaded, save as a .csv file and open with MS Excel" style='float: right'><small>info</small></a>
+		<input type="button" class="btn btn-mini btn-primary export pull-right" value="Export Data">
+		<a href="#" class="dbh pull-right" rel="tooltip" data-placement="top" data-original-title="Once downloaded, save as a .csv file and open with MS Excel"><small>info</small></a>
 	</div>
     </div> <!-- /container -->
 
