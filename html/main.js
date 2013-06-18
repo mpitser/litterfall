@@ -98,10 +98,11 @@ $(document).ready(function(){
 			//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
 			this.$el.attr('id', thisTree._id.$oid).html(_.template(this.template, {tree: thisTree}));
 			this.$el.addClass("tree-cluster-" + thisTree.tree_id);
+			this.$el.children().eq(2).css("font-style","italic");
 			
 			this.options.targetEl.append(this.el);								   //appends the tree's row element to table
 			
-						// based on whether user is in analyze data mode or enter data mode, change button text and class tags
+			// based on whether user is in analyze data mode or enter data mode, change button text and class tags
 			if (document.location.hash.search("update") === -1) {
 				$(".btn-tree").text("View more");
 				$(".btn-tree").addClass("btn-analyze");
@@ -225,7 +226,7 @@ $(document).ready(function(){
 		populateSpecies: function(){
 			// creates list of all distinct species to fill dropdown menu
 			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allSpecies', function(data) {
-			console.log(data);
+			
 				$.each(data, function(index, value) {
 					$("#plot-table .species select").append($("<option></option>").attr("value",value).text(value));
 				});
@@ -241,37 +242,14 @@ $(document).ready(function(){
 			//save tree to database
 			var plotNumber = $(".plot-number").text();
 			var siteName = $(".site-name").text();
-			/*
-			var maxID = -1;
-
-			$.getJSON(app.config.cgiDir + 'litterfall.py?site=' + siteName + '&plot=' + plotNumber + '&treeid=maxID', function(data) {
-				maxID = data;
-				var newTree = new Tree();
-				newTree.url = app.config.cgiDir + 'litterfall.py';
-				newTree.set({
-					"plot": parseInt(plotNumber),
-					"site": siteName,
-					"tree_id": maxID+1,
-					'species': $("#plot-table .species select").val(),
-					'angle': parseInt($("#plot-table .angle input").val(), 10),
-					'distance': parseFloat($("#plot-table .distance input").val(), 10),
-					'diameter': {},
-					'dead': false
-				});
-
-				// save a new tree
-				newTree.save();
-				// catching error?
-				//redirects to treeEditView page for the new tree
-				app_router.navigate(document.location.hash + "/treeid/" + (maxID+1), {trigger: true});
-			});*/
 			
+			// create a new Tree object and set the data
 			var newTree = new Tree();
 			newTree.url = app.config.cgiDir + 'litterfall.py';
 			newTree.set({
 				"plot": parseInt(plotNumber),
 				"site": siteName,
-				"tree_id": -1,
+				"tree_id": -1, // -1 means it's new
 				'species': $("#plot-table .species select").val(),
 				'angle': parseInt($("#plot-table .angle input").val(), 10),
 				'distance': parseFloat($("#plot-table .distance input").val(), 10),
@@ -279,19 +257,19 @@ $(document).ready(function(){
 				'dead': false
 			});
 			
-			var result = newTree.save();
-			if (result != false) {
-
-				result.done(function(data) {
-					//newTree.set("tree_id", data.tree_id);
+			// save the new tree
+			var result = newTree.save({}, {
+				'success': function(data) {
 					app_router.navigate(document.location.hash + "/treeid/" + newTree.get("tree_id"), {trigger: true});
-				});
-				
-			}
+				}
+			});
 			
 		},
 		deleteRow: function() {
-			this.$el.remove();
+			
+			this.$el.fadeOut("slow", function() {
+				$(this).remove();
+			});
 		}
 	});
 
@@ -335,11 +313,8 @@ $(document).ready(function(){
 			$(".tree-row-goaway").remove();
 			this.$el.addClass("sub-tree-row-goaway");
 			//insert the new tree row to the table next to its fellow subtrees
-			$('#' + thisTree._id.$oid).after(this.el);
-			//$("html, body").animate({scrollTop: this.el.css("top")});
+			$('.tree-cluster-'+thisTree.tree_id).eq(-1).after(this.el);
 
-			//this.postRender();
-			
 			return this;
 		},
 
@@ -349,19 +324,9 @@ $(document).ready(function(){
 		},
 		saveSubtree: function() {
 			var newSubTree = new Tree();
-			/*
-			//calculates sub_tree_id for the newSubTree based on the model
-			// this.model is the tree with the highest sub_tree_id for the given tree_id
-			subTreeID = this.model.get("sub_tree_id") + 1;
-			// change parent tree to reflect that it is now also a subtree
-			if (subTreeID == 1) {
-				this.model.set("sub_tree_id", 1);
-				this.model.save();
-				subTreeID = 2;
-			}
-			*/
 			
 			newSubTree.url = app.config.cgiDir + 'litterfall.py';
+			
 			// sets newSubTree's information to match the parent tree's information
 			newSubTree.set({
 				"plot": parseInt($(".plot-number").text()),
@@ -375,16 +340,10 @@ $(document).ready(function(){
 				"dead": false
 			});
 
-			//console.log(newSubTree);
-
-			//save newSubTree to server
-			result = newSubTree.save();
-			if (result !== false) {
-				result.done(function(data) {
-					//redirect to page where user can add entries for the newSubTree
-					app_router.navigate(document.location.hash + "/treeid/" + newSubTree.get("tree_id") + "/subtreeid/" + newSubTree.get("sub_tree_id"), {trigger: true});
-				});
-			}
+			result = newSubTree.save({}, {success: function() {
+				//redirect to page where user can add entries for the newSubTree
+				app_router.navigate(document.location.hash + "/treeid/" + newSubTree.get("tree_id") + "/subtreeid/" + newSubTree.get("sub_tree_id"), {trigger: true});
+			}});
 			
 						
 		}, 
@@ -473,9 +432,18 @@ $(document).ready(function(){
 			this.populateSpecies();
 		},
 		populateSpecies: function(){
-			var treeSpecies = this.model.get('diameter');
+			var treeSpecies = this.model.get('species');
 			//console.log(treeSpecies);
-
+			//??
+			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allSpecies', function(data) {
+				$.each(data, function(index, value) {
+					if (value == treeSpecies) {
+						$(".species select").append($("<option></option>").attr("value",value).attr("selected", "selected").text(value));
+					} else {
+						$(".species select").append($("<option></option>").attr("value",value).text(value))
+					}
+				});
+			});
 
 		},
 		events: {
@@ -830,7 +798,9 @@ $(document).ready(function(){
 			response.full_tree_id = response.tree_id + (response.sub_tree_id * .1);
 			return response;
 		},
+		// overriding the save method, so that when the model saves it updates its inside to match what the server sends back
 		save: function(attrs, options) {
+			
 			var result = Backbone.Model.prototype.save.call(this, attrs, options);
 			
 			treeModel = this;
@@ -842,6 +812,8 @@ $(document).ready(function(){
 			
 			return result;
 		},
+		// ** Normally, it would not have to go through save, but somehow destroy doesn't work
+		// I think there is something wrong with the DELETE request method
 		destroy: function() {
 			this.set('delete', true);
 			return this.save();
@@ -850,16 +822,10 @@ $(document).ready(function(){
 			//this is where we validate the model's data
 			var isInt = [];
 			var isFloat = [];
-
-			//console.log("");
-			//console.log("attrs");
-			//console.log(attrs);
-			//console.log(options);
 		},
 
 		newSubTreeRowViewInitialize: function() {
 			var subTreeRow = new newSubTreeRowView({
-				//targetEl: $('#plot-table'),
 				model: this
 			});
 		}
@@ -928,37 +894,15 @@ $(document).ready(function(){
   			//add subtree
   		},
   		populateTreeIDs: function(){
-  			/*
-			var plotNumber = $(".plot-number").text();
-			var siteName = $(".site-name").text();
-			$.getJSON(app.config.cgiDir + 'litterfall.py?site=' + siteName + '&plot=' + plotNumber + '&treeid=allIDs', function(data) {
-				$.each(data, function(index, value) {
-					$("#tree-info .species select").append($("<option></option>").attr("value",value).text(value));
-					$("#tree-info .species option[value='" + treeSpecies + "']").attr('selected','selected');
-				});
-
-			});*/
 
 			// Get all the ids
 			var ids = [];
-			var maxSubtrees = [];
-
+			
+			// Populate the ids array
 			this.each(function(tree){
-				// Check if tree_id is already in the array
-				/*
-				if (numSubtrees.length < tree.get("tree_id") || tree.get("subtree_id") > numSubtrees[tree.get("tree_id")]) {
-					numSubtrees[tree.get("tree_id")] = tree.get("subtree_id");
-				}*/
 				var treeid = tree.get("tree_id");
-				var subtreeid = tree.get("sub_tree_id");
-				if (maxSubtrees[treeid] === undefined) {
-					maxSubtrees[treeid] = subtreeid;
-				} else {
-					if (maxSubtrees[treeid] < subtreeid) {
-						maxSubtrees[treeid] = subtreeid;
-					}
-				}
-				if (ids.length == 0 || ids[ids.length - 1] != treeid) {
+				// Avoiding duplicates
+				if (ids.length == 0 || ids.indexOf(treeid) < 0) {
 					ids.push(treeid);
 				}
 			});
@@ -973,32 +917,23 @@ $(document).ready(function(){
 				var id = ids[i];
 				$(".id-list").append( 
 					$("<li></li>").append( 
-						$("<a></a>").text(id).append(
-							$("<span></span>").text(id + (maxSubtrees[id] * .1) ).css("display","none")
-						)
+						$("<a></a>").text(id)
 					)
 				);
 
 			}
 			
 			$(".id-list li a").click(function(){
-							
-				console.log("What's this?");
-				console.log(treeCollection);
-				console.log(maxSubtrees);
 
 				var aTag = $(this);
 
 				var parentTree = treeCollection.find(function(tree) {
-					return tree.get("full_tree_id") == parseFloat(aTag.children("span").text());
+					return tree.get("tree_id") == parseInt(aTag.text());
 				});
-
-
-				console.log("parentTree: ");
-				console.log(parentTree);
 
 				//console.log(parentTrees[parentTrees.length - 1]);
 				parentTree.newSubTreeRowViewInitialize();
+				
 			});
 
 
@@ -1076,11 +1011,12 @@ $(document).ready(function(){
 			//need to use site and plot variable to build url to python script
 			thisPlot.url = app.config.cgiDir + 'litterfall.py?site=' + site + '&plot=' + plot;
 			thisPlot.fetch();
-
+			
+			// adding new tree
 			$('.add-new-tree').click(function(){
 				thisPlot.addTree();
 			});
-
+			
 		});
 
     });
