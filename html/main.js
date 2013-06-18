@@ -880,7 +880,8 @@ $(document).ready(function(){
   				$.getJSON(app.config.cgiDir + 'litterfall.py?site=' + siteName + "&plot=" + plotNumber, function(data) {
 					$.each(data, function(index, value) {
 						// format Comma Separated Value string with data from each tree
-						CSV = CSV + "\n" + (parseInt(value["tree_id"]) + parseInt(value["sub_tree_id"])*.1) + "," + value["species"] + "," + value["angle"] + "," + value["distance"];
+						$("#CSV").append("<br>");
+						CSV = CSV + "\r\n" + (parseInt(value["tree_id"]) + parseInt(value["sub_tree_id"])*.1) + "," + value["species"] + "," + value["angle"] + "," + value["distance"];
 						$.each(value["diameter"], function(date, obs) {
 							var parsedDate = $.datepicker.parseDate('yymmdd', date)
 							var formattedDate = $.datepicker.formatDate('m/d/yy', parsedDate)
@@ -893,11 +894,11 @@ $(document).ready(function(){
 					});
 					// adds formatted data to a hidden input on the page
 					$("#CSV").append(CSV);
-    				j = 1;
+					j = 1;
 				});
 				// ensures information has loaded before opening the CSV file
 				if (j > 0) {
-					window.open('data:application/vnd.ms-excel,' + $('#CSV').text());    				
+					window.open('data:text/csv;charset=utf-8,' + encodeURIComponent($('#CSV').text()));    				
 					e.preventDefault();
 
 				}
