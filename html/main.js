@@ -314,6 +314,10 @@ $(document).ready(function(){
 			this.$el.addClass("sub-tree-row-goaway");
 			//insert the new tree row to the table next to its fellow subtrees
 			$('.tree-cluster-'+thisTree.tree_id).eq(-1).after(this.el);
+			
+			$('html, body').animate({
+				scrollTop: $(".sub-tree-row-goaway").offset().top-100
+			}, 2000);
 
 			return this;
 		},

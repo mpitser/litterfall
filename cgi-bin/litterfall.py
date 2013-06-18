@@ -3,6 +3,7 @@ from datetime import datetime
 from pymongo import MongoClient
 from bson import json_util
 from bson.objectid import ObjectId
+from types import *
 import json, cgi, os, ConfigParser, unicodedata, pymongo
 # for debug purpose
 import cgitb; cgitb.enable()
@@ -91,7 +92,7 @@ class Tree:
 		if not self.format():
 			raise RuntimeError("Illegal data")
 		
-		# ---- dealing with possibly new tree ----
+		# ---- dealing with a possible new tree ----
 		
 		# do we need a new tree_id?
 		if self.tree['tree_id'] == -1:
@@ -215,7 +216,6 @@ class Tree:
 		
 		else:
 			
-			
 			allSubTrees = sorted(allSubTrees, key = lambda SubTree: SubTree['sub_tree_id'])
 			
 			i = 0
@@ -249,7 +249,8 @@ def getdata(obs, site, plot, treeid, subtreeid):
 		# from each diam field, get all observers (within date range eventually)
 		data = obs.find({'collection_type':'tree'}, {'fields':'diameter'}).distinct('diameter')
 		data.sort()
-		n = 0; # n is not important, just helps up in decigin which data to assign to json_data
+		n = 0 # n is not important, just helps up in decigin which data to assign to json_data
+		
 	elif treeid == 'maxID':
 		# Return max existing tree id at site and plot
 		data = obs.find({'collection_type':'tree', 'plot': int(plot), 'site': site}, {'fields':'tree_id'}).distinct('tree_id')
@@ -428,16 +429,23 @@ def main():
 		print 'Content-Type: application/json\n'
 		query = cgi.FieldStorage()
 		
-		oid = query.getvalue('oid')
-		plot = query.getvalue('plot')
-		site = query.getvalue('site')
-		treeid = query.getvalue('treeid')
-		subtreeid = query.getvalue('subtreeid')
+		action = query.getvalue('action')
 		
-		if oid != None:
+		if action == 'search':
+			oid = query.getvalue('oid')
 			getdatafromoid(obs, oid)
 		else:
-			getdata(obs, site, plot, treeid, subtreeid)	
+			oid = query.getvalue('oid')
+			plot = query.getvalue('plot')
+			site = query.getvalue('site')
+			treeid = query.getvalue('treeid')
+			subtreeid = query.getvalue('subtreeid')
+			
+			if oid != None:
+				getdatafromoid(obs, oid)
+			else:
+				getdata(obs, site, plot, treeid, subtreeid)
+			
 	elif method == 'POST' or method == 'PUT':
 		form = cgi.FieldStorage()
 		data = json.loads(form.file.read(), object_hook=json_util.object_hook)	
