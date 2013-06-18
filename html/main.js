@@ -864,11 +864,11 @@ $(document).ready(function(){
   			}, this);
   			// populate the treeIDs dropdown menu for adding new subtrees
   			this.populateTreeIDs();
-<<<<<<< HEAD
   
     		
-    		// add tablesorter jquery plugin (no sorting for first column)
+    			// add tablesorter jquery plugin (no sorting for first column)
   			$("#plot-table").tablesorter({headers: { 0: { sorter: false}}}); 
+  			
   			// set up column headers for CSV
   			var CSV = "Full Tree ID,Species,Angle,Distance"
   			for(var i = 1; i <= maxDiam; i++) {
@@ -901,49 +901,9 @@ $(document).ready(function(){
 					e.preventDefault();
 
 				}
-=======
-  			// add tablesorter jquery plugin (no sorting for first column)
-  			$("#plot-table").tablesorter({headers: { 0: { sorter: false}}}); 
-  		
-  			/*
-  			$("#btnExport").click(function(e) {
-				$("#plot-table").val( $("<div>").append( $("#datatodisplay").eq(0).clone() ).html() );
-    		});*/
-    			this.addActionsToTable();
+  
     		},
-		addActionsToTable: function(){
-		/*
-			var SaveToDisk = 
-			"<div class='TableToolBar'>;" +
-			"<form action='/reports/SaveData/SaveToExcel.php' method='post' target='_blank' id='save-form'" +
-			"onsubmit='$(\".DataToDisplay\", this ).val( $("<div>").append( $(\"#plot-table\").eq(0).clone() ).html() )'/>;" +
-			"<input type='hidden' id='datatodisplay' name='DataToDisplay' class='DataToDisplay'>" +
-			"<input type='hidden' id='saveto' name='SaveTo' val=''>" +
-			"</form>" +
-			"<input  class='button btn-mini btn-success export' type='button' value='Export to Excel' id=excel-save'" +
-			" onclick='$(\"input:checked\").attr(\"checked\",true); $(\"#saveto\").val(\"Excel\"); $(\"#save-form\").submit();' />" +
-			"<input  class='button btn-mini btn-success export' type='button' value='Export to HTML' id='Save to HTML'" +
-			" onclick='$(\"input:checked\").attr(\"checked\",true); $(\"#saveto\").val(\"HTML\"); $(\"#save-form\").submit();' />" +
-			"<input  class='button btn-mini btn-success export' type='button' value='Export to PDF' title='Save to PDF'" +
-			" onclick='$(\"input:checked\").attr(\"checked\",true); $(\"#saveto\").val(\"PDF\"); $(\"#save-form\").submit();' />" +
-			"</div>" ;*/
-		//	$("#plot-table").prepend('.TableToolBar');
-			$(".export").click(function() {
-				$("input:checked").attr("checked",true); 
-				$("#saveto").val("Excel"); 
-				$("#save-form").submit();
-			});
-			$("#save-form").submit(function() {
-				$("#datatodisplay").val($("<div>").append($("#plot-table").eq(0).clone()).html());
->>>>>>> dfdd72812941c64d0cb376a2a7ce4a8d8728212a
-			});
 
-		},
-		
-<<<<<<< HEAD
-=======
-  			
->>>>>>> dfdd72812941c64d0cb376a2a7ce4a8d8728212a
   		addTree: function(){
   			this.newTreeRowViewInitialize();	
   		},
