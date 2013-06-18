@@ -760,54 +760,70 @@ $(document).ready(function(){
   			 //this.on('change', this.renderTrees);
   		},
   		renderTrees: function(){
+  			var siteName = "";
+  			var plotNumber = 0;
+  			var maxDiam = 0;
   			this.each(function(tree){
   				tree.plotViewInitialize();
+  				siteName = tree.get("site");
+  				plotNumber = tree.get("plot");
+  				var allObvs = tree.get("diameter");
+  				var numObvs = 0;
+  				// determine the maximum number of observations for any tree in this plot
+  				// to allocate enough columns in the CSV file
+  				$.each(allObvs, function(index, value) {
+  					numObvs++;
+  				});
+  				if (numObvs > maxDiam) {
+  					maxDiam = numObvs;
+  				}
   			}, this);
-  			// populate the tree
+  			// populate the treeIDs dropdown menu for adding new subtrees
   			this.populateTreeIDs();
-  			/*
-  			$("#btnExport").click(function(e) {
-				$("#plot-table").val( $("<div>").append( $("#datatodisplay").eq(0).clone() ).html() );
-    		});*/
-    		this.addActionsToTable();
-    	},
-		addActionsToTable: function(){
-		/*
-			var SaveToDisk = 
-			"<div class='TableToolBar'>;" +
-			"<form action='/reports/SaveData/SaveToExcel.php' method='post' target='_blank' id='save-form'" +
-			"onsubmit='$(\".DataToDisplay\", this ).val( $("<div>").append( $(\"#plot-table\").eq(0).clone() ).html() )'/>;" +
-			"<input type='hidden' id='datatodisplay' name='DataToDisplay' class='DataToDisplay'>" +
-			"<input type='hidden' id='saveto' name='SaveTo' val=''>" +
-			"</form>" +
-			"<input  class='button btn-mini btn-success export' type='button' value='Export to Excel' id=excel-save'" +
-			" onclick='$(\"input:checked\").attr(\"checked\",true); $(\"#saveto\").val(\"Excel\"); $(\"#save-form\").submit();' />" +
-			"<input  class='button btn-mini btn-success export' type='button' value='Export to HTML' id='Save to HTML'" +
-			" onclick='$(\"input:checked\").attr(\"checked\",true); $(\"#saveto\").val(\"HTML\"); $(\"#save-form\").submit();' />" +
-			"<input  class='button btn-mini btn-success export' type='button' value='Export to PDF' title='Save to PDF'" +
-			" onclick='$(\"input:checked\").attr(\"checked\",true); $(\"#saveto\").val(\"PDF\"); $(\"#save-form\").submit();' />" +
-			"</div>" ;*/
-		//	$("#plot-table").prepend('.TableToolBar');
-			$(".export").click(function() {
-				$("input:checked").attr("checked",true); 
-				$("#saveto").val("Excel"); 
-				$("#save-form").submit();
+  
+    		
+    		// add tablesorter jquery plugin (no sorting for first column)
+  			$("#plot-table").tablesorter({headers: { 0: { sorter: false}}}); 
+  			// set up column headers for CSV
+  			var CSV = "Full Tree ID,Species,Angle,Distance"
+  			for(var i = 1; i <= maxDiam; i++) {
+  				CSV += "," + "Obs Date " + i + ",Diameter " + i + ",Notes " + i;
+  			}
+  			var j = 0;
+  			$(".export").click(function(e) {
+  				// query database for all trees in the plot
+  				$.getJSON(app.config.cgiDir + 'litterfall.py?site=' + siteName + "&plot=" + plotNumber, function(data) {
+					$.each(data, function(index, value) {
+						// format Comma Separated Value string with data from each tree
+						CSV = CSV + "\n" + (parseInt(value["tree_id"]) + parseInt(value["sub_tree_id"])*.1) + "," + value["species"] + "," + value["angle"] + "," + value["distance"];
+						$.each(value["diameter"], function(date, obs) {
+							var parsedDate = $.datepicker.parseDate('yymmdd', date)
+							var formattedDate = $.datepicker.formatDate('m/d/yy', parsedDate)
+							CSV += "," + formattedDate + "," + obs["value"] + ",";
+							if (obs["notes"] != "" && obs["notes"] != undefined){
+								CSV += obs["notes"];
+							}
+						});
+
+					});
+					// adds formatted data to a hidden input on the page
+					$("#CSV").append(CSV);
+    				j = 1;
+				});
+				// ensures information has loaded before opening the CSV file
+				if (j > 0) {
+					window.open('data:application/vnd.ms-excel,' + $('#CSV').text());    				
+					e.preventDefault();
+
+				}
 			});
-			$("#save-form").submit(function() {
-				$("#datatodisplay").val($("<div>").append($("#plot-table").eq(0).clone()).html());
-			});
+
 		},
 		
-  			// add tablesorter jquery plugin (no sorting for first column)
-  			$("#plot-table").tablesorter({headers: { 0: { sorter: false}}}); 
-  		},
   		addTree: function(){
   			this.newTreeRowViewInitialize();	
   		},
   		
-  		addSubtree: function(){
-  			//add subtree
-  		},
   		populateTreeIDs: function(){
   			/*
 			var plotNumber = $(".plot-number").text();
