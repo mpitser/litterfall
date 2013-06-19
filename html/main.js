@@ -880,11 +880,11 @@ $(document).ready(function(){
   			}
   			var j = 0;
   			$(".export").click(function(e) {
+  				$(".export").val("Preparing data for export...");
   				// query database for all trees in the plot
   				$.getJSON(app.config.cgiDir + 'litterfall.py?site=' + siteName + "&plot=" + plotNumber, function(data) {
 					$.each(data, function(index, value) {
 						// format Comma Separated Value string with data from each tree
-						$("#CSV").append("<br>");
 						CSV = CSV + "\r\n" + (parseInt(value["tree_id"]) + parseInt(value["sub_tree_id"])*.1) + "," + value["species"] + "," + value["angle"] + "," + value["distance"];
 						$.each(value["diameter"], function(date, obs) {
 							var parsedDate = $.datepicker.parseDate('yymmdd', date)
@@ -898,6 +898,8 @@ $(document).ready(function(){
 					});
 					// adds formatted data to a hidden input on the page
 					$("#CSV").append(CSV);
+					$(".export").val("Click to open file");
+					$(".export").addClass("btn-success");
 					j = 1;
 				});
 				// ensures information has loaded before opening the CSV file
