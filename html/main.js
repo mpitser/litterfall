@@ -868,7 +868,7 @@ $(document).ready(function(){
   			}, this);
   			// populate the treeIDs dropdown menu for adding new subtrees
   			this.populateTreeIDs();
-  
+  			$(".btn").css("display", "inline-block");
     		
     			// add tablesorter jquery plugin (no sorting for first column)
   			$("#plot-table").tablesorter({headers: { 0: { sorter: false}}}); 

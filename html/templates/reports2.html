@@ -34,12 +34,13 @@
 
   <body>
      <div class="container">
-      <h1>Updating Data Records <small><%= site %>, Plot <%= plot %></small></h1>
-      <div class="button-row">
+  	  <div class="site-name"><%= site %></div><div class="plot-number"><%= plot %></div>
+      <h1>Analyzing Data Records <small><%= site %>, Plot <%= plot %></small></h1>
+		<div class="button-row">
       <span style="display:none" id="CSV"></span>
       <input type="button" class="btn btn-mini btn-primary export pull-right" value="Export Data"/>
 		<a href="#" class="dbh pull-right" rel="tooltip" data-placement="top" data-original-title="Once downloaded, save as a .csv file and open with MS Excel"><small>info</small></a>
- 	</div>
+ 		</div>
  	<table class="table-striped tablesorter" id="plot-table">
 	<thead>
 		<tr>
@@ -73,7 +74,6 @@
 		<a href="#" class="dbh pull-right" rel="tooltip" data-placement="top" data-original-title="Once downloaded, save as a .csv file and open with MS Excel"><small>info</small></a>
     </div>
     </div> <!-- /container -->
-
    
   </body>
 </html>
