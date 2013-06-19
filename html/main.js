@@ -425,7 +425,8 @@ $(document).ready(function(){
 			// show or hide edit buttons/columns based on whether user is in analyze data mode or enter data mode
 			if (document.location.hash.search("update") === -1) {				
 				$(".btn").hide();
-				$(".btn-column").hide();
+				$(".btn-column").hide();			
+				$(".back").css("display", "inline-block");
 				$("#tree_observations").tablesorter(); 				
 			} else {
 				$("#tree_observations").tablesorter({headers: { 0: { sorter: false}}}); 
