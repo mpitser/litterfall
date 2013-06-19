@@ -982,6 +982,8 @@ $(document).ready(function(){
    
     //default route is the App Home Page
     app_router.on('route:defaultRoute', function (actions) {
+    	$(".home").addClass("active");
+    	$(".data").removeClass("active");
     	var  templateFile = 'index.html';
 		require(['lib/text!templates/' + templateFile + '!strip'], function(templateHTML){			//require's library takes HTML templates
 			$('#main').html(templateHTML);
@@ -990,6 +992,8 @@ $(document).ready(function(){
     
     //Site, plot selection
     app_router.on('route:accessObservations', function () {											//listening for user action (for user to select location and plot)
+    	$(".data").addClass("active");
+    	$(".home").removeClass("active");
     	var  templateFile = 'update.html';
 		require(['lib/text!templates/' + templateFile + '!strip'], function(templateHTML){			
 			$('#main').html(templateHTML);
@@ -1014,7 +1018,8 @@ $(document).ready(function(){
     //Plot view
     app_router.on('route:goToPlot', function(site, plot) {		
     	//reloads page based on selected location (site) and plot
-
+		$(".data").addClass("active");
+    	$(".home").removeClass("active");
 		// load different template depending on whether we are updating or analyzing data
 		var templateFile;		
 		if (document.location.hash.search("update") === -1) { //if url does not contain 'update' (i.e. it must contain 'reports')
@@ -1048,6 +1053,8 @@ $(document).ready(function(){
     
     //Edit tree view
     app_router.on('route:goToTree', function(site, plot, treeId, subTreeId) {						//reloads page based on selected location (site) and plot
+    	$(".data").addClass("active");
+    	$(".home").removeClass("active");
     	var  templateFile = 'update-tree.html';
 		require(['lib/text!templates/' + templateFile + '!strip'], function(templateHTML){			//<WHAT DOES THIS FUNCTION DO?> [ ] (some sort of require wrapper)
 
