@@ -10,6 +10,7 @@
 /* Alert user of invalid input
 ----------------------------------*/
 .edit_cell .alert_invalid { background-color: #ffe9e8;}
+#current.alert-valid  { background-color: #ffe9e8;}
 
 
 /* Layout helpers

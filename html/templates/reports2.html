@@ -34,36 +34,137 @@
 
   <body>
      <div class="container">
-  	  <div class="site-name"><%= site %></div><div class="plot-number"><%= plot %></div>
-      <h1>Analyzing Data Records <small><%= site %>, Plot <%= plot %></small></h1>
-		<div class="button-row">
-      <span style="display:none" id="CSV"></span>
-      <input type="button" class="btn btn-mini btn-primary export pull-right" value="Export Data"/>
-		<a href="#" class="dbh pull-right" rel="tooltip" data-placement="top" data-original-title="Once downloaded, save as a .csv file and open with MS Excel"><small>info</small></a>
- 		</div>
+      
+  	<div class="site-name"><%= site %></div><div class="plot-number"><%= plot %></div>
+      	<h1>Analyzing Data Records <small><%= site %>, Plot <%= plot %></small></h1>
+			<div class="button-row">
+     			<span style="display:none" id="CSV"></span>
+      			<input type="button" class="btn btn-mini btn-primary export pull-right" value="Export Data"/>
+				<a href="#" class="dbh pull-right" rel="tooltip" data-placement="top" data-original-title="Once downloaded, save as a .csv file and open with MS Excel"><small>info</small></a>
+ 	</div>
+ 	     
+    <h3>View data from:
+		<select id="startYear" class="dropdown"> 
+			<option >
+				2002
+			</option>
+      		<option >
+      			2003
+  			</option>	
+  			<option >
+      			2004
+  			</option>
+  			<option >
+      			2005
+  			</option>
+  			<option >
+      			2006
+  			</option>
+  			<option >
+      			2007
+  			</option>
+  			<option >
+      			2008
+  			</option>
+  			<option >
+      			2009
+  			</option>
+  			<option >
+      			2010
+  			</option>
+  			<option >
+      			2011
+  			</option>
+  			<option >
+      			2012
+  			</option>
+  			<option >
+      			2013
+  			</option>
+  			
+  		</select>
+  		to
+  		<select id="endYear" class="dropdown"> 
+			<option >
+				2002
+			</option>
+      		<option >
+      			2003
+  			</option>	
+  			<option >
+      			2004
+  			</option>
+  			<option >
+      			2005
+  			</option>
+  			<option >
+      			2006
+  			</option>
+  			<option >
+      			2007
+  			</option>
+  			<option >
+      			2008
+  			</option>
+  			<option >
+      			2009
+  			</option>
+  			<option >
+      			2010
+  			</option>
+  			<option >
+      			2011
+  			</option>
+  			<option >
+      			2012
+  			</option>
+  			<option selected="selected">
+      			2013
+  			</option>
+  		</select>
+      	<button id="btn-go" type="button">Go!</button>
+      </h3>
+      
  	<table class="table-striped tablesorter" id="plot-table">
 	<thead>
 		<tr>
-		<th></th>
-		<th>
-			Tree ID
-		</th>
-		<th>
-			Species
-		</th>
-		<th>
-			Angle Degrees
-		</th>
-		<th>
-			Distance Meters
-		</th>
-		<th>
-			Last DBH (cm) <a href="#" class="dbh" rel="tooltip" data-placement="top" data-original-title="Diameter at Breast Height"><small>info</small></a>
-		</th>
-		<th>
-			Comments
-		</th>
-	</tr>
+			<th class="btn-column"></th>
+			<th>
+				Tree ID
+			</th>
+			<th>
+				Species
+			</th>
+			<th>
+				Angle Degrees
+			</th>
+			<th>
+				Distance Meters
+			</th>
+			<th id="DBH">
+				DBH (cm) <a href="#" class="dbh" rel="tooltip" data-placement="top" data-original-title="Diameter at Breast Height"><small>info</small></a>
+			</th>
+
+		</tr>
+		<tr id="sub-header">
+			<th class="sorter-false btn-column"></th>
+			<th class="sorter-false"></th>
+			<th class="sorter-false"></th>
+			<th class="sorter-false"></th>
+			<th class="sorter-false"></th>
+			<th class="sorter-false date-entry 2002">2002</th>
+			<th class="sorter-false date-entry 2003">2003</th>
+			<th class="sorter-false date-entry 2004">2004</th>
+			<th class="sorter-false date-entry 2005">2005</th>
+			<th class="sorter-false date-entry 2006">2006</th>
+			<th class="sorter-false date-entry 2007">2007</th>
+			<th class="sorter-false date-entry 2008">2008</th>
+			<th class="sorter-false date-entry 2009">2009</th>
+			<th class="sorter-false date-entry 2010">2010</th>
+			<th class="sorter-false date-entry 2011">2011</th>
+			<th class="sorter-false date-entry 2012">2012</th>
+			<th class="sorter-false date-entry 2013">2013</th>
+		</tr>
 	</thead>
 	<tbody>
 	

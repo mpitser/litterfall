@@ -14,14 +14,13 @@ $(document).ready(function(){
     //The global router declaration, handles all of the app's URLs
 	var AppRouter = Backbone.Router.extend({
         routes: {
-            "update": "updateObservation", //inits the add record "wizard", leads to the edit pages
-            "update/trees/site/:location/plot/:plot": "editPlot",
-            "update/trees/site/:location/plot/:plot/treeid/:treeid(/subtreeid/:subTreeId)": "editTree",
             "data": "accessObservations", //inits the add record "wizard", leads to the edit pages
             "data/update": "accessObservations", //inits the add record "wizard", leads to the edit pages
             "data/reports": "accessObservations",
             "data/update/trees/site/:location/plot/:plot": "goToPlot",
             "data/reports/trees/site/:location/plot/:plot": "goToPlot",
+          	//"update/trees/site/:location/plot/:plot/treeid/new": "newTree",
+            "data/update/trees/site/:location/plot/:plot/treeid/:treeid/subtreeid/new": "newSubTree",
             "data/update/trees/site/:location/plot/:plot/treeid/:treeid(/subtreeid/:subTreeId)": "goToTree",
             "data/reports/trees/site/:location/plot/:plot/treeid/:treeid(/subtreeid/:subTreeId)": "goToTree",
             "*actions": "defaultRoute" // Backbone will try match the route above first
@@ -46,7 +45,59 @@ $(document).ready(function(){
 	//build a row in the plot table representing a tree
 	var plotRowView = Backbone.View.extend({
 		tagName: 'tr',
-		template: '\
+		templateReports: '\
+			<td class="btn-column">\
+				<button class="btn-tree btn btn-mini btn-primary" type="button"></button>\
+			</td>\
+			<td class="tree-id">\
+				<%= tree.full_tree_id %>\
+			</td>\
+			<td>\
+				<%= tree.species %>\
+			</td>\
+			<td>\
+				<%= tree.angle %>\
+			</td>\
+			<td>\
+				<%= tree.distance %>\
+			</td>\
+			<td class="date-entry 2002">\
+				<%= tree.diameter2 %>\
+			</td>\
+			<td class="date-entry 2003">\
+				<%= tree.diameter3 %>\
+			</td>\
+			<td class="date-entry 2004">\
+				<%= tree.diameter4 %>\
+			</td>\
+			<td class="date-entry 2005">\
+				<%= tree.diameter5 %>\
+			</td>\
+			<td class="date-entry 2006">\
+				<%= tree.diameter6 %>\
+			</td>\
+			<td class="date-entry 2007">\
+				<%= tree.diameter7 %>\
+			</td>\
+			<td class="date-entry 2008">\
+				<%= tree.diameter8 %>\
+			</td>\
+			<td class="date-entry 2009">\
+				<%= tree.diameter9 %>\
+			</td>\
+			<td class="date-entry 2010">\
+				<%= tree.diameter10 %>\
+			</td>\
+			<td class="date-entry 2011">\
+				<%= tree.diameter11 %>\
+			</td>\
+			<td class="date-entry 2012">\
+				<%= tree.diameter12 %>\
+			</td>\
+			<td class="date-entry 2013">\
+				<%= tree.diameter13 %>\
+			</td>',
+		templateUpdate:	'\
 			<td>\
 				<div class="btn-group">\
 					<button class="btn-tree btn btn-mini btn-primary" type="button"></button>\
@@ -75,47 +126,90 @@ $(document).ready(function(){
 			</td>\
 			<td>\
 				<%= tree.thisComment %>\
-		</td>',
+			</td>',
 		initialize: function(){
 			this.render();
 		},
 		render: function(){
 			var thisTree = this.model.toJSON();
 			thisTree.thisDate = "";
+			thisTree.diameter2 = "-";
+			thisTree.diameter3 = "-";
+			thisTree.diameter4 = "-";
+			thisTree.diameter5 = "-";
+			thisTree.diameter6 = "-";
+			thisTree.diameter7 = "-";
+			thisTree.diameter8 = "-";
+			thisTree.diameter9 = "-";
+			thisTree.diameter10 = "-";
+			thisTree.diameter11 = "-";
+			thisTree.diameter12 = "-";
+			thisTree.diameter13 = "-";
 			for (date in thisTree.diameter){                      //loop through the list of existing dates and store the most recent
 				if (date > thisTree.thisDate){					  //Date format is YYYYMMDD (reformated in template html above)
 					thisTree.thisDate = date;
 				}
+				if (date.slice(0,4) === '2002') {
+					thisTree.diameter2 = thisTree.diameter[date].value;
+				} else if (date.slice(0,4) === '2003') {
+					thisTree.diameter3 = thisTree.diameter[date].value;
+				} else if (date.slice(0,4) === '2004') {
+					thisTree.diameter4 = thisTree.diameter[date].value;
+				} else if (date.slice(0,4) === '2005') {
+					thisTree.diameter5 = thisTree.diameter[date].value;
+				} else if (date.slice(0,4) === '2006') {
+					thisTree.diameter6 = thisTree.diameter[date].value;
+				} else if (date.slice(0,4) === '2007') {
+					thisTree.diameter7 = thisTree.diameter[date].value;
+				} else if (date.slice(0,4) === '2008') {
+					thisTree.diameter8 = thisTree.diameter[date].value;
+				} else if (date.slice(0,4) === '2009') {
+					thisTree.diameter9 = thisTree.diameter[date].value;
+				} else if (date.slice(0,4) === '2010') {
+					thisTree.diameter10 = thisTree.diameter[date].value;
+				} else if (date.slice(0,4) === '2011') {
+					thisTree.diameter11 = thisTree.diameter[date].value;
+				} else if (date.slice(0,4) === '2012') {
+					thisTree.diameter12 = thisTree.diameter[date].value;
+				} else if (date.slice(0,4) === '2013') {
+					thisTree.diameter13 = thisTree.diameter[date].value;
+				}
 			}
+			
 			if (Object.keys(thisTree.diameter).length > 0){
 				thisTree.thisDiameter = thisTree.diameter[thisTree.thisDate].value;    //gets diameter from most recent measurement
 				thisTree.thisComment = thisTree.diameter[thisTree.thisDate].notes;     //gets comments from most recent measurement
 			}
 			
-			
-			//$el --> gets the jQuery object for this view's element 
-			//*.attr('id', thisTree._id.$oid) --> sets 'id' to MongoDB value for tree's ID
-			//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
-			this.$el.attr('id', thisTree._id.$oid).html(_.template(this.template, {tree: thisTree}));
-			this.$el.addClass("tree-cluster-" + thisTree.tree_id);
-			this.$el.children().eq(2).css("font-style","italic");
-			
-			this.options.targetEl.append(this.el);								   //appends the tree's row element to table
-			
 			// based on whether user is in analyze data mode or enter data mode, change button text and class tags
 			if (document.location.hash.search("update") === -1) {
+				
+				//$el --> gets the jQuery object for this view's element 
+				//*.attr('id', thisTree._id.$oid) --> sets 'id' to MongoDB value for tree's ID
+				//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
+				this.$el.attr('id', thisTree._id.$oid).html(_.template(this.templateReports, {tree: thisTree}));
+				this.$el.addClass("tree-cluster-" + thisTree.tree_id);
+				this.$el.children().eq(2).css("font-style","italic");
+				this.options.targetEl.append(this.el);	
+				
 				$(".btn-tree").text("View more");
 				$(".btn-tree").addClass("btn-analyze");
 				$(".btn-tree").removeClass("btn-update");
-
+				$(".btn-column").hide();
+				
 			} else {
+				//$el --> gets the jQuery object for this view's element 
+				//*.attr('id', thisTree._id.$oid) --> sets 'id' to MongoDB value for tree's ID
+				//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
+				this.$el.attr('id', thisTree._id.$oid).html(_.template(this.templateUpdate, {tree: thisTree}));
+				this.$el.addClass("tree-cluster-" + thisTree.tree_id);
+				this.$el.children().eq(2).css("font-style","italic");
+				this.options.targetEl.append(this.el);	
+				
 				$(".btn-tree").text("Update");
 				$(".btn-tree").addClass("btn-update");
 				$(".btn-tree").removeClass("btn-analyze");				
 			}
-			
-			return this;
-			
 			
 		},
 		events: {
@@ -179,7 +273,6 @@ $(document).ready(function(){
 				});
 			}
 		}
-
 	});
 
 	// Adding new row for inserting a new tree
@@ -282,7 +375,7 @@ $(document).ready(function(){
 				<button class="btn-cancel-new-subtree btn btn-mini btn-danger" type="button">Cancel</button>\
 				</div>\
 			</td>\
-			<td>\
+			<td class="tree-id">\
 			\
 			</td>\
 			<td>\
@@ -319,7 +412,6 @@ $(document).ready(function(){
 				scrollTop: $(".sub-tree-row-goaway").offset().top-100
 			}, 2000);
 
-			return this;
 		},
 
 		events: {
@@ -582,7 +674,12 @@ $(document).ready(function(){
 									         success: function(model, response, options){console.log("save to database was successful")}});	
 			// NOTE: another hack to make sure that the display view is rendered instead of the edit view
 			//(otherwise the edit view hangs there when nothing is changed)
+
+			//row_to_save.find(".editable").attr("id", "current");
+			//row_to_save.find("#current").addClass("alert-valid", {duration:500});
+			//row_to_save.find("#current").removeClass("alert-valid", {duration:500});
 			this.render();		
+
 		},
 
 		validateField: function(event){
@@ -874,9 +971,14 @@ $(document).ready(function(){
   			this.populateTreeIDs();
   			$(".btn").css("display", "inline-block");
     		
-    			// add tablesorter jquery plugin (no sorting for first column)
+    		// add tablesorter jquery plugin (no sorting for first column)
   			$("#plot-table").tablesorter({headers: { 0: { sorter: false}}}); 
+  			// populate the diameter entries based on user's given years
+  			this.populateTreeDiameters();
   			
+  			// re-populate (really just showing/hiding columns) corresponding to the date range desired when user clicks Go!
+  			$("#btn-go").click(this.populateTreeDiameters);
+
   			// set up column headers for CSV
   			var CSV = "Full Tree ID,Species,Angle,Distance"
   			for(var i = 1; i <= maxDiam; i++) {
@@ -915,8 +1017,28 @@ $(document).ready(function(){
 				
   			});
   
-    		},
+    	},
+		populateTreeDiameters: function(){
+    		// get year range user wished to view data from
+			var startYear = $("#startYear").val();
+  			var endYear = $("#endYear").val();
+			var numYears = $("#endYear").val()-$("#startYear").val() + 1;
+			
+			if (startYear > endYear){
+				// switch years so user doesn't have to be specific about which direction their date range goes
+				var tempYear = startYear;
+				startYear = endYear;
+				endYear = tempYear;
+			}
+			
+			$('.date-entry').hide();
+			for (var i=parseInt(startYear); i<=parseInt(endYear); i++){
+				$('.'+i).show();
+			}
 
+			//format header row to make the DBH cell span all the years specified
+  			document.getElementById("DBH").colSpan = numYears;
+    	},
   		addTree: function(){
   			this.newTreeRowViewInitialize();	
   		},
@@ -1026,8 +1148,10 @@ $(document).ready(function(){
 		// load different template depending on whether we are updating or analyzing data
 		var templateFile;		
 		if (document.location.hash.search("update") === -1) { //if url does not contain 'update' (i.e. it must contain 'reports')
+			console.log("should be reporting");
 			templateFile = 'reports2.html';
-		} else {											  // url contains 'update'
+		} else {		
+			console.log("should be updating");									  // url contains 'update'
 			templateFile = 'update2.html';
 		}
 		require(['lib/text!templates/' + templateFile + '!strip'], function(templateHTML){			//<WHAT DOES THIS FUNCTION DO?> [ ] (some sort of require wrapper)

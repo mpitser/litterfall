@@ -8,6 +8,12 @@
  * Designed and built with all the love in the world @twitter by @mdo and @fat.
  */
 
+.dropdown-toggle .caret {
+  margin-top: 6px;
+  border-top-color: #0088cc;
+  border-bottom-color: #0088cc;
+}
+
 article,
 aside,
 details,
