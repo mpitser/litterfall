@@ -427,7 +427,7 @@ $(document).ready(function(){
 				$(".btn-column").hide();			
 				$(".back").css("display", "inline-block");
 				var new_href = "#data/reports/trees/site/" + $(".site-name").text() + "/plot/" + $(".plot-number").text();
-				$("a").attr("href", new_href);
+				$(".back").attr("href", new_href);
 				$(".title").text("Analyzing Data Records ");
 				$("#tree_observations").tablesorter(); 				
 			} else {			
