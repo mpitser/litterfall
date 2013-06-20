@@ -34,10 +34,10 @@
   <body>
 
     <div class="container">
-      <h1>Updating Data Records <small><%= site %>, Plot <%= plot %></small>
-      <div id="back"><button class="btn btn-mini btn-primary back" style='text-decoration: none; float: right'><a href="#data/update/trees/site/<%= site %>/plot/<%= plot %>" style="text-decoration: none">Return to Plot</a></button>
+ 	 <div class="site-name"><%= site %></div><div class="plot-number"><%= plot %></div>
+      <h1><span class="title">Updating Data Records </span><small><%= site %>, Plot <%= plot %></small></h1>
+      <div id="back"><button class="btn btn-mini btn-primary back" style='text-decoration: none; float: right'><a class="back" href="#data/update/trees/site/<%= site %>/plot/<%= plot %>" style="text-decoration: none">Return to Plot</a></button>
 		</div>
-		</h1>
 		<h2>Tree: <%= treeId %><%= subTreeId != 0 ?  '.' + subTreeId : '' %>
 		</h2>
 		<div id="treeEditView">

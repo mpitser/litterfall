@@ -158,7 +158,7 @@ $(document).ready(function(){
 				} else if (date.slice(0,4) === '2005') {
 					thisTree.diameter5 = thisTree.diameter[date].value;
 				} else if (date.slice(0,4) === '2006') {
-					thisTree.diameter6 = thisTree.diameter[date].value;
+					thisTree.diameter6 = thisTree.diameter[date].value.toFixed(2);
 				} else if (date.slice(0,4) === '2007') {
 					thisTree.diameter7 = thisTree.diameter[date].value;
 				} else if (date.slice(0,4) === '2008') {
@@ -513,16 +513,8 @@ $(document).ready(function(){
 			thisTree.datesDesc = _.keys(thisTree.diameter).sort().reverse();
 			this.$el.html(_.template(this.template, {tree: thisTree}));
 			this.postRender();
-			
-			// show or hide edit buttons/columns based on whether user is in analyze data mode or enter data mode
-			if (document.location.hash.search("update") === -1) {				
-				$(".btn").hide();
-				$(".btn-column").hide();			
-				$(".back").css("display", "inline-block");
-				$("#tree_observations").tablesorter(); 				
-			} else {
-				$("#tree_observations").tablesorter({headers: { 0: { sorter: false}}}); 
-			}
+			$("#tree_observations").tablesorter({headers: { 0: { sorter: false}}}); 
+	
 		},
 		postRender: function(){
 			//add any methods/functions that need to be call after redendering the Tree edit view
