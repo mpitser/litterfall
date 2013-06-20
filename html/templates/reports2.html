@@ -11,10 +11,6 @@
     <!-- Le styles -->
     <link href="css/bootstrap.css" rel="stylesheet">
     <link href="css/tables.css" rel="stylesheet">
-    
-    <!-- Jquery plugin for table sorting -->
-    <!--<script type="text/javascript" src="/path/to/jquery-latest.js"></script> 
-	<script type="text/javascript" src="/lib/jquery.tablesorter.js"></script> -->
 
     <style>
       body {
@@ -38,52 +34,102 @@
 
   <body>
      <div class="container">
-      <h1>Updating Data Records <small><%= site %>, Plot <%= plot %></small></h1>
+      <h1>Viewing Data Records <small><%= site %>, Plot <%= plot %></small></h1>
       
 
       <h3>View data from:
-		<span class="dropdown"> 
-			<a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">
+		<select id="startYear" class="dropdown"> 
+			<option >
 				2002
-				<b class="caret"></b>
-			</a>
-      		<ul class="dropdown-menu" role="menu" aria-labelledby="dropDownMenu">
-      			<li> 2013 </li>
-      			<li> 2013 </li>
-      			<li> 2013 </li>
-  			</ul>	
-  		</span>
+			</option>
+      		<option >
+      			2003
+  			</option>	
+  			<option >
+      			2004
+  			</option>
+  			<option >
+      			2005
+  			</option>
+  			<option >
+      			2006
+  			</option>
+  			<option >
+      			2007
+  			</option>
+  			<option >
+      			2008
+  			</option>
+  			<option >
+      			2009
+  			</option>
+  			<option >
+      			2010
+  			</option>
+  			<option >
+      			2011
+  			</option>
+  			<option >
+      			2012
+  			</option>
+  			<option >
+      			2013
+  			</option>
+  			
+  		</select>
   		to
-  		<span class="dropdown"> 
-  			<a class="dropdown-toggle" data-toggle="dropdown" href="#">
-  			2013
-				<b class="caret"></b>
-  			</a>
-      		<ul class="dropdown-menu" role="menu" aria-labelledby="dropDownMenu">
-      			<li> 2003 </li>
-  			</ul>
-      	</span> 
-      </h3>
-      
-      <h3>View data from last 
-		<span class="dropdown"> 
-			<a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">
+  		<select id="endYear" class="dropdown"> 
+			<option >
 				2002
-				<b class="caret"></b>
-			</a>
-      		<ul class="dropdown-menu" role="menu" aria-labelledby="dropDownMenu">
-      			<li> 2013 </li>
-      			<li> 2013 </li>
-      			<li> 2013 </li>
-  			</ul>	
-  		</span>
-  		years
+			</option>
+      		<option >
+      			2003
+  			</option>	
+  			<option >
+      			2004
+  			</option>
+  			<option >
+      			2005
+  			</option>
+  			<option >
+      			2006
+  			</option>
+  			<option >
+      			2007
+  			</option>
+  			<option >
+      			2008
+  			</option>
+  			<option >
+      			2009
+  			</option>
+  			<option >
+      			2010
+  			</option>
+  			<option >
+      			2011
+  			</option>
+  			<option >
+      			2012
+  			</option>
+  			<option selected="selected">
+      			2013
+  			</option>
+  		</select>
+      	<button id="btn-go" type="button">Go!</button>
       </h3>
       
+  	<div class="site-name"><%= site %></div><div class="plot-number"><%= plot %></div>
+      	<h1>Analyzing Data Records <small><%= site %>, Plot <%= plot %></small></h1>
+			<div class="button-row">
+     			<span style="display:none" id="CSV"></span>
+      			<input type="button" class="btn btn-mini btn-primary export pull-right" value="Export Data"/>
+				<a href="#" class="dbh pull-right" rel="tooltip" data-placement="top" data-original-title="Once downloaded, save as a .csv file and open with MS Excel"><small>info</small></a>
+ 	</div>
  	<table class="table-striped tablesorter" id="plot-table">
 	<thead>
 		<tr>
-			<th></th>
+			<th class="btn-column"></th>
 			<th>
 				Tree ID
 			</th>
@@ -96,35 +142,40 @@
 			<th>
 				Distance Meters
 			</th>
-			<th colspan="3">
+			<th id="DBH">
 				DBH (cm) <a href="#" class="dbh" rel="tooltip" data-placement="top" data-original-title="Diameter at Breast Height"><small>info</small></a>
 			</th>
 
 		</tr>
-		<tr id="sub-header-dates">
+		<tr id="sub-header">
+			<th class="sorter-false btn-column"></th>
 			<th class="sorter-false"></th>
 			<th class="sorter-false"></th>
 			<th class="sorter-false"></th>
 			<th class="sorter-false"></th>
-			<th class="sorter-false"></th>
-			<th class="sorter-false">
-			2013
-			</th>
-			<th class="sorter-false">
-			2012
-			</th>
-			<th class="sorter-false">
-			2011
-			</th>
-
+			<th class="sorter-false date-entry 2002">2002</th>
+			<th class="sorter-false date-entry 2003">2003</th>
+			<th class="sorter-false date-entry 2004">2004</th>
+			<th class="sorter-false date-entry 2005">2005</th>
+			<th class="sorter-false date-entry 2006">2006</th>
+			<th class="sorter-false date-entry 2007">2007</th>
+			<th class="sorter-false date-entry 2008">2008</th>
+			<th class="sorter-false date-entry 2009">2009</th>
+			<th class="sorter-false date-entry 2010">2010</th>
+			<th class="sorter-false date-entry 2011">2011</th>
+			<th class="sorter-false date-entry 2012">2012</th>
+			<th class="sorter-false date-entry 2013">2013</th>
 		</tr>
 	</thead>
 	<tbody>
 	
 	</tbody>
 	</table>
+	<div class="button-row">
+	<input type="button" class="btn btn-mini btn-primary export pull-right" value="Export Data">
+		<a href="#" class="dbh pull-right" rel="tooltip" data-placement="top" data-original-title="Once downloaded, save as a .csv file and open with MS Excel"><small>info</small></a>
+    </div>
     </div> <!-- /container -->
-
    
   </body>
 </html>

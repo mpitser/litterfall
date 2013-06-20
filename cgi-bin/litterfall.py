@@ -2,7 +2,9 @@
 from datetime import datetime
 from pymongo import MongoClient
 from bson import json_util
-import json, cgi, os, ConfigParser, unicodedata
+from bson.objectid import ObjectId
+from types import *
+import json, cgi, os, ConfigParser, unicodedata, pymongo
 # for debug purpose
 import cgitb; cgitb.enable()
 
@@ -12,8 +14,222 @@ import cgitb; cgitb.enable()
 # to the database																			#
 #############################################################################################
 
+# TODO: what kind of feedback would it give if validation fails?
+
 # some global variables
 sites_predef = ["beech","floodplains","Knoll","norway","Oaks","swamp","TBNO","TOH"]
+
+# Tree is an object that mediates between MongoDB and the script. it makes sure the data--
+# both the input data and the data to be stored in the database--is formatted in the correct
+# way.
+class Tree:
+
+	# __init__(tree, obs):
+	# 	> tree is a json containing elementary data of the tree
+	#		- the only two fields that tree has to have are plot and site
+	#		- tree_id and sub_tree_id do not have to be specified. however, if they are not
+	#		  specified, it means that the tree is new
+	#		- if tree_id is specified and sub_tree_id is not, there are two possibilities
+	#		  depending on whether there is already subtree(s) under the specified tree_id.
+	#		  if there is, then the new Tree would be assumed to be the latest new sub_tree.
+	#		  if there isn't, then the new Tree would become the new tree.
+	#	> obs is the mongodb collection
+	def __init__(self, tree, obs):
+		
+		# if they are specified, domesticate them
+		self.plot = int(tree['plot'])
+		self.site = tree['site']
+		
+		# collection	
+		self.obs = obs
+		
+		# tree and formatted data
+		self.tree = tree
+		self.tree['collection_type'] = 'tree'
+		self.tree['plot'] = int(self.tree['plot'])
+		
+		# tree_id and sub_tree_id
+		# these ids do not have to be specified, yet
+		# if the ids are not specified, that means it is new!
+		# the default would be False, which means that it is not new
+		
+		# tree_id
+		if not 'tree_id' in self.tree:
+			self.tree['tree_id'] = -1
+			self.tree['sub_tree_id'] = -1
+		else:
+			self.tree['tree_id'] = int(tree['tree_id'])
+			
+			# sub_tree_id	
+			if not 'tree_id' in self.tree:
+				self.tree['sub_tree_id'] = 0
+			else:
+				self.tree['sub_tree_id'] = int(tree['sub_tree_id'])
+	
+	def initValidate(self):
+		if tree['plot'] == None or tree['site'] == None:
+			raise RuntimeError("Cannot instantiate Tree, since plot and/or site are illegal")
+			
+	def printJSON(self):
+		data = json.dumps(self.tree, default=json_util.default, separators=(',', ':'))
+		print 'Content-Type: application/json\n'
+		print data
+			
+	def updateData(self, data):
+		self.tree = data
+		
+	def getData(self):
+		return self.tree
+	
+	# save(data = self.tree)
+	def save(self, data = None):
+	
+		# if user does not update the data
+		if data != None:
+			self.updateData(data)
+			
+		# format the data
+		if not self.format():
+			raise RuntimeError("Illegal data")
+		
+		# ---- dealing with a possible new tree ----
+		
+		# do we need a new tree_id?
+		if self.tree['tree_id'] == -1:
+			# get the highest tree_id
+			maxIdQuery = {
+				'collection_type':'tree',
+				'plot': self.tree['plot'],
+				'site': self.tree['site']
+			}
+			
+			maxIdTree = self.obs.find(maxIdQuery).sort([('tree_id',pymongo.DESCENDING)]).limit(1)
+			maxId = maxIdTree[0]['tree_id']
+			
+			self.tree['tree_id'] = maxId + 1
+			self.tree['sub_tree_id'] = 0
+			
+			self.tree['_id'] = ObjectId()
+			
+		else:
+			# check sub_tree_id
+			findQueryAllSubTrees = {
+				'collection_type':'tree',
+				'plot': self.tree['plot'],
+				'site': self.tree['site'],
+				'tree_id': self.tree['tree_id']
+			}
+			
+			allSubTrees = self.obs.find(findQueryAllSubTrees)
+			numSubTrees = allSubTrees.count()
+			
+			# if there is no tree existing
+			if numSubTrees < 1:
+				# create a new tree
+				self.tree['sub_tree_id'] = 0
+				self.tree['_id'] = ObjectId()
+				
+			# if there are trees existing already under the specified tree_id
+			else:
+				# find the subtree
+				
+				numThisSubTree = 0
+				
+				if self.tree['sub_tree_id'] >= 0:
+				
+					findQueryThisSubTree = {
+						'collection_type':'tree',
+						'plot': self.tree['plot'],
+						'site': self.tree['site'],
+						'tree_id': self.tree['tree_id'],
+						'sub_tree_id': self.tree['sub_tree_id']
+					}
+					
+					thisSubTree = self.obs.find(findQueryThisSubTree)
+					numThisSubTree = thisSubTree.count()
+				
+				# if this subtree does not already exist
+				if numThisSubTree == 0:
+					# only one tree
+					if allSubTrees.count() == 1:
+						self.obs.update(findQueryAllSubTrees, {'$set': {'sub_tree_id': 1}})
+						# then, add a new subtree
+						self.tree['sub_tree_id'] = 2
+					else:
+						# sorted(allSubTrees, key=lambda subTree: subTree['sub_tree_id'], reverse=True)
+						maxSubTreeId = allSubTrees.count()
+						self.tree['sub_tree_id'] = maxSubTreeId + 1
+						
+					self.tree['_id'] = ObjectId()
+		
+		self.obs.save(self.tree)
+		self.updateTreeUniversal()
+		return self.tree
+	
+	def format(self):
+		self.tree = self.tree
+		return True
+	
+	def updateTreeUniversal(self):
+	
+		findQueryAllSubTrees = {
+			'collection_type':'tree',
+			'plot': self.tree['plot'],
+			'site': self.tree['site'],
+			'tree_id': self.tree['tree_id']
+		}
+		
+		self.obs.update(findQueryAllSubTrees, {'$set' : {'species': self.tree['species']} }, **{'multi':True})
+		
+	def delete(self):
+		
+		if not '_id' in self.tree:
+		
+			findQueryThisSubTree = {
+				'collection_type':'tree',
+				'plot': self.tree['plot'],
+				'site': self.tree['site'],
+				'tree_id': self.tree['tree_id'],
+				'sub_tree_id': self.tree['sub_tree_id']
+			}
+			
+			self.obs.remove(findQueryThisSubTree)
+			
+		else:
+		
+			self.obs.remove({'_id': self.tree['_id']})
+			
+		# update the ordering of the remaining subtrees
+		findQueryAllSubTrees = {
+			'collection_type':'tree',
+			'plot': self.tree['plot'],
+			'site': self.tree['site'],
+			'tree_id': self.tree['tree_id']
+		}
+		
+		allSubTrees = [] 
+		
+		allSubTrees = self.obs.find(findQueryAllSubTrees)
+		
+		if allSubTrees.count() == 1:
+			self.obs.update({'_id': allSubTrees[0]['_id']}, {'$set': {'sub_tree_id': 0} })
+		
+		else:
+			
+			allSubTrees = sorted(allSubTrees, key = lambda SubTree: SubTree['sub_tree_id'])
+			
+			i = 0
+			for SubTree in allSubTrees:
+				self.obs.update({'_id': SubTree['_id']}, {'$set': {'sub_tree_id': i + 1} })
+				#self.tree['error'][i] = SubTree['sub_tree_id']
+				i = i + 1
+						
+def getdatafromoid(obs, oid):
+	objectId = ObjectId(oid)
+	data = obs.find({'_id': objectId})
+	json_data = data[0]
+	ser_data = json.dumps(json_data, default=json_util.default, separators=(',', ':'))
+	print ser_data
 
 def getdata(obs, site, plot, treeid, subtreeid):
 	if site == 'all':
@@ -33,7 +249,7 @@ def getdata(obs, site, plot, treeid, subtreeid):
 		# from each diam field, get all observers (within date range eventually)
 		data = obs.find({'collection_type':'tree'}, {'fields':'diameter'}).distinct('diameter')
 		data.sort()
-		n = 0; # n is not important, just helps up in decigin which data to assign to json_data
+		n = 0 # n is not important, just helps up in decigin which data to assign to json_data
 	elif treeid == 'maxID':
 		# Return max existing tree id at site and plot
 		data = obs.find({'collection_type':'tree', 'plot': int(plot), 'site': site}, {'fields':'tree_id'}).distinct('tree_id')
@@ -191,6 +407,8 @@ def validate(obs, data):
 	return {'flag': True, 'msg': 'passed all checks'}
 		
 def main():
+	global Tree
+
 	# Load config (for database info, etc)
 	Config = ConfigParser.ConfigParser()
 	Config.read("litterfall_translate.conf")
@@ -209,11 +427,24 @@ def main():
 	if method == 'GET':
 		print 'Content-Type: application/json\n'
 		query = cgi.FieldStorage()
-		plot = query.getvalue('plot')
-		site = query.getvalue('site')
-		treeid = query.getvalue('treeid')
-		subtreeid = query.getvalue('subtreeid')
-		getdata(obs, site, plot, treeid, subtreeid)	
+		
+		action = query.getvalue('action')
+		
+		if action == 'search':
+			oid = query.getvalue('oid')
+			getdatafromoid(obs, oid)
+		else:
+			oid = query.getvalue('oid')
+			plot = query.getvalue('plot')
+			site = query.getvalue('site')
+			treeid = query.getvalue('treeid')
+			subtreeid = query.getvalue('subtreeid')
+			
+			if oid != None:
+				getdatafromoid(obs, oid)
+			else:
+				getdata(obs, site, plot, treeid, subtreeid)
+			
 	elif method == 'POST' or method == 'PUT':
 		form = cgi.FieldStorage()
 		data = json.loads(form.file.read(), object_hook=json_util.object_hook)	
@@ -221,13 +452,24 @@ def main():
 		flag = result['flag']
 		msg = result['msg']
 		if flag:
-			obs.save(data)
-			data = json.dumps(data, default=json_util.default, separators=(',', ':'))
-			print 'Content-Type: application/json\n'
-			print data
+			newTree = Tree(data, obs)
+			if 'delete' in data:
+				if data['delete'] == True:
+					newTree.delete()
+			else:
+				newTree.save()
+			newTree.printJSON()
 		else:
 			print 'Status:406\n'
 			print result['key'] + '->' + msg
+			
+	elif method == 'DELETE':
+		form = cgi.FieldStorage()
+		data = json.loads(form.file.read(), object_hook=json_util.object_hook)
+		newTree = Tree(data, obs)
+		newTree.delete()
+		newTree.printJSON()
+		
 		
 if __name__ == "__main__":
     main()
