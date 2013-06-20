@@ -420,15 +420,18 @@ $(document).ready(function(){
 			//get the dates in descending order
 			thisTree.datesDesc = _.keys(thisTree.diameter).sort().reverse();
 			this.$el.html(_.template(this.template, {tree: thisTree}));
-			this.postRender();
 			
 			// show or hide edit buttons/columns based on whether user is in analyze data mode or enter data mode
-			if (document.location.hash.search("update") === -1) {				
+			if (document.location.hash.search("update") === -1) {	
 				$(".btn").hide();
 				$(".btn-column").hide();			
 				$(".back").css("display", "inline-block");
+				var new_href = "#data/reports/trees/site/" + $(".site-name").text() + "/plot/" + $(".plot-number").text();
+				$("a").attr("href", new_href);
+				$(".title").text("Analyzing Data Records ");
 				$("#tree_observations").tablesorter(); 				
-			} else {
+			} else {			
+				this.postRender();
 				$("#tree_observations").tablesorter({headers: { 0: { sorter: false}}}); 
 			}
 		},
