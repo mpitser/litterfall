@@ -1018,6 +1018,7 @@ $(document).ready(function(){
   			}, this);
   			// populate the treeIDs dropdown menu for adding new subtrees
   			this.populateTreeIDs();
+  			$(".dbh").attr("href", document.location.hash);
   			$(".btn").css("display", "inline-block");
     		
     		// add tablesorter jquery plugin (no sorting for first column)
