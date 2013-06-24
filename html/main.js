@@ -47,7 +47,7 @@ $(document).ready(function(){
 		tagName: 'tr',
 		templateReports: '\
 			<td class="btn-column">\
-				<button class="btn-tree btn btn-mini btn-primary" type="button"></button>\
+				<button class="btn-tree btn btn-mini btn-primary btn-analyze" type="button">View More</button>\
 			</td>\
 			<td class="tree-id">\
 				<%= tree.full_tree_id %>\
@@ -100,7 +100,7 @@ $(document).ready(function(){
 		templateUpdate:	'\
 			<td>\
 				<div class="btn-group">\
-					<button class="btn-tree btn btn-mini btn-primary" type="button"></button>\
+					<button class="btn-tree btn btn-mini btn-primary btn-update" type="button">Update</button>\
 					<button class="btn btn-mini dropdown-toggle btn-primary" data-toggle="dropdown">\
 						<span class="caret"></span>\
 					</button>\
@@ -128,11 +128,15 @@ $(document).ready(function(){
 				<%= tree.thisComment %>\
 			</td>',
 		initialize: function(){
-			this.render();
+			if (document.location.hash.search("update") === -1) {
+				this.renderReport();
+			} else {
+				this.renderUpdate();
+			}
 		},
-		render: function(){
+		renderReport: function(){
 			var thisTree = this.model.toJSON();
-			thisTree.thisDate = "";
+			
 			thisTree.diameter2 = "-";
 			thisTree.diameter3 = "-";
 			thisTree.diameter4 = "-";
@@ -146,9 +150,6 @@ $(document).ready(function(){
 			thisTree.diameter12 = "-";
 			thisTree.diameter13 = "-";
 			for (date in thisTree.diameter){                      //loop through the list of existing dates and store the most recent
-				if (date > thisTree.thisDate){					  //Date format is YYYYMMDD (reformated in template html above)
-					thisTree.thisDate = date;
-				}
 				if (date.slice(0,4) === '2002') {
 					thisTree.diameter2 = thisTree.diameter[date].value;
 				} else if (date.slice(0,4) === '2003') {
@@ -176,41 +177,38 @@ $(document).ready(function(){
 				}
 			}
 			
+			//$el --> gets the jQuery object for this view's element 
+			//*.attr('id', thisTree._id.$oid) --> sets 'id' to MongoDB value for tree's ID
+			//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
+			this.$el.attr('id', thisTree._id.$oid).html(_.template(this.templateReports, {tree: thisTree}));
+			this.$el.addClass("tree-cluster-" + thisTree.tree_id);
+			this.$el.children().eq(2).css("font-style","italic");
+			this.options.targetEl.append(this.el);	
+				
+		},
+		renderUpdate: function(){
+			var thisTree = this.model.toJSON();
+			thisTree.thisDate = "";
+			for (date in thisTree.diameter){                      //loop through the list of existing dates and store the most recent
+				if (date > thisTree.thisDate){					  //Date format is YYYYMMDD (reformated in template html above)
+					thisTree.thisDate = date;
+				}
+			}
+
 			if (Object.keys(thisTree.diameter).length > 0){
 				thisTree.thisDiameter = thisTree.diameter[thisTree.thisDate].value;    //gets diameter from most recent measurement
 				thisTree.thisComment = thisTree.diameter[thisTree.thisDate].notes;     //gets comments from most recent measurement
 			}
 			
-			// based on whether user is in analyze data mode or enter data mode, change button text and class tags
-			if (document.location.hash.search("update") === -1) {
-				
-				//$el --> gets the jQuery object for this view's element 
-				//*.attr('id', thisTree._id.$oid) --> sets 'id' to MongoDB value for tree's ID
-				//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
-				this.$el.attr('id', thisTree._id.$oid).html(_.template(this.templateReports, {tree: thisTree}));
-				this.$el.addClass("tree-cluster-" + thisTree.tree_id);
-				this.$el.children().eq(2).css("font-style","italic");
-				this.options.targetEl.append(this.el);	
-				
-				$(".btn-tree").text("View more");
-				$(".btn-tree").addClass("btn-analyze");
-				$(".btn-tree").removeClass("btn-update");
-				$(".btn-column").hide();
-				
-			} else {
-				//$el --> gets the jQuery object for this view's element 
-				//*.attr('id', thisTree._id.$oid) --> sets 'id' to MongoDB value for tree's ID
-				//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
-				this.$el.attr('id', thisTree._id.$oid).html(_.template(this.templateUpdate, {tree: thisTree}));
-				this.$el.addClass("tree-cluster-" + thisTree.tree_id);
-				this.$el.children().eq(2).css("font-style","italic");
-				this.options.targetEl.append(this.el);	
-				
-				$(".btn-tree").text("Update");
-				$(".btn-tree").addClass("btn-update");
-				$(".btn-tree").removeClass("btn-analyze");				
-			}
 			
+			//$el --> gets the jQuery object for this view's element 
+			//*.attr('id', thisTree._id.$oid) --> sets 'id' to MongoDB value for tree's ID
+			//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
+			this.$el.attr('id', thisTree._id.$oid).html(_.template(this.templateUpdate, {tree: thisTree}));
+			this.$el.addClass("tree-cluster-" + thisTree.tree_id);
+			this.$el.children().eq(2).css("font-style","italic");
+			this.options.targetEl.append(this.el);	
+
 		},
 		events: {
 			'click .delete-row': 'deleteTree',
@@ -452,7 +450,41 @@ $(document).ready(function(){
 	//build a row in the plot table representing a tree
 	var treeEditView = Backbone.View.extend({
 		tagName: 'div',
-		template: '\
+		templateReport: '\
+		<div id="tree-info">\
+			<ul>\
+				<li>Species: <span class="display-tree-info species"><%= tree.species %></span><span class="edit-tree-info species"><select></select></span></li>\
+				<li>Angle Degrees: <span class="display-tree-info angle"><%= tree.angle %></span><span class="edit-tree-info angle"><input value="<%= tree.angle %>"></input></span></li>\
+				<li>Distance Meters: <span class="display-tree-info distance"><%= tree.distance %></span><span class="edit-tree-info distance"><input value="<%= tree.distance %>"></input></span></li>\
+			</ul>\
+		</div>\
+		<table id="tree_observations" class="table-striped tablesorter">\
+			<thead>\
+				<tr>\
+					<th>Date</th>\
+					<th>Observers</th>\
+					<th>\
+						DBH (cm) <a href="#" class="dbh" rel="tooltip" data-placement="top" data-original-title="Diameter at Breast Height"><small>info</small></a>\
+					</th>\
+					<th>\
+						Comments\
+					</th>\
+				</tr>\
+			</thead>\
+			<tbody>\
+			<% _.each(tree.datesDesc, function(date){ %>\
+			<tr>\
+				<td><span class="display_cell date_select"><%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %></span>\
+				<input type="hidden" class="formatted_date" value="<%= date %>"></span></td>\
+				<td><span class="display_cell observers"><%= tree.diameter[date].observers %></span>\
+				<td><span class="display_cell diameter"><%= tree.diameter[date].value %></span>\
+				<td><span class="display_cell notes"><%= tree.diameter[date].notes %></span>\
+			</tr>\
+			<% }); %>\
+			</tbody>\
+			</table>\
+		',
+		templateUpdate: '\
 		<div id="tree-info">\
 			<button class="btn btn-success btn-mini edit-tree-info-btn">Edit Tree Info</button>\
 			<div class="edit-tree-info btn-group"><button class="btn-save-tree-info btn btn-mini btn-success" type="button">Submit</button>\
@@ -503,18 +535,33 @@ $(document).ready(function(){
 			</div>\
 		',
 		initialize: function(){
-			this.render();
-			this.model.on('change', this.render, this); //re-render when the model is saved (new observation, or an edit)
+		console.log("here");
+			if (document.location.hash.search("update") === -1) {
+				this.renderReport();
+				this.model.on('change', this.renderReport, this); //re-render when the model is saved (new observation, or an edit)
+			} else {
+				this.renderReport();
+				this.model.on('change', this.renderUpdate, this); //re-render when the model is saved (new observation, or an edit)
+			}
 		},
-		render: function(){
+		renderReport: function(){
+			//console.log('render report tree');
+			var thisTree = this.model.toJSON();
+			//get the dates in descending order
+			thisTree.datesDesc = _.keys(thisTree.diameter).sort().reverse();
+			this.$el.html(_.template(this.templateReport, {tree: thisTree}));
+			$(".title").text("Analyzing Tree Data ");
+			this.postRender();
+		},
+		renderUpdate: function(){
 			//console.log('render edit');
 			var thisTree = this.model.toJSON();
 			//get the dates in descending order
 			thisTree.datesDesc = _.keys(thisTree.diameter).sort().reverse();
-			this.$el.html(_.template(this.template, {tree: thisTree}));
-			this.postRender();
+			this.$el.html(_.template(this.templateUpdate, {tree: thisTree}));
+			$(".title").text("Updating Tree Data ");
 			$("#tree_observations").tablesorter({headers: { 0: { sorter: false}}}); 
-	
+			this.postRender();
 		},
 		postRender: function(){
 			//add any methods/functions that need to be call after redendering the Tree edit view
