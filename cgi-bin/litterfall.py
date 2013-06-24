@@ -162,6 +162,16 @@ class Tree:
 						
 					self.tree['_id'] = ObjectId()
 		
+		if self.tree['angle'] <= 0 or self.tree['angle'] > 360:
+			#print "Angle out of range"
+			raise TypeError
+			return None
+			
+		elif self.tree['distance'] < 0 or self.tree['distance'] > 999:
+			#print "Distance out of range"
+			raise TypeError
+			return None
+		
 		self.obs.save(self.tree)
 		self.updateTreeUniversal()
 		return self.tree

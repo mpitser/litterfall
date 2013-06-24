@@ -288,10 +288,10 @@ $(document).ready(function(){
 				<span class="species"><select></select></span>\
 			</td>\
 			<td class="editable">\
-				<span class="angle"><input value="" type="text"></input></span>\
+				<span class="edit_cell new_tree angle"><input value="" title="Angle must be a number between 0 and 360." type="text"></input></span>\
 			</td>\
 			<td class="editable">\
-				<span class="distance"><input value="" type="text"></input></span>\
+				<span class="edit_cell new_tree distance"><input value="" title="Distance must be a number between 0 and 1000." type="text"></input></span>\
 			</td>\
 			<td>\
 			</td>\
@@ -308,6 +308,7 @@ $(document).ready(function(){
 			$(".sub-tree-row-goaway").remove();
 			this.$el.addClass("tree-row-goaway");
 			this.options.targetEl.prepend(this.el);
+			$("#plot-table > tbody > tr:first .edit_cell").show();
 
 			this.postRender();
 		},
@@ -326,7 +327,9 @@ $(document).ready(function(){
 		},
 		events: {
 			'click .btn-save-new-tree': 'saveTree',
-			'click .btn-cancel-new-tree': 'deleteRow'
+			'click .btn-cancel-new-tree': 'deleteRow',
+			'change .new_tree': 'validateField'
+
 		},
 		saveTree: function() {
 			//calculate treeID
@@ -347,14 +350,71 @@ $(document).ready(function(){
 				'diameter': {},
 				'dead': false
 			});
-			
+			if (! (this.validateDistance() && this.validateAngle())){
+				console.log("didn't save");
+				return; // user will remain in edit view until their data passes validation
+			}
+
 			// save the new tree
 			var result = newTree.save({}, {
-				'success': function(data) {
+				'success': function(data) {if (result != null){ console.log(result);
 					app_router.navigate(document.location.hash + "/treeid/" + newTree.get("tree_id"), {trigger: true});
-				}
+				}}
 			});
 			
+		},
+		validateField: function(event){
+
+			var fieldToValidate = event.currentTarget.className;
+			console.log(fieldToValidate);
+			/* if angle field lost focus */
+			if (fieldToValidate == "edit_cell new_tree angle"){		
+				this.validateAngle();
+			/* if distance field lost focus */				
+			} else if (fieldToValidate == "edit_cell new_tree distance"){
+				this.validateDistance();
+			} else {
+				return;
+			}
+
+		},
+		validateAngle: function() {
+
+			// get angle entry
+			var angleEntered = parseFloat($("#plot-table .angle input").val());
+
+			// make sure the angle is in correct format and range
+			if (isNaN(angleEntered)|| angleEntered < 0 || angleEntered > 360) {
+				console.log("returned NaN");
+				$(".edit_cell.new_tree.angle :input").tooltip(); // NOTE: the text shown on the tooltip is listed as the title attribute of the template for NewTreeRiwView.
+				$(".edit_cell.new_tree.angle :input").tooltip("show");				
+				$(".edit_cell.new_tree.angle :input").addClass("alert_invalid");
+				return false;
+			} else { 
+				$(".edit_cell.new_tree.angle :input").removeClass("alert_invalid");
+				$(".edit_cell.new_tree.angle :input").tooltip("destroy");
+				console.log("angle validation passed");
+				return true;
+			}
+		},
+		validateDistance: function() {
+
+			// get distance entry
+			var distanceEntered = parseFloat($("#plot-table .angle input").val());
+
+			// make sure the distance is in correct format and range
+			if (isNaN(distanceEntered) || distanceEntered < 0 || distanceEntered > 999) {
+				console.log("returned NaN");
+				$(".edit_cell.new_tree.distance :input").tooltip(); // NOTE: the text shown on the tooltip is listed as the title attribute of the template for NewTreeRowView.
+				$(".edit_cell.new_tree.distance :input").tooltip("show");				
+				$(".edit_cell.new_tree.distance :input").addClass("alert_invalid");
+				return false;
+			} else { 
+				$(".edit_cell.new_tree.distance :input").removeClass("alert_invalid");
+				$(".edit_cell.new_tree.distance :input").tooltip("destroy");
+				console.log("distance validation passed");
+				return true;
+			}
 		},
 		deleteRow: function() {
 			
@@ -551,6 +611,7 @@ $(document).ready(function(){
 			thisTree.datesDesc = _.keys(thisTree.diameter).sort().reverse();
 			this.$el.html(_.template(this.templateReport, {tree: thisTree}));
 			$(".title").text("Analyzing Tree Data ");
+			$("#tree_observations").tablesorter(); 
 			this.postRender();
 		},
 		renderUpdate: function(){
@@ -1005,6 +1066,7 @@ $(document).ready(function(){
   			}, this);
   			// populate the treeIDs dropdown menu for adding new subtrees
   			this.populateTreeIDs();
+  			$(".dbh").attr("href", document.location.hash);
   			$(".btn").css("display", "inline-block");
     		
     		// add tablesorter jquery plugin (no sorting for first column)
