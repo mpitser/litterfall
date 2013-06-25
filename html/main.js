@@ -271,7 +271,7 @@ $(document).ready(function(){
 		tagName: 'tr',
 		templateReports: '\
 			<td class="btn-column">\
-				<button class="btn-tree btn btn-mini btn-primary" type="button"></button>\
+				<button class="btn-tree btn btn-mini btn-primary btn-analyze" type="button">View More</button>\
 			</td>\
 			<td class="tree-id">\
 				<%= tree.full_tree_id %>\
@@ -324,7 +324,7 @@ $(document).ready(function(){
 		templateUpdate:	'\
 			<td>\
 				<div class="btn-group">\
-					<button class="btn-tree btn btn-mini btn-primary" type="button"></button>\
+					<button class="btn-tree btn btn-mini btn-primary btn-update" type="button">Update</button>\
 					<button class="btn btn-mini dropdown-toggle btn-primary" data-toggle="dropdown">\
 						<span class="caret"></span>\
 					</button>\
@@ -353,11 +353,15 @@ $(document).ready(function(){
 				<%= tree.thisComment %>\
 			</td>',
 		initialize: function(){
-			this.render();
+			if (document.location.hash.search("update") === -1) {
+				this.renderReport();
+			} else {
+				this.renderUpdate();
+			}
 		},
-		render: function(){
+		renderReport: function(){
 			var thisTree = this.model.toJSON();
-			thisTree.thisDate = "";
+			
 			thisTree.diameter2 = "-";
 			thisTree.diameter3 = "-";
 			thisTree.diameter4 = "-";
@@ -371,9 +375,6 @@ $(document).ready(function(){
 			thisTree.diameter12 = "-";
 			thisTree.diameter13 = "-";
 			for (date in thisTree.diameter){                      //loop through the list of existing dates and store the most recent
-				if (date > thisTree.thisDate){					  //Date format is YYYYMMDD (reformated in template html above)
-					thisTree.thisDate = date;
-				}
 				if (date.slice(0,4) === '2002') {
 					thisTree.diameter2 = thisTree.diameter[date].value;
 				} else if (date.slice(0,4) === '2003') {
@@ -401,41 +402,38 @@ $(document).ready(function(){
 				}
 			}
 			
+			//$el --> gets the jQuery object for this view's element 
+			//*.attr('id', thisTree._id.$oid) --> sets 'id' to MongoDB value for tree's ID
+			//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
+			this.$el.attr('id', thisTree._id.$oid).html(_.template(this.templateReports, {tree: thisTree}));
+			this.$el.addClass("tree-cluster-" + thisTree.tree_id);
+			this.$el.children().eq(2).css("font-style","italic");
+			this.options.targetEl.append(this.el);	
+				
+		},
+		renderUpdate: function(){
+			var thisTree = this.model.toJSON();
+			thisTree.thisDate = "";
+			for (date in thisTree.diameter){                      //loop through the list of existing dates and store the most recent
+				if (date > thisTree.thisDate){					  //Date format is YYYYMMDD (reformated in template html above)
+					thisTree.thisDate = date;
+				}
+			}
+
 			if (Object.keys(thisTree.diameter).length > 0){
 				thisTree.thisDiameter = thisTree.diameter[thisTree.thisDate].value;    //gets diameter from most recent measurement
 				thisTree.thisComment = thisTree.diameter[thisTree.thisDate].notes;     //gets comments from most recent measurement
 			}
 			
-			// based on whether user is in analyze data mode or enter data mode, change button text and class tags
-			if (document.location.hash.search("update") === -1) {
-				
-				//$el --> gets the jQuery object for this view's element 
-				//*.attr('id', thisTree._id.$oid) --> sets 'id' to MongoDB value for tree's ID
-				//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
-				this.$el.attr('id', thisTree._id.$oid).html(_.template(this.templateReports, {tree: thisTree}));
-				this.$el.addClass("tree-cluster-" + thisTree.tree_id);
-				this.$el.children().eq(2).css("font-style","italic");
-				this.options.targetEl.append(this.el);	
-				
-				$(".btn-tree").text("View more");
-				$(".btn-tree").addClass("btn-analyze");
-				$(".btn-tree").removeClass("btn-update");
-				$(".btn-column").hide();
-				
-			} else {
-				//$el --> gets the jQuery object for this view's element 
-				//*.attr('id', thisTree._id.$oid) --> sets 'id' to MongoDB value for tree's ID
-				//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
-				this.$el.attr('id', thisTree._id.$oid).html(_.template(this.templateUpdate, {tree: thisTree}));
-				this.$el.addClass("tree-cluster-" + thisTree.tree_id);
-				this.$el.children().eq(2).css("font-style","italic");
-				this.options.targetEl.append(this.el);	
-				
-				$(".btn-tree").text("Update");
-				$(".btn-tree").addClass("btn-update");
-				$(".btn-tree").removeClass("btn-analyze");				
-			}
 			
+			//$el --> gets the jQuery object for this view's element 
+			//*.attr('id', thisTree._id.$oid) --> sets 'id' to MongoDB value for tree's ID
+			//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
+			this.$el.attr('id', thisTree._id.$oid).html(_.template(this.templateUpdate, {tree: thisTree}));
+			this.$el.addClass("tree-cluster-" + thisTree.tree_id);
+			this.$el.children().eq(2).css("font-style","italic");
+			this.options.targetEl.append(this.el);	
+
 		},
 		events: {
 			'click .delete-row': 'deleteTree',
@@ -518,10 +516,10 @@ $(document).ready(function(){
 				<span class="species"><select></select></span>\
 			</td>\
 			<td class="editable">\
-				<span class="angle"><input value="" type="text"></input></span>\
+				<span class="edit_cell new_tree angle"><input value="" title="Angle must be a number between 0 and 360." type="text"></input></span>\
 			</td>\
 			<td class="editable">\
-				<span class="distance"><input value="" type="text"></input></span>\
+				<span class="edit_cell new_tree distance"><input value="" title="Distance must be a number between 0 and 1000." type="text"></input></span>\
 			</td>\
 			<td>\
 			</td>\
@@ -538,6 +536,7 @@ $(document).ready(function(){
 			$(".sub-tree-row-goaway").remove();
 			this.$el.addClass("tree-row-goaway");
 			this.options.targetEl.prepend(this.el);
+			$("#plot-table > tbody > tr:first .edit_cell").show();
 
 			this.postRender();
 		},
@@ -556,7 +555,9 @@ $(document).ready(function(){
 		},
 		events: {
 			'click .btn-save-new-tree': 'saveTree',
-			'click .btn-cancel-new-tree': 'deleteRow'
+			'click .btn-cancel-new-tree': 'deleteRow',
+			'change .new_tree': 'validateField'
+
 		},
 		saveTree: function() {
 			//calculate treeID
@@ -577,14 +578,71 @@ $(document).ready(function(){
 				'diameter': {},
 				'dead': false
 			});
-			
+			if (! (this.validateDistance() && this.validateAngle())){
+				console.log("didn't save");
+				return; // user will remain in edit view until their data passes validation
+			}
+
 			// save the new tree
 			var result = newTree.save({}, {
-				'success': function(data) {
+				'success': function(data) {if (result != null){ console.log(result);
 					app_router.navigate(document.location.hash + "/treeid/" + newTree.get("tree_id"), {trigger: true});
-				}
+				}}
 			});
 			
+		},
+		validateField: function(event){
+
+			var fieldToValidate = event.currentTarget.className;
+			console.log(fieldToValidate);
+			// if angle field lost focus
+			if (fieldToValidate == "edit_cell new_tree angle"){		
+				this.validateAngle();
+			// if distance field lost focus				
+			} else if (fieldToValidate == "edit_cell new_tree distance"){
+				this.validateDistance();
+			} else {
+				return;
+			}
+
+		},
+		validateAngle: function() {
+
+			// get angle entry
+			var angleEntered = parseFloat($("#plot-table .angle input").val());
+
+			// make sure the angle is in correct format and range
+			if (isNaN(angleEntered)|| angleEntered < 0 || angleEntered > 360) {
+				console.log("returned NaN");
+				$(".edit_cell.new_tree.angle :input").tooltip(); // NOTE: the text shown on the tooltip is listed as the title attribute of the template for NewTreeRiwView.
+				$(".edit_cell.new_tree.angle :input").tooltip("show");				
+				$(".edit_cell.new_tree.angle :input").addClass("alert_invalid");
+				return false;
+			} else { 
+				$(".edit_cell.new_tree.angle :input").removeClass("alert_invalid");
+				$(".edit_cell.new_tree.angle :input").tooltip("destroy");
+				console.log("angle validation passed");
+				return true;
+			}
+		},
+		validateDistance: function() {
+
+			// get distance entry
+			var distanceEntered = parseFloat($("#plot-table .angle input").val());
+
+			// make sure the distance is in correct format and range
+			if (isNaN(distanceEntered) || distanceEntered < 0 || distanceEntered > 999) {
+				console.log("returned NaN");
+				$(".edit_cell.new_tree.distance :input").tooltip(); // NOTE: the text shown on the tooltip is listed as the title attribute of the template for NewTreeRowView.
+				$(".edit_cell.new_tree.distance :input").tooltip("show");				
+				$(".edit_cell.new_tree.distance :input").addClass("alert_invalid");
+				return false;
+			} else { 
+				$(".edit_cell.new_tree.distance :input").removeClass("alert_invalid");
+				$(".edit_cell.new_tree.distance :input").tooltip("destroy");
+				console.log("distance validation passed");
+				return true;
+			}
 		},
 		deleteRow: function() {
 			
@@ -593,7 +651,9 @@ $(document).ready(function(){
 			});
 		}
 	});
+	*/
 
+/*
 	// Adding new row for inserting a new SUBtree
 	var newSubTreeRowView = Backbone.View.extend({
 		tagName: 'tr',
@@ -680,7 +740,41 @@ $(document).ready(function(){
 	//build a row in the plot table representing a tree
 	var treeEditView = Backbone.View.extend({
 		tagName: 'div',
-		template: '\
+		templateReport: '\
+		<div id="tree-info">\
+			<ul>\
+				<li>Species: <span class="display-tree-info species"><%= tree.species %></span><span class="edit-tree-info species"><select></select></span></li>\
+				<li>Angle Degrees: <span class="display-tree-info angle"><%= tree.angle %></span><span class="edit-tree-info angle"><input value="<%= tree.angle %>"></input></span></li>\
+				<li>Distance Meters: <span class="display-tree-info distance"><%= tree.distance %></span><span class="edit-tree-info distance"><input value="<%= tree.distance %>"></input></span></li>\
+			</ul>\
+		</div>\
+		<table id="tree_observations" class="table-striped tablesorter">\
+			<thead>\
+				<tr>\
+					<th>Date</th>\
+					<th>Observers</th>\
+					<th>\
+						DBH (cm) <a href="#" class="dbh" rel="tooltip" data-placement="top" data-original-title="Diameter at Breast Height"><small>info</small></a>\
+					</th>\
+					<th>\
+						Comments\
+					</th>\
+				</tr>\
+			</thead>\
+			<tbody>\
+			<% _.each(tree.datesDesc, function(date){ %>\
+			<tr>\
+				<td><span class="display_cell date_select"><%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %></span>\
+				<input type="hidden" class="formatted_date" value="<%= date %>"></span></td>\
+				<td><span class="display_cell observers"><%= tree.diameter[date].observers %></span>\
+				<td><span class="display_cell diameter"><%= tree.diameter[date].value %></span>\
+				<td><span class="display_cell notes"><%= tree.diameter[date].notes %></span>\
+			</tr>\
+			<% }); %>\
+			</tbody>\
+			</table>\
+		',
+		templateUpdate: '\
 		<div id="tree-info">\
 			<button class="btn btn-success btn-mini edit-tree-info-btn">Edit Tree Info</button>\
 			<div class="edit-tree-info btn-group"><button class="btn-save-tree-info btn btn-mini btn-success" type="button">Submit</button>\
@@ -731,22 +825,37 @@ $(document).ready(function(){
 			</div>\
 		',
 		initialize: function(){
-			this.render();
-			this.model.on('change', this.render, this); //re-render when the model is saved (new observation, or an edit)
+		console.log("here");
+			if (document.location.hash.search("update") === -1) {
+				this.renderReport();
+				this.model.on('change', this.renderReport, this); //re-render when the model is saved (new observation, or an edit)
+			} else {
+				this.renderUpdate();
+				this.model.on('change', this.renderUpdate, this); //re-render when the model is saved (new observation, or an edit)
+			}
 		},
-		render: function(){
-			//console.log('render edit');
-			//console.log(this.model.get('diameter')[0].notes);
+		renderReport: function(){
+			//console.log('render report tree');
 			var thisTree = this.model.toJSON();
 			//console.log(thisTree.diameter);
 			//get the dates in descending order
 			console.log(thisTree);
 			console.log(thisTree.diameter);
 			thisTree.datesDesc = _.keys(thisTree.diameter).sort().reverse();
-			this.$el.html(_.template(this.template, {tree: thisTree}));
+			this.$el.html(_.template(this.templateReport, {tree: thisTree}));
+			$(".title").text("Analyzing Tree Data ");
+			$("#tree_observations").tablesorter(); 
 			this.postRender();
+		},
+		renderUpdate: function(){
+			//console.log('render edit');
+			var thisTree = this.model.toJSON();
+			//get the dates in descending order
+			thisTree.datesDesc = _.keys(thisTree.diameter).sort().reverse();
+			this.$el.html(_.template(this.templateUpdate, {tree: thisTree}));
+			$(".title").text("Updating Tree Data ");
 			$("#tree_observations").tablesorter({headers: { 0: { sorter: false}}}); 
-	
+			this.postRender();
 		},
 		postRender: function(){
 			//add any methods/functions that need to be call after redendering the Tree edit view
@@ -1208,8 +1317,8 @@ $(document).ready(function(){
   				}
   			}, this);
   			
-    		// populate the treeIDs dropdown menu for adding new subtrees
-  			// this.populateTreeIDs();
+  			// populate the treeIDs dropdown menu for adding new subtrees
+  			$(".dbh").attr("href", document.location.hash);
   			// $(".btn").css("display", "inline-block");
     		
     		// add tablesorter jquery plugin (no sorting for first column)
