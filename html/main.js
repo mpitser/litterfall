@@ -122,7 +122,7 @@ $(document).ready(function(){
 				<%= tree.distance %>\
 			</td>\
 			<td>\
-				<%= tree.thisDiameter %> on <%= tree.thisDate.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %>\
+				<%= tree.thisDiameter %> on <%= tree.thisDate %>\
 			</td>\
 			<td>\
 				<%= tree.thisComment %>\
@@ -532,13 +532,14 @@ $(document).ready(function(){
 				</tr>\
 			</thead>\
 			<tbody>\
-			<% _.each(tree.datesDesc, function(date){ %>\
+			<% $.each(tree.datesDesc, function(obs){ %>\
+				<% d = obs.date; %> \
+    			<% var date = $.datepicker.formatDate("dd/mm/yy", new Date(d)); %>\
 			<tr>\
-				<td><span class="display_cell date_select"><%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %></span>\
-				<input type="hidden" class="formatted_date" value="<%= date %>"></span></td>\
-				<td><span class="display_cell observers"><%= tree.diameter[date].observers %></span>\
-				<td><span class="display_cell diameter"><%= tree.diameter[date].value %></span>\
-				<td><span class="display_cell notes"><%= tree.diameter[date].notes %></span>\
+				<td><span class="display_cell date_select"><%= date %></span>\
+				<td><span class="display_cell observers"><%= obs.observers %></span>\
+				<td><span class="display_cell diameter"><%= obs.value %></span>\
+				<td><span class="display_cell notes"><%= obs.notes %></span>\
 			</tr>\
 			<% }); %>\
 			</tbody>\
@@ -574,18 +575,19 @@ $(document).ready(function(){
 				</tr>\
 			</thead>\
 			<tbody>\
-			<% _.each(tree.datesDesc, function(date){ %>\
+			<% _.each(tree.datesDesc, function(obs){ %>\
+				<% d = obs.date; %> \
+    			<% var date = $.datepicker.formatDate("yy/dd/mm", new Date(d)); %>\
 			<tr>\
 				<td class="btn-column">\
 					<button class="display_cell btn btn-mini btn-primary edit-existing" type="button">Edit</button>\
 					<div class="edit_cell btn-group"><button class="btn-save-observation btn btn-mini btn-success" type="button">Submit</button>\
 					<button class="btn-cancel-observation btn btn-mini btn-danger" type="button">Cancel</button>\
 				</td>\
-				<td class="editable"><span class="display_cell date_select"><%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %></span><span class="edit_cell date_select"><input title="Enter a date in mm/dd/yyyy format.  It may not already have an associated diameter entry or be in the future." type="text" value="<%= date.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %>"/>\
-				<input type="hidden" class="formatted_date" value="<%= date %>"></span></td>\
-				<td class="editable"><span class="display_cell observers"><%= tree.diameter[date].observers %></span><span class="edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= tree.diameter[date].observers %>"></span></td>\
-				<td class="editable"><span class="display_cell diameter"><%= tree.diameter[date].value %></span><span class="edit_cell diameter"><input title = "Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= tree.diameter[date].value %>"></span></td>\
-				<td class="editable"><span class="display_cell notes"><%= tree.diameter[date].notes %></span><span class="edit_cell notes"><input type="text" value="<%= tree.diameter[date].notes %>"></span></span></td>\
+				<td class="editable"><span class="display_cell date_select"><%= date %></span><span class="edit_cell date_select"><input title="Enter a date in mm/dd/yyyy format.  It may not already have an associated diameter entry or be in the future." type="text" value="<%= date %>"/>\
+				<td class="editable"><span class="display_cell observers"><%= obs.observers %></span><span class="edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= obs.observers %>"></span></td>\
+				<td class="editable"><span class="display_cell diameter"><%= obs.value %></span><span class="edit_cell diameter"><input title = "Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= obs.value %>"></span></td>\
+				<td class="editable"><span class="display_cell notes"><%= obs.notes %></span><span class="edit_cell notes"><input type="text" value="<%= obs.notes %>"></span></span></td>\
 			</tr>\
 			<% }); %>\
 			</tbody>\
@@ -595,30 +597,33 @@ $(document).ready(function(){
 			</div>\
 		',
 		initialize: function(){
-		console.log("here");
+			var i = 0;
+			console.log("here");
 			if (document.location.hash.search("update") === -1) {
 				this.renderReport();
 				this.model.on('change', this.renderReport, this); //re-render when the model is saved (new observation, or an edit)
 			} else {
-				this.renderReport();
+				this.renderUpdate();
 				this.model.on('change', this.renderUpdate, this); //re-render when the model is saved (new observation, or an edit)
 			}
 		},
 		renderReport: function(){
-			//console.log('render report tree');
+			console.log('render report');
 			var thisTree = this.model.toJSON();
 			//get the dates in descending order
-			thisTree.datesDesc = _.keys(thisTree.diameter).sort().reverse();
+			var dates = thisTree.diameter;
+			console.log(dates);
+			thisTree.datesDesc = dates;
 			this.$el.html(_.template(this.templateReport, {tree: thisTree}));
 			$(".title").text("Analyzing Tree Data ");
-			$("#tree_observations").tablesorter(); 
-			this.postRender();
+			$("#tree_observations").tablesorter();
 		},
 		renderUpdate: function(){
-			//console.log('render edit');
 			var thisTree = this.model.toJSON();
 			//get the dates in descending order
-			thisTree.datesDesc = _.keys(thisTree.diameter).sort().reverse();
+			var dates = thisTree.diameter;
+
+			thisTree.datesDesc = dates;
 			this.$el.html(_.template(this.templateUpdate, {tree: thisTree}));
 			$(".title").text("Updating Tree Data ");
 			$("#tree_observations").tablesorter({headers: { 0: { sorter: false}}}); 
@@ -673,25 +678,26 @@ $(document).ready(function(){
 		},
 		newObservation: function(){
 			//add a new blank row to the observation table
-			var diameters = _.clone(this.model.get('diameter')); //must clone object to update it
 			var today = new Date();
 			var todayDateKey = [today.getFullYear(),((today.getMonth() < 9) ? 0 : ""),(today.getMonth() + 1),((today.getDate() < 10) ? 0 : ""),today.getDate()].join(""); //yes it generates the date in YYYYMMDD format
 			// if today's date already has an entry, set a template dateKey using tomorrow's date (which the user will be forced to change to pass validation)
-			diameters[(diameters[todayDateKey] == undefined) ? todayDateKey : (parseInt(todayDateKey) + 1)] = {
+			newDiameter = {
+					date: today,
 					value: 'n/a',
 					notes: "",
 					observers: ""
 			};
-			this.model.set({"diameter": diameters});
+			
+			//this.model.push({newDiameter});
 
 
-			// Disable all the fields from being editing
+			// Disable all the other edit buttons
 			$("#tree_observations .btn.display_cell").hide();
 
 			// Show edit content, hide display content, show "Submit/cancel button", add date_picker		
 			$("#tree_observations > tbody > tr:first .edit_cell").show();
 			$("#tree_observations > tbody > tr:first .display_cell").hide();
-			$("#tree_observations > tbody > tr:first .edit_cell.date_select :input" ).datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date" , maxDate: 0 , changeYear: true , changeMonth: true , constrainInput: true});	
+			$("#tree_observations > tbody > tr:first .edit_cell.date_select :input" ).datepicker({ maxDate: 0 , changeYear: true , changeMonth: true , constrainInput: true});	
 			var existingObs = this.model.findAllObservers();
 			$("#tree_observations > tbody > tr:first .edit_cell.observers :input").autocomplete({source: existingObs});
 		},
