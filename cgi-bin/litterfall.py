@@ -4,7 +4,7 @@ from pymongo import MongoClient
 from bson import json_util
 from bson.objectid import ObjectId
 from types import *
-import json, cgi, os, ConfigParser, unicodedata, pymongo
+import json, cgi, os, ConfigParser, unicodedata, pymongo, datetime
 # for debug purpose
 import cgitb; cgitb.enable()
 
@@ -162,22 +162,15 @@ class Tree:
 						
 					self.tree['_id'] = ObjectId()
 		
-		if self.tree['angle'] <= 0 or self.tree['angle'] > 360:
-			#print "Angle out of range"
-			raise TypeError
-			return None
-			
-		elif self.tree['distance'] < 0 or self.tree['distance'] > 999:
-			#print "Distance out of range"
-			raise TypeError
-			return None
-		
 		self.obs.save(self.tree)
 		self.updateTreeUniversal()
 		return self.tree
 	
 	def format(self):
-		self.tree = self.tree
+		
+		for (key, entry) in enumerate(self.tree['diameter']):
+			self.tree['diameter'][key]['date'] = datetime.datetime.strptime(self.tree['diameter'][key]['date'], "%Y-%m-%dT%H:%M:%S.%fZ")
+		
 		return True
 	
 	def updateTreeUniversal(self):
@@ -265,6 +258,7 @@ def getdata(obs, site, plot, treeid, subtreeid):
 		data = obs.find({'collection_type':'tree', 'plot': int(plot), 'site': site}, {'fields':'tree_id'}).distinct('tree_id')
 		data.sort()
 		n = -1
+	
 	else:
 		# then the query is about a particular site and plot
 		findQuery = {
