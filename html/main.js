@@ -975,7 +975,7 @@ $(document).ready(function(){
 			sub_tree_id: 0,
 			angle: 0.0,
 			distance: 0,
-			diameter: {},
+			diameter: [{date: new Date(), observers: [], note: "", value: 0}],
 			species: 'Unknown',
 			species_certainty: 0,
 			dead: true,
@@ -1007,6 +1007,23 @@ $(document).ready(function(){
 		},
 		parse: function(response){
 			response.full_tree_id = response.tree_id + (response.sub_tree_id * .1);
+			
+			var newEntryArray = [];
+			var convertToJSDate = function(mongoDateObject) {
+				return new Date(mongoDateObject.$date);
+			};
+			console.log(response);
+			
+			console.log(response.diameter);
+			_.each(response.diameter, function(entry, key) {
+				console.log(new Date(response.diameter[key].date.$date));
+				response.diameter[key].date = new Date(response.diameter[key].date.$date);
+				console.log(response.diameter[key]);
+				console.log(response.diameter[key].date.getFullYear());
+			});
+			
+			console.log(response);
+			
 			return response;
 		},
 		// overriding the save method, so that when the model saves it updates its inside to match what the server sends back
@@ -1017,7 +1034,14 @@ $(document).ready(function(){
 			treeModel = this;
 			result.done(function(data) {
 				
-				treeModel.set(data);
+			treeModel.set(data);
+			if (result !== false) {
+			
+				treeModel = this;
+				
+				result.done(function(data) {
+				
+					treeModel.set(treeModel.parse(data));
 				
 			});
 			
