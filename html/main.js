@@ -333,6 +333,7 @@ $(document).ready(function(){
 					</button>\
 					<ul class="dropdown-menu">\
 						<li><a style="cursor:pointer;" class="delete-row">Delete</a></li>\
+						<li><a style="cursor:pointer;" class="add-new-sub-tree-from-row">Add a sub-tree</a></li>\
 					</ul>\
 				</div>\
 			</td>\
