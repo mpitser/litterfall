@@ -171,6 +171,53 @@ class Tree:
 		for (key, entry) in enumerate(self.tree['diameter']):
 			self.tree['diameter'][key]['date'] = datetime.datetime.strptime(self.tree['diameter'][key]['date'], "%Y-%m-%dT%H:%M:%S.%fZ")
 		
+		if not 'tree_id' in self.tree:
+			return False
+		else:
+			if self.tree['tree_id'] <= 0:
+				return False
+		
+		if not 'sub_tree_id' in self.tree:
+			return False
+		else:
+			if self.tree['sub_tree_id'] < 0:
+				return False
+		
+		if not 'plot' in self.tree:
+			return False
+		if not 'site' in self.tree:
+			return False
+		
+		if not 'collection_type' in self.tree:
+			return False
+		elif self.tree['collection_type'] != 'tree':
+			self.tree['collection_type'] = 'tree'
+		
+		if not 'species' in self.tree:
+			return False
+		elif self.tree['species'] == '':
+			return False
+		
+		if not 'angle' in self.tree:
+			return False
+		else:
+			if type(self.tree['angle']) is not IntType:
+				return False
+			else:
+				self.tree['angle'] = self.tree['angle'] % 360
+		
+		if not 'distance' in self.tree:
+			return False
+		else:
+			if type(self.tree['distance']) is not IntType:
+				return False
+			elif self.tree['distance'] < 0:
+				self.tree['distance'] = -1 * self.tree['distance']
+				self.tree['angle'] = (self.tree['angle'] + 180) % 360
+		
+		if 'full_tree_id' in self.tree:
+			del self.tree['full_tree_id']
+		
 		return True
 	
 	def updateTreeUniversal(self):
@@ -253,11 +300,6 @@ def getdata(obs, site, plot, treeid, subtreeid):
 		data = obs.find({'collection_type':'tree'}, {'fields':'diameter'}).distinct('diameter')
 		data.sort()
 		n = 0 # n is not important, just helps up in decigin which data to assign to json_data
-	elif treeid == 'maxID':
-		# Return max existing tree id at site and plot
-		data = obs.find({'collection_type':'tree', 'plot': int(plot), 'site': site}, {'fields':'tree_id'}).distinct('tree_id')
-		data.sort()
-		n = -1
 	
 	else:
 		# then the query is about a particular site and plot

@@ -119,7 +119,7 @@ $(document).ready(function(){
 			this.$el.on("hidden", function() {
 				this.remove();
 				if (self.isSubTree) {
-					$('.add-new-sub-tree').trigger('click');
+					$('.add-new-sub-tree').eq(0).trigger("notChoosingParentTreeAnymore");
 				}
 			});
 			
@@ -237,7 +237,7 @@ $(document).ready(function(){
 			this.model.url = app.config.cgiDir + 'litterfall.py';
 			var self = this;
 			this.model.validate = function() {
-				if (!(self.validateAngle() || self.validateDistance())) {
+				if (!(self.validateAngle() || self.validateDistance() || self.validateSpecies())) {
 					return "Invalid data";
 				}
 			}
@@ -256,6 +256,9 @@ $(document).ready(function(){
 				success: function() {
 					self.$el.modal("hide");
 					if (backToPlot == true) {
+						/* if (self.isSubTree === true) {
+							$(".add-new-sub-tree").trigger("click");
+						} */
 						self.trigger("treeSaved");
 					} else {
 						app_router.navigate(document.location.hash + "/treeid/" + self.model.get("tree_id"), {trigger: true});
@@ -347,10 +350,10 @@ $(document).ready(function(){
 				<%= tree.distance %>\
 			</td>\
 			<td>\
-				<%= tree.thisDiameter %> on <%= tree.thisDate.replace(/^([0-9]{4})([0-9]{2})([0-9]{2})$/, "$2/$3/$1") %>\
+				<%= tree.latestDBHMessage %>\
 			</td>\
 			<td>\
-				<%= tree.thisComment %>\
+				<%= tree.latestComment %>\
 			</td>',
 		initialize: function(){
 			if (document.location.hash.search("update") === -1) {
@@ -413,17 +416,42 @@ $(document).ready(function(){
 		},
 		renderUpdate: function(){
 			var thisTree = this.model.toJSON();
+			/*
 			thisTree.thisDate = "";
 			for (date in thisTree.diameter){                      //loop through the list of existing dates and store the most recent
 				if (date > thisTree.thisDate){					  //Date format is YYYYMMDD (reformated in template html above)
 					thisTree.thisDate = date;
 				}
-			}
-
-			if (Object.keys(thisTree.diameter).length > 0){
-				thisTree.thisDiameter = thisTree.diameter[thisTree.thisDate].value;    //gets diameter from most recent measurement
-				thisTree.thisComment = thisTree.diameter[thisTree.thisDate].notes;     //gets comments from most recent measurement
-			}
+			}*/
+			
+			var isFormerDateMoreRecent = function(formerDate, latterDate) {
+				
+				if (formerDate.y > latterDate.y) return true;
+				if (formerDate.y < latterDate.y) return false;
+				
+				if (formerDate.m > latterDate.m) return true;
+				if (formerDate.m < latterDate.m) return false;
+				
+				return formerDate.d > formerDate.d;
+				
+			};
+			
+			thisTree.latestDBHMessage = "";
+			thisTree.latestComment = "";
+			
+			console.log(thisTree);
+			
+			/*
+			if (thisTree.diameter.length > 0){
+				//thisTree.thisDiameter = thisTree.diameter[thisTree.thisDate].value;    //gets diameter from most recent measurement
+				//thisTree.thisComment = thisTree.diameter[thisTree.thisDate].notes;     //gets comments from most recent measurement
+				var mostRecentEntry = _.max(thisTree.diameter, function(entry) {
+					// return (entry.y - 2000)*10000 + entry.m*100 + entry.d;
+				});
+				console.log(mostRecentEntry);
+				thisTree.latestDBHMessage = mostRecentEntry.value + " on " + toFormattedDate(mostRecentEntry.date);
+				thisTree.latestComment = mostRecentEntry.comment;
+			}*/
 			
 			
 			//$el --> gets the jQuery object for this view's element 
@@ -737,7 +765,7 @@ $(document).ready(function(){
 		}
 	});
 */
-	//build a row in the plot table representing a tree
+	
 	var treeEditView = Backbone.View.extend({
 		tagName: 'div',
 		templateReport: '\
@@ -774,7 +802,7 @@ $(document).ready(function(){
 			</tbody>\
 			</table>\
 		',
-		templateUpdate: '\
+		templateUpdateBackUp: '\
 		<div id="tree-info">\
 			<button class="btn btn-success btn-mini edit-tree-info-btn">Edit Tree Info</button>\
 			<div class="edit-tree-info btn-group"><button class="btn-save-tree-info btn btn-mini btn-success" type="button">Submit</button>\
@@ -824,24 +852,77 @@ $(document).ready(function(){
 				<button class="btn-new-observation btn btn-mini btn-success pull-left" type="button">+ New Entry</button>\
 			</div>\
 		',
+		templateUpdate: '\
+		<div id="tree-info">\
+			<button class="btn btn-success btn-mini edit-tree-info-btn">Edit Tree Info</button>\
+			<div class="edit-tree-info btn-group"><button class="btn-save-tree-info btn btn-mini btn-success" type="button">Submit</button>\
+			<button class="btn-cancel-tree-info btn btn-mini btn-danger" type="button">Cancel</button>\
+			</div>\
+			<ul>\
+				<li>Species: <span class="display-tree-info species"><%= tree.species %></span><span class="edit-tree-info species"><select></select></span></li>\
+				<li>Angle Degrees: <span class="display-tree-info angle"><%= tree.angle %></span><span class="edit-tree-info angle"><input value="<%= tree.angle %>"></input></span></li>\
+				<li>Distance Meters: <span class="display-tree-info distance"><%= tree.distance %></span><span class="edit-tree-info distance"><input value="<%= tree.distance %>"></input></span></li>\
+			</ul>\
+		</div>\
+		<div class="button-row">\
+			<button class="btn-new-observation btn btn-mini btn-success pull-left" type="button">+ New Entry</button>\
+		</div>\
+		<table id="tree_observations" class="table-striped tablesorter">\
+			<thead>\
+				<tr>\
+					<th class="btn-column"></th>\
+					<th>Date</th>\
+					<th>Observers</th>\
+					<th>\
+						DBH (cm) <a href="#" class="dbh" rel="tooltip" data-placement="top" data-original-title="Diameter at Breast Height"><small>info</small></a>\
+					</th>\
+					<th>\
+						Comments\
+					</th>\
+				</tr>\
+			</thead>\
+			<tbody>\
+			<% _.each(tree.diameter, function(entry){ %>\
+			<tr>\
+				<td class="btn-column">\
+					<button class="display_cell btn btn-mini btn-primary edit-existing" type="button">Edit</button>\
+					<div class="edit_cell btn-group"><button class="btn-save-observation btn btn-mini btn-success" type="button">Submit</button>\
+					<button class="btn-cancel-observation btn btn-mini btn-danger" type="button">Cancel</button>\
+				</td>\
+				<td class="editable"><span class="display_cell date_select"><%= toFormattedDate(entry.date) %></span><span class="edit_cell date_select"><input title="Enter a date in mm/dd/yyyy format.  It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
+				<input type="hidden" class="formatted_date" value="<%= toFormattedDate(entry.date) %>"></span></td>\
+				<td class="editable"><span class="display_cell observers"><%= entry.observers %></span><span class="edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
+				<td class="editable"><span class="display_cell diameter"><%= entry.value %></span><span class="edit_cell diameter"><input title = "Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
+				<td class="editable"><span class="display_cell notes"><%= entry.notes %></span><span class="edit_cell notes"><input type="text" value="<%= entry.notes %>"></span></span></td>\
+			</tr>\
+			<% }); %>\
+			</tbody>\
+			</table>\
+			<div class="button-row">\
+				<button class="btn-new-observation btn btn-mini btn-success pull-left" type="button">+ New Entry</button>\
+			</div>\
+		',
 		initialize: function(){
-		console.log("here");
+		
+			this.render();
+			console.log(this.model);
+		},
+		render: function() {
 			if (document.location.hash.search("update") === -1) {
 				this.renderReport();
-				this.model.on('change', this.renderReport, this); //re-render when the model is saved (new observation, or an edit)
+				// this.model.on('change', this.renderReport, this); //re-render when the model is saved (new observation, or an edit)
 			} else {
 				this.renderUpdate();
-				this.model.on('change', this.renderUpdate, this); //re-render when the model is saved (new observation, or an edit)
+				//this.model.on('change', this.renderUpdate, this.model); //re-render when the model is saved (new observation, or an edit)
 			}
 		},
 		renderReport: function(){
 			//console.log('render report tree');
+			console.log(this.model);
 			var thisTree = this.model.toJSON();
 			//console.log(thisTree.diameter);
 			//get the dates in descending order
-			console.log(thisTree);
-			console.log(thisTree.diameter);
-			thisTree.datesDesc = _.keys(thisTree.diameter).sort().reverse();
+			// thisTree.datesDesc = _.keys(thisTree.diameter).sort().reverse();
 			this.$el.html(_.template(this.templateReport, {tree: thisTree}));
 			$(".title").text("Analyzing Tree Data ");
 			$("#tree_observations").tablesorter(); 
@@ -851,7 +932,7 @@ $(document).ready(function(){
 			//console.log('render edit');
 			var thisTree = this.model.toJSON();
 			//get the dates in descending order
-			thisTree.datesDesc = _.keys(thisTree.diameter).sort().reverse();
+			// thisTree.datesDesc = _.keys(thisTree.diameter).sort().reverse();
 			this.$el.html(_.template(this.templateUpdate, {tree: thisTree}));
 			$(".title").text("Updating Tree Data ");
 			$("#tree_observations").tablesorter({headers: { 0: { sorter: false}}}); 
@@ -863,8 +944,6 @@ $(document).ready(function(){
 		},
 		populateSpecies: function(){
 			var treeSpecies = this.model.get('species');
-			//console.log(treeSpecies);
-			//??
 			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allSpecies', function(data) {
 				$.each(data, function(index, value) {
 					if (value == treeSpecies) {
@@ -1199,7 +1278,7 @@ $(document).ready(function(){
 			sub_tree_id: 0,
 			angle: 0.0,
 			distance: 0,
-			diameter: [{date: new Date(), observers: ['Boyd'], note: "", value: 10}],
+			diameter: [{date: {'y': 2013, 'm': 1, 'd': 1}, observers: ['Boyd'], note: "", value: 10}],
 			species: 'Unknown',
 			species_certainty: 0,
 			dead: true,
@@ -1210,7 +1289,7 @@ $(document).ready(function(){
 			collection_type: 'tree'
 		},
 		initialize: function(){
-			this.editViewInitialize();
+			// this.editViewInitialize();
 			this.on('invalid', this.showError);
 		},
 		showError: function(){
@@ -1232,11 +1311,8 @@ $(document).ready(function(){
 		parse: function(response){
 			response.full_tree_id = response.tree_id + (response.sub_tree_id * .1);
 			
+			/*
 			var newEntryArray = [];
-			var convertToJSDate = function(mongoDateObject) {
-				return new Date(mongoDateObject.$date);
-			};
-			console.log(response);
 			
 			console.log(response.diameter);
 			_.each(response.diameter, function(entry, key) {
@@ -1245,8 +1321,7 @@ $(document).ready(function(){
 				console.log(response.diameter[key]);
 				console.log(response.diameter[key].date.getFullYear());
 			});
-			
-			console.log(response);
+			*/
 			
 			return response;
 		},
@@ -1294,19 +1369,14 @@ $(document).ready(function(){
 	var Plot = Backbone.Collection.extend({
 		model: Tree,
 		url: "/",
+		areWeChoosingParentTree: false,
   		initialize: function(){
-  			 this.on('reset', function() {
-  			 	this.renderTrees();
-  			 	//this.addFunctions();
-  			 }); 
-  			 this.on('add', function() {
-  			 	$('#plot-table tbody').empty();
-  			 	this.renderTrees();
-  			 });
-  			 //this.on('add', myFunction);
-  			 //this.on('reset', this.findAllObservers); 
-  			 //this.on('add', this.findAllObservers); 
-  			 //this.on('change', this.renderTrees);
+  			
+  			this.on('reset', this.renderTrees); 
+  			//this.on('add', myFunction);
+  			//this.on('reset', this.findAllObservers); 
+  			//this.on('add', this.findAllObservers); 
+  			//this.on('change', this.renderTrees);
   		},
   		renderTrees: function(){
   			var siteName = "";
@@ -1412,7 +1482,7 @@ $(document).ready(function(){
   			$("#DBH").attr("colSpan", numYears);
     	},
   		addTree: function(){
-  			//this.newTreeRowViewInitialize();
+  			
   			var randomTree = this.find(function(){return true;});
   			
   			var newTree = new Tree({
@@ -1585,41 +1655,53 @@ $(document).ready(function(){
 			thisPlot.url = app.config.cgiDir + 'litterfall.py?site=' + site + '&plot=' + plot;
 			thisPlot.fetch();
 			
+			var $addNewSubTree = $('.add-new-sub-tree');
+			
 			// adding new tree
 			$('.add-new-tree').click(function(){
+				if (thisPlot.areWeChoosingParentTree === true) {
+					$addNewSubTree.eq(0).trigger("notChoosingParentTreeAnymore");
+				}
 				thisPlot.addTree();
 			});
 			
 			// add popover
 			
-			$('.add-new-sub-tree')
+			$addNewSubTree
 			.popover({
 				title: 'Add a new sub-tree',
 				content: 'Choose the parent tree from below'
 			})
 			// add the toggling functions
-			.toggle(
-				function() {
-					$(this).popover('show');
+			.bind("choosingParentTree", function() {
+				$addNewSubTree.popover('show').addClass('active');
 					
-					$('#plot-table tr').css('cursor', 'pointer')
-					.bind('click.makeTreeClickable', function() {
+				$('#plot-table tr').css('cursor', 'pointer')
+				.bind('click.makeTreeClickable', function() {
+				
+					// add sub-tree
+					var thisTreeId = Math.floor(parseFloat($(this).children("td").eq(1).text()));
+					thisPlot.addSubTree(thisTreeId);
+				});
+				
+				//$('.btn-update').attr("disabled", "disabled");
+				$('#plot-table tr .btn').attr("disabled", "disabled");
+			})
+			.bind("notChoosingParentTreeAnymore", function() {
+				$addNewSubTree.popover('hide').removeClass('active');
 					
-						// add sub-tree
-						var thisTreeId = Math.floor(parseFloat($(this).children("td").eq(1).text()));
-						thisPlot.addSubTree(thisTreeId);
-					});
-					
-					//$('.btn-update').attr("disabled", "disabled");
-					$('#plot-table tr .btn').attr("disabled", "disabled");
-				},
-				function() {
-					$(this).popover('hide');
-					
-					$('#plot-table tr').css('cursor', 'default').unbind('click.makeTreeClickable');
-					$('#plot-table tr .btn').removeAttr("disabled");
+				$('#plot-table tr').css('cursor', 'default').unbind('click.makeTreeClickable');
+				$('#plot-table tr .btn').removeAttr("disabled");
+			})
+			.click(function() {
+				if (thisPlot.areWeChoosingParentTree === false) {
+					thisPlot.areWeChoosingParentTree = true;
+					$(this).trigger("choosingParentTree");
+				} else {
+					thisPlot.areWeChoosingParentTree = false;
+					$(this).trigger("notChoosingParentTreeAnymore");
 				}
-			);
+			});
 			
 		});
 
@@ -1648,8 +1730,13 @@ $(document).ready(function(){
 
 			var thisTree = new Tree();
 			thisTree.url = app.config.cgiDir + 'litterfall.py?site=' + site + '&plot=' + plot + '&treeid=' + treeId + '&subtreeid=' + subTreeId;
-			thisTree.fetch();
-
+			thisTree.fetch({
+				success: function() {
+					thisTree.editViewInitialize();
+				}
+			});
+			
+			
 			//DBH Tooltip 
 			updateFunctions();
 		});
@@ -1695,8 +1782,6 @@ $(document).ready(function(){
     // Start Backbone history a necessary step for bookmarkable URL's; enables user to click BACK without navigating to entirely different domain
     Backbone.history.start();
 
-
-
 });
 // Start Bootstrap and template related jQuery
 
@@ -1717,6 +1802,28 @@ $(function(){
   });
 });
 // End Active Nav Tracking
+
+function toFormattedDate(date){
+	
+	var returnString = "";
+	
+	console.log(date);
+	
+	function looper(num, i, numDigit, string) {
+		
+		var thisDigit = (num%(Math.pow(10,i)) - num%(Math.pow(10,i-1)))/Math.pow(10,i-1);
+		
+		string = thisDigit + string;
+		
+		if (i == numDigit) return string;
+		
+		i++;
+		return looper(num, i, numDigit, string);
+	}
+	
+	return looper(date.y, 1, 4, "") + "/" + looper(date.m, 1, 2, "") + "/" + looper(date.d, 1, 2, "");
+	
+}
 
 /*
 
