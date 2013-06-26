@@ -1034,14 +1034,16 @@ $(document).ready(function(){
 			treeModel = this;
 			result.done(function(data) {
 				
-			treeModel.set(data);
-			if (result !== false) {
+				treeModel.set(data);
+				if (result !== false) {
 			
-				treeModel = this;
+					treeModel = this;
 				
-				result.done(function(data) {
+					result.done(function(data) {
 				
-					treeModel.set(treeModel.parse(data));
+						treeModel.set(treeModel.parse(data));
+					});
+				}
 				
 			});
 			
