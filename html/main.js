@@ -1286,7 +1286,7 @@ $(document).ready(function(){
 			sub_tree_id: 0,
 			angle: 0.0,
 			distance: 0,
-			diameter: {},
+			diameter: [],
 			species: 'Unknown',
 			species_certainty: 0,
 			dead: true,
