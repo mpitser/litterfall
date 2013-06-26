@@ -42,6 +42,230 @@ $(document).ready(function(){
     	}
 	});
 
+	//build a Bootstrap modal
+	var newTreeModal = Backbone.View.extend({
+		tagName: 'div',
+		className: 'modal hide fade',
+		id: 'addNewTreeModal',
+		template: '\
+		<div class="modal-header">\
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>\
+			<h3>Add a new tree</h3>\
+		</div>\
+		<div class="modal-body"><p>\
+			<form class="form-horizontal">\
+				<div class="control-group">\
+					<label class="control-label" for="newTreeSpecies">Species</label>\
+					<div class="controls">\
+						<input type="text" id="newTreeSpecies" placeholder="Species" style="font-style: italic;">\
+						<span class="help-block"></span>\
+					</div>\
+				</div>\
+				\
+				<div class="control-group">\
+					<label class="control-label" for="newTreeAngle">Angle</label>\
+					<div class="controls">\
+						<input type="text" id="newTreeAngle" placeholder="Angle">\
+						<small class="help-inline">Degrees</small>\
+						<span class="help-block"></span>\
+					</div>\
+				</div>\
+				\
+				<div class="control-group">\
+					<label class="control-label" for="newTreeDistance">Distance</label>\
+					<div class="controls">\
+						<input type="text" id="newTreeDistance" placeholder="Distance">\
+						<small class="help-inline">Meters</small>\
+						<span class="help-block"></span>\
+					</div>\
+				</div>\
+			</form>\
+		</p></div>\
+		<div class="modal-footer">\
+			<a class="btn btn-danger" data-dismiss="modal">Cancel</a>\
+			<a class="btn btn-save-and-back">Save and Go Back</a>\
+			<a class="btn btn-primary btn-save-and-update">Save and Add Observations</a>\
+		</div>\
+		',
+		initialize: function() {
+			this.isSubTree = this.model.get('tree_id') > 0;
+			this.render();
+		},
+		render: function() {
+			// Usual stuff
+
+			this.$el.html(_.template(this.template, {}));
+
+			// This is a bit ugly--to be fixed later
+			if (this.isSubTree) {
+				this.$el.find(".modal-header h3").html("Add a new sub-tree <small>Tree ID:  "+this.model.get("tree_id")+"</small>");
+				this.$el.find("#newTreeSpecies").tooltip({title: "The species of all sub-trees should be the same, no?"})
+					.attr("disabled", "disabled").val(this.model.get("species"));
+				this.$el.find('#newTreeAngle').val(this.model.get("angle"));
+				this.$el.find('#newTreeDistance').val(this.model.get("distance"));
+
+			}
+
+			// Append it to the body
+			$("body").append(this.el);
+			this.$el.modal();
+
+			// Add autocomplete to the species field
+			this.addAutocomplete();
+
+			var self = this;
+
+			// Remove the modal when done
+			this.$el.on("hidden", function() {
+				this.remove();
+				if (self.isSubTree) {
+					$('.add-new-sub-tree').trigger('click');
+				}
+			});
+
+			return this;
+
+		},
+		addAutocomplete: function() {
+
+			// Array to contain species
+			var allSpecies = [];
+
+			// Get all the species first
+			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allSpecies', function(data) {
+				for (i in data) {
+					allSpecies[i] = data[i];
+				}
+			});
+
+			// Add autocomplete
+			$("#newTreeSpecies").autocomplete({
+				minLength: 0,
+				source: allSpecies,
+				appendTo: "#addNewTreeModal" // so that the list moves along with the modal
+			})
+			.focus(function() { // when focus, trigger autocomplete
+				$(this).autocomplete("search");
+			});
+
+			// Limit the height of the dropdown list
+			// (Forget IE6 Compatibility)
+			$(".ui-autocomplete").css({
+				'max-height': '200px',
+				'overflow-y': 'auto',
+				'overflow-x': 'hidden'
+			});
+
+		},
+		events: {
+			'click .btn-save-and-back': function() {
+				this.addAndSaveTree(true);
+			},
+			'click .btn-save-and-update': function() {
+				this.addAndSaveTree(false);
+			},
+			'change #newTreeAngle': 'validateAngle',
+			'change #newTreeDistance': 'validateDistance',
+			'change #newTreeSpecies': 'validateSpecies'
+		},
+		validateSpecies: function() {
+
+			var $species = $('#newTreeSpecies');
+
+			var error = false;
+
+			if ($species.val() == '') {
+				error = "This cannot be empty";
+			}
+
+			return this.addErrorMessage($species, error);
+
+		},
+		validateAngle: function() {
+
+			var $angle = $('#newTreeAngle');
+			// What do I need to do to change the angle?
+
+			// It should only be numbers
+			var numberRegex = /^[0-9]*$/;
+
+			var error = false;
+
+			if ($angle.val() == '') {
+				error = "This cannot be empty.";
+			} else if (!numberRegex.test($angle.val())) {
+				error = "An angle should be a number.";
+			} else if (parseInt($angle.val()) > 360 || parseInt($angle.val()) < 0) {
+				error = "It should be between 0-360 degrees!";
+			}
+
+			return this.addErrorMessage($angle, error);
+
+		},
+		validateDistance: function() {
+			var $distance = $('#newTreeDistance');
+
+			var numberRegex = /^[0-9]*$/;
+
+			var error = false;
+
+			if ($distance.val() == '') {
+				error = "This cannot be empty.";
+			} else if (!numberRegex.test($distance.val())) {
+				error = "A distance should be a number.";
+			} else if (parseInt($distance.val()) > 30 || parseInt($distance.val()) < 0) {
+				error = "Do you think it is a bit too far?";
+			}
+
+			return this.addErrorMessage($distance, error);
+
+		},
+		addErrorMessage: function($target, error) {
+			if (error !== false) {
+				$target.parent().parent().addClass("error");
+				$target.parent().find(".help-block").text(error);
+				return false;
+			} else {
+				$target.parent().parent().removeClass("error").addClass("success");
+				$target.parent().find(".help-block").empty();
+				return true;
+			}
+		},
+		addAndSaveTree: function(backToPlot) {
+
+			// Set the URL--don't you think we should not have to specify the URL every time we call the server?
+			this.model.url = app.config.cgiDir + 'litterfall.py';
+			var self = this;
+			this.model.validate = function() {
+				if (!(self.validateAngle() || self.validateDistance())) {
+					return "Invalid data";
+				}
+			}
+			this.model.on("invalid", function() {
+				$('addNewTreeModal .error').eq(0).focus();
+			});
+
+
+			// save!
+			this.model.save({
+				species: $('#newTreeSpecies').val(),
+				angle: parseInt($('#newTreeAngle').val()),
+				distance: parseInt($('#newTreeDistance').val())
+			},
+			{
+				success: function() {
+					self.$el.modal("hide");
+					if (backToPlot == true) {
+						self.trigger("treeSaved");
+					} else {
+						app_router.navigate(document.location.hash + "/treeid/" + self.model.get("tree_id"), {trigger: true});
+					}
+				}
+			});
+
+		}
+	});
+
 	//build a row in the plot table representing a tree
 	var plotRowView = Backbone.View.extend({
 		tagName: 'tr',
@@ -272,7 +496,7 @@ $(document).ready(function(){
 			}
 		}
 	});
-
+/*
 	// Adding new row for inserting a new tree
 	var newTreeRowView = Backbone.View.extend({
 		tagName: 'tr',
@@ -367,10 +591,10 @@ $(document).ready(function(){
 
 			var fieldToValidate = event.currentTarget.className;
 			console.log(fieldToValidate);
-			/* if angle field lost focus */
+			// if angle field lost focus
 			if (fieldToValidate == "edit_cell new_tree angle"){		
 				this.validateAngle();
-			/* if distance field lost focus */				
+			// if distance field lost focus
 			} else if (fieldToValidate == "edit_cell new_tree distance"){
 				this.validateDistance();
 			} else {
@@ -505,7 +729,7 @@ $(document).ready(function(){
 		deleteRow: function() {
 			this.$el.remove();
 		}
-	});
+	});*/
 
 	//build a row in the plot table representing a tree
 	var treeEditView = Backbone.View.extend({
