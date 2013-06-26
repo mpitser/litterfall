@@ -349,8 +349,10 @@ $(document).ready(function(){
 				<%= tree.distance %>\
 			</td>\
 			<td>\
+				<%= tree.latestDBHMessage %>\
 			</td>\
 			<td>\
+				<%= tree.latestComment %>\
 			</td>',
 		initialize: function(){
 			if (document.location.hash.search("update") === -1) {
@@ -433,8 +435,8 @@ $(document).ready(function(){
 				
 			};
 			
-			thisTree.latestDBHMessage = "";
-			thisTree.latestComment = "";
+			thisTree.latestDBHMessage = "-";
+			thisTree.latestComment = "-";
 			
 			console.log(thisTree);
 			
@@ -449,6 +451,17 @@ $(document).ready(function(){
 				thisTree.latestDBHMessage = mostRecentEntry.value + " on " + toFormattedDate(mostRecentEntry.date);
 				thisTree.latestComment = mostRecentEntry.comment;
 			}*/
+			
+			if (thisTree.diameter.length > 0) {
+				
+				var mostRecentEntry = _.max(thisTree.diameter, function(entry) {
+					return (entry.date.y - 2000)*10000 + entry.date.m*100 + entry.date.d;
+				});
+				
+				thisTree.latestDBHMessage = mostRecentEntry.value + " on " + toFormattedDate(mostRecentEntry.date);
+				thisTree.latestComment = mostRecentEntry.comment == '' ? mostRecentEntry.comment : '-';
+				
+			}
 			
 			
 			//$el --> gets the jQuery object for this view's element 
