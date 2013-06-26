@@ -168,10 +168,7 @@ class Tree:
 	
 	def format(self):
 		
-		for (key, entry) in enumerate(self.tree['diameter']):
-			self.tree['diameter'][key]['date'] = datetime.datetime.strptime(self.tree['diameter'][key]['date'], "%Y-%m-%dT%H:%M:%S.%fZ")
-		
-		if not 'tree_id' in self.tree:
+		'''if not 'tree_id' in self.tree:
 			return False
 		else:
 			if self.tree['tree_id'] <= 0:
@@ -216,7 +213,7 @@ class Tree:
 				self.tree['angle'] = (self.tree['angle'] + 180) % 360
 		
 		if 'full_tree_id' in self.tree:
-			del self.tree['full_tree_id']
+			del self.tree['full_tree_id']'''
 		
 		return True
 	

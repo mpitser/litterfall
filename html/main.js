@@ -1330,7 +1330,14 @@ $(document).ready(function(){
 			});
 		},
 		parse: function(response){
-			response.full_tree_id = response.tree_id + (response.sub_tree_id * .1);
+		
+			function formatSubTreeId(subTreeId) {
+				subTreeId *= .1;
+				if (subTreeId < 1) return subTreeId;
+				return formatSubTreeId(subTreeId);
+			}
+			
+			response.full_tree_id = response.tree_id + formatSubTreeId(response.sub_tree_id);
 			
 			/*
 			var newEntryArray = [];
@@ -1408,7 +1415,7 @@ $(document).ready(function(){
   				}
   			}, this);
   			// populate the treeIDs dropdown menu for adding new subtrees
-  			this.populateTreeIDs();
+  			// this.populateTreeIDs();
   			$(".dbh").attr("href", document.location.hash);
   			$(".btn").css("display", "inline-block");
     		
@@ -1511,6 +1518,34 @@ $(document).ready(function(){
 
   		},
   		
+  		
+  		 addSubTree: function(treeId) {
+  			var parentTree = this.find(function (tree) {return tree.get('tree_id') == treeId;});
+  			
+  			var newTree = new Tree({
+  				tree_id: treeId,
+  				sub_tree_id: -1,
+  				species: parentTree.get('species'),
+  				plot: parentTree.get('plot'),
+  				site: parentTree.get('site'),
+  				angle: parentTree.get('angle'),
+  				distance: parentTree.get('distance')
+  			});
+  			
+  			var newModal = new newTreeModal({
+  				model: newTree
+  			});
+  			
+  			var thisPlot = this;
+  			
+  			// reload the whole page
+  			// this is not a good idea
+  			// we have to somehow think about sorting
+  			newModal.on("treeSaved", function() {
+  				$('#plot-table tbody').empty();
+  				thisPlot.fetch({reset: true});
+  			});
+  		} /*
   		populateTreeIDs: function(){
 
 			// Get all the ids
@@ -1559,7 +1594,7 @@ $(document).ready(function(){
 
 
 
-		}
+		} */
 		/*,
 
 		newTreeRowViewInitialize: function(){
@@ -1651,13 +1686,13 @@ $(document).ready(function(){
 
 			// add popover
 			
-			$addNewSubTree
+			$('.add-new-sub-tree')
 			.popover({
 				title: 'Add a new sub-tree',
 				content: 'Choose the parent tree from below'
-			})
+			});
 			// add the toggling functions
-			.bind("choosingParentTree", function() {
+			$addNewSubTree.bind("choosingParentTree", function() {
 				$addNewSubTree.popover('show').addClass('active');
 					
 				$('#plot-table tr').css('cursor', 'pointer')
