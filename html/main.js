@@ -615,6 +615,7 @@ $(document).ready(function(){
 			console.log(dates);
 			thisTree.datesDesc = dates;
 			this.$el.html(_.template(this.templateReport, {tree: thisTree}));
+			$(".back").attr("href", "#data/reports/trees/site/" + $(".site-name").text() + "/plot/" + $(".plot-number").text());
 			$(".title").text("Analyzing Tree Data ");
 			$("#tree_observations").tablesorter();
 		},
@@ -975,7 +976,7 @@ $(document).ready(function(){
 			sub_tree_id: 0,
 			angle: 0.0,
 			distance: 0,
-			diameter: [{date: new Date(), observers: [], note: "", value: 0}],
+			diameter: {},
 			species: 'Unknown',
 			species_certainty: 0,
 			dead: true,
@@ -1007,23 +1008,6 @@ $(document).ready(function(){
 		},
 		parse: function(response){
 			response.full_tree_id = response.tree_id + (response.sub_tree_id * .1);
-			
-			var newEntryArray = [];
-			var convertToJSDate = function(mongoDateObject) {
-				return new Date(mongoDateObject.$date);
-			};
-			console.log(response);
-			
-			console.log(response.diameter);
-			_.each(response.diameter, function(entry, key) {
-				console.log(new Date(response.diameter[key].date.$date));
-				response.diameter[key].date = new Date(response.diameter[key].date.$date);
-				console.log(response.diameter[key]);
-				console.log(response.diameter[key].date.getFullYear());
-			});
-			
-			console.log(response);
-			
 			return response;
 		},
 		// overriding the save method, so that when the model saves it updates its inside to match what the server sends back
@@ -1035,15 +1019,6 @@ $(document).ready(function(){
 			result.done(function(data) {
 				
 				treeModel.set(data);
-				if (result !== false) {
-			
-					treeModel = this;
-				
-					result.done(function(data) {
-				
-						treeModel.set(treeModel.parse(data));
-					});
-				}
 				
 			});
 			
@@ -1122,7 +1097,6 @@ $(document).ready(function(){
 							// format Comma Separated Value string with data from each tree
 							CSV = CSV + "\r\n" + (parseInt(value["tree_id"]) + parseInt(value["sub_tree_id"])*.1) + "," + value["species"] + "," + value["angle"] + "," + value["distance"];
 							$.each(value["diameter"], function(i) {
-								console.log(CSV);
 								var obs = value["diameter"][i];
 								if (obs["date"] != null){
 									var parsedDate = new Date(obs["date"]["$date"]);
