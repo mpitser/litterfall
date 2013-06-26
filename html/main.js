@@ -477,7 +477,10 @@ $(document).ready(function(){
 		events: {
 			'click .delete-row': 'deleteTree',
 			'click .btn-update': 'goToTree',								//if update button is clicked, runs updateTree function
-			'click .btn-analyze': 'goToTree'								//if update button is clicked, runs updateTree function
+			'click .btn-analyze': 'goToTree',								//if update button is clicked, runs updateTree function
+			'click .add-new-sub-tree-from-row': function() {
+				this.model.trigger("addNewSubTreeFromRow");
+			}
 		},
 		goToTree: function(){
 			//goto update tree page
@@ -1406,9 +1409,24 @@ $(document).ready(function(){
   			var siteName = "";
   			var plotNumber = 0;
   			var maxDiam = 0;
+  			
   			this.each(function(tree){
   				tree.plotViewInitialize();
   				var numObvs = tree.get("diameter").length;
+  				
+
+
+
+  				this.listenTo(tree, 'addNewSubTreeFromRow', function() {			
+  				
+					// add sub-tree
+					// var thisTreeId = Math.floor(parseFloat(this.$el.children("td").eq(1).text()));
+					$('.add-new-sub-tree').eq(0).trigger("choosingParentTree");
+					this.addSubTree(tree.get("tree_id"));
+
+				});
+
+  				
   				// determine the maximum number of observations for any tree in this plot
   				// to allocate enough columns in the CSV file
   				if (numObvs > maxDiam) {
