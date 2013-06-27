@@ -801,10 +801,8 @@ $(document).ready(function(){
 			</thead>\
 			<tbody>\
 			<% $.each(tree.dates_desc, function(obs){ %>\
-				<% d = obs.date; %> \
-    			<% var date = $.datepicker.formatDate("dd/mm/yy", new Date(d)); %>\
 			<tr>\
-				<td><span class="display_cell date_select"><%= date %></span>\
+				<td><span class="display_cell date_select"><%= obs.year %></span>\
 				<td><span class="display_cell observers"><%= obs.observers %></span>\
 				<td><span class="display_cell diameter"><%= obs.value %></span>\
 				<td><span class="display_cell notes"><%= obs.notes %></span>\
@@ -906,7 +904,7 @@ $(document).ready(function(){
 					</th>\
 				</tr>\
 			</thead>\
-			<tbody><% console.log("What") %>\
+			<tbody>\
 			<% _.each(tree.diameter, function(entry, index){ %>\
 				<tr id="entry-<%= index %>">\
 					<td class="btn-column">\
@@ -927,22 +925,33 @@ $(document).ready(function(){
 			</div>\
 		',
 		initialize: function(){
-		
+			
+			// sort, the latest goes to the top
+			this.model.set('diameter', _.sortBy(this.model.get('diameter'), function (entry) {
+				return 0 - entry.year;
+			}));
+			
 			this.render();
 			
 		},
+		is_report: function() {
+			return document.location.hash.search("update") === -1;
+		},
 		render: function() {
 		
-			if (document.location.hash.search("update") === -1) {
+			if (this.is_report() === true) {
 				this.renderReport();
 				// this.model.on('change', this.renderReport, this); //re-render when the model is saved (new observation, or an edit)
 			} else {
 				this.renderUpdate();
 				//this.model.on('change', this.renderUpdate, this.model); //re-render when the model is saved (new observation, or an edit)
 			}
+			
+			return this;
+			
 		},
 		renderReport: function(){
-
+			
 			var this_tree = this.model.toJSON();
 			//get the dates in descending order
 			// this_tree.dates_desc = _.keys(this_tree.diameter).sort().reverse();
@@ -957,10 +966,6 @@ $(document).ready(function(){
 		},
 		renderUpdate: function(){
 		
-			// sort, the latest goes to the top
-			this.model.set('diameter', _.sortBy(this.model.get('diameter'), function (entry) {
-				return 0 - (entry.date.y*366 + entry.date.m*32 + entry.date.d);
-			}));
 			var this_tree = this.model.toJSON();
 			//get the dates in descending order
 			
@@ -1015,7 +1020,12 @@ $(document).ready(function(){
 				'angle': parseInt($("#tree-info .angle input").val(), 10),
 				'distance': parseFloat($("#tree-info .distance input").val(), 10)
 			});
-			this.model.save();
+			
+			var self = this;
+			
+			this.model.save({}, {
+				success: function() {if (self.is_report() === false) self.renderUpdate();}
+			});
 		},
 		newObservation: function(){
 			//add a new blank row to the observation table
@@ -1024,6 +1034,7 @@ $(document).ready(function(){
 			// if today's date already has an entry, set a template dateKey using tomorrow's date (which the user will be forced to change to pass validation)
 			var new_entry = {
 				date: today.toLitterfallDateObject(),
+				year: today.getFullYear(),
 				value: 'n/a',
 				notes: "",
 				observers: []
@@ -1033,11 +1044,11 @@ $(document).ready(function(){
 			// class="new" to mark the row as new
 			var $new_entry_row = $('<tr></tr>').addClass("new").html(_.template(this.rowEntryTemplateUpdate, {entry: new_entry}));
 			// prepend it to the table
-			$("#tree_observations > tbody").prepend($new_entry_row);
+			$("#tree-observations > tbody").prepend($new_entry_row);
 			
 			// Disable all the other edit buttons
 			// Why do we need to do that though?
-			$("#tree_observations .btn.display_cell").hide();
+			$("#tree-observations .btn.display_cell").hide();
 
 			// Show edit content, hide display content, show "Submit/cancel button", add date_picker		
 			$new_entry_row.find(".edit_cell").show();
@@ -1050,7 +1061,7 @@ $(document).ready(function(){
 			});	
 			//var existingObs = this.model.findAllObservers();
 			var all_observers = this.getAllObservers();
-			$("#tree_observations > tbody > tr:first .edit_cell.observers :input").autocomplete({source: all_observers});
+			$new_entry_row.find(".edit_cell.observers :input").typeahead({source: all_observers});
 		},
 
 		editObservation: function(event) {
@@ -1066,9 +1077,10 @@ $(document).ready(function(){
 			$row_to_edit.find(".display_cell").hide();
 			$row_to_edit.find(".edit_cell.date_select :input").datepicker({dateFormat: "yy/mm/dd", altFormat: "@" , altField: "#tree_observations > tbody > tr .unix-time" , maxDate: 0, changeYear: true , changeMonth: true , constrainInput: true });
 			$row_to_edit.addClass("old");
+			
 			// get all observers existing in database, feed them into an autocomplete for the observers field
 			var all_observers = this.getAllObservers();
-			$row_to_edit.find(".edit_cell.observers :input").autocomplete({source: all_observers});			
+			$row_to_edit.find(".edit_cell.observers :input").typeahead({source: all_observers});			
 
 		},
 
@@ -1083,62 +1095,6 @@ $(document).ready(function(){
 		saveObservation: function(event) {
 			// User added or edited an observation.  Save it to the server.	
 			// Get the row that is being edited
-			
-			/*
-			row_to_save = $("#tree_observations > tbody > tr .edit_cell :visible").parents("tr");
-
-			var new_date = row_to_save.find(".formatted-date").val();
-			console.log(new_date);
-			var new_value = parseFloat(row_to_save.find(".diameter :input").val());
-			// convert observers from string to array
-			var new_observers = row_to_save.find(".observers :input").val().split(",");
-			for (var i=0; i<new_observers.length; i++){
-				new_observers[i] = new_observers[i].trim(" ");
-			}
-			var new_notes = row_to_save.find(".notes :input").val();
-
-			// final validation before saving to database
-			if (! (this.validateDate(row_to_save) && this.validateObservers(row_to_save) && this.validateDiameter(row_to_save))){
-				console.log("didn't save");
-				return; // user will remain in edit view until their data passes validation
-			}
-
-			//must clone object to update it
-			var diameters = _.clone(this.model.get('diameter'));
-
-			// Find the existing date key by figuring out the index of the row being edited and matching it up with the index of the 
-			// observations (sorted by date key in reverse)
-			var index_of_observation = $("#tree-observations tbody tr").index(row_to_save);
-			var existing_date_key = _.keys(diameters).sort().reverse()[index_of_observation];
-
-			// Remove the existing date key/object.  Since _.clone is a shallow clone, we need to remove the reference to the
-			// existing observation before removing it.
-			//console.log(existing_date_key);
-			diameters[existing_date_key] = new Object();
-			delete diameters[existing_date_key];
-
-			// Add in the new data
-			diameters.push( {
-			
-					value: new_value,
-					notes: new_notes,
-					observers: new_observers
-				});
-
-			// Set the diameter to be the new list of observations and save the object	
-
-			//** May need to check to see if no change 
-
-			this.model.set({"diameter": diameters});
-			var ret = this.model.save(null, {error: function(model, response, options){alert("There was an error with the database.  Please alert the instructor of this issue.")}, 
-									         success: function(model, response, options){console.log("save to database was successful")}});	
-			// NOTE: another hack to make sure that the display view is rendered instead of the edit view
-			//(otherwise the edit view hangs there when nothing is changed)
-
-			//row_to_save.find(".editable").attr("id", "current");
-			//row_to_save.find("#current").addClass("alert-valid", {duration:500});
-			//row_to_save.find("#current").removeClass("alert-valid", {duration:500});
-			*/
 			
 			// Get the row that is being edited
 			var $row_to_save = $(event.target).parents("tr");
@@ -1159,6 +1115,7 @@ $(document).ready(function(){
 			// new entry object
 			var new_entry = {
 				date: ($row_to_save.find(".edit_cell.date_select :input").datepicker("getDate")).toLitterfallDateObject(),
+				year: ($row_to_save.find(".edit_cell.date_select :input").datepicker("getDate")).getFullYear(),
 				value: parseFloat($row_to_save.find(".diameter :input").val()),
 				observers: new_observers,
 				notes: $row_to_save.find(".notes :input").val(),
@@ -1427,10 +1384,12 @@ $(document).ready(function(){
 		},
 		parse: function(response){
 		
-			function formatSubTreeId(sub_tree_id) {
+			function formatSubTreeId(sub_tree_id, i) {
+				if (i === undefined) i = 1;
+				else i++;
 				sub_tree_id *= .1;
 				if (sub_tree_id < 1) return sub_tree_id;
-				return formatSubTreeId(sub_tree_id);
+				return formatSubTreeId(sub_tree_id, i);
 			}
 			
 			response.full_tree_id = response.tree_id + formatSubTreeId(response.sub_tree_id);
