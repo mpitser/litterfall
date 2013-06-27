@@ -850,12 +850,12 @@ $(document).ready(function(){
 					<div class="edit_cell btn-group"><button class="btn-save-observation btn btn-mini btn-success" type="button">Submit</button>\
 					<button class="btn-cancel-observation btn btn-mini btn-danger" type="button">Cancel</button>\
 				</td>\
-				<td class="editable"><span class="display_cell date_select"><%= toFormattedDate(entry.date) %></span><span class="edit_cell date_select"><input title="Enter a date in mm/dd/yyyy format.  It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
+				<td class="editable"><span class="display_cell date_select"><%= toFormattedDate(entry.date) %></span><span class="edit-cell date_select"><input title="Enter a date in mm/dd/yyyy format.  It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
 				<input type="hidden" class="formatted_date" value="<%= toFormattedDate(entry.date) %>">\
 				<input type="hidden" class="unix-time" value="<%= toUnixTime(entry.date) %>"></span></td>\
-				<td class="editable"><span class="display_cell observers"><%= entry.observers %></span><span class="edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
-				<td class="editable"><span class="display_cell diameter"><%= entry.value %></span><span class="edit_cell diameter"><input title = "Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
-				<td class="editable"><span class="display_cell notes"><%= entry.notes %></span><span class="edit_cell notes"><input type="text" value="<%= entry.notes %>"></span></span></td>\
+				<td class="editable"><span class="display_cell observers"><%= entry.observers %></span><span class="edit-cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
+				<td class="editable"><span class="display_cell diameter"><%= entry.value %></span><span class="edit-cell diameter"><input title = "Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
+				<td class="editable"><span class="display_cell notes"><%= entry.notes %></span><span class="edit-cell notes"><input type="text" value="<%= entry.notes %>"></span></span></td>\
 			</tr>\
 			<% }); %>\
 			</tbody>\
@@ -870,7 +870,7 @@ $(document).ready(function(){
 					<div class="edit_cell btn-group"><button class="btn-save-observation btn btn-mini btn-success" type="button">Submit</button>\
 					<button class="btn-cancel-observation btn btn-mini btn-danger" type="button">Cancel</button>\
 				</td>\
-				<td class="editable"><span class="display_cell date_select"><%= toFormattedDate(entry.date) %></span><span class="edit_cell date_select"><input title="Enter a date in mm/dd/yyyy format.  It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
+				<td class="editable"><span class="display_cell date_select"><%= toFormattedDate(entry.date) %></span><span class="edit-cell date_select"><input title="Enter a date in mm/dd/yyyy format.  It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
 				<input type="hidden" class="formatted_date" value="<%= toFormattedDate(entry.date) %>">\
 				<input type="hidden" class="unix-time" value="<%= toUnixTime(entry.date) %>"></span></td>\
 				<td class="editable"><span class="display_cell observers"><%= entry.observers %></span><span class="edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
@@ -906,11 +906,9 @@ $(document).ready(function(){
 					</th>\
 				</tr>\
 			</thead>\
-			<tbody>\
-			<% _.each(tree.diameter, function(entry){ %>\
-				<% console.log("date"); %>\
-				<% console.log(entry.date); %>\
-				<tr>\
+			<tbody><% console.log("What") %>\
+			<% _.each(tree.diameter, function(entry, index){ %>\
+				<tr id="entry-<%= index %>">\
 					<td class="btn-column">\
 						<button class="display_cell btn btn-mini btn-primary edit-existing" type="button">Edit</button>\
 						<div class="edit_cell btn-group"><button class="btn-save-observation btn btn-mini btn-success" type="button">Submit</button>\
@@ -921,6 +919,12 @@ $(document).ready(function(){
 					<td class="editable"><span class="display_cell observers"><%= entry.observers %></span><span class="edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
 					<td class="editable"><span class="display_cell diameter"><%= entry.value %></span><span class="edit_cell diameter"><input title = "Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
 				<td class="editable"><span class="display_cell notes"><%= entry.notes %></span><span class="edit_cell notes"><input type="text" value="<%= entry.notes %>"></span></span></td>\
+			<% }); %>\
+			</tbody>\
+			</table>\
+			<div class="button-row">\
+				<button class="btn-new-observation btn btn-mini btn-success pull-left" type="button">+ New Entry</button>\
+			</div>\
 		',
 		initialize: function(){
 		
@@ -957,13 +961,12 @@ $(document).ready(function(){
 			this.model.set('diameter', _.sortBy(this.model.get('diameter'), function (entry) {
 				return 0 - (entry.date.y*366 + entry.date.m*32 + entry.date.d);
 			}));
-			var thisTree = this.model.toJSON();
+			var this_tree = this.model.toJSON();
 			//get the dates in descending order
 			
-			var dates = thisTree.diameter;
+			var dates = this_tree.diameter;
 
 			this_tree.dates_desc = dates;
-
 			this.$el.html(_.template(this.templateUpdate, {tree: this_tree}));
 			$(".title").text("Updating Tree Data ");
 			$("#tree-observations").tablesorter({headers: { 0: { sorter: false}}}); 
@@ -1418,7 +1421,7 @@ $(document).ready(function(){
 		},
 		editViewInitialize: function(){
 			var edit_form = new treeEditView({
-				el: $('#treeEditView'),
+				el: $('#tree-edit-view'),
 				model: this
 			});
 		},
@@ -1625,7 +1628,7 @@ $(document).ready(function(){
   			});
 
   		},
-		addSubTree: function(treeId) {
+		addSubTree: function(tree_id) {
   			var parentTree = this.find(function (tree) {return tree.get('tree_id') == treeId;});
   			
   			var new_tree = new Tree({
@@ -1799,7 +1802,7 @@ $(document).ready(function(){
 			});
 			// add the toggling functions
 			$addNewSubTree.bind("choosing_parent_tree", function() {
-				this_plot.areWeChoosingParentTree = true;
+				this_plot.choosing_parent_tree = true;
 				$addNewSubTree.popover('show').addClass('active');
 					
 				$('#plot-table tr').css('cursor', 'pointer')
@@ -1814,7 +1817,7 @@ $(document).ready(function(){
 				$('#plot-table tr .btn').attr("disabled", "disabled");
 			})
 			.bind("not_choosing_parent_tree", function() {
-				this_plot.areWeChoosingParentTree = false;
+				this_plot.choosing_parent_tree = false;
 				$addNewSubTree.popover('hide').removeClass('active');
 					
 				$('#plot-table tr').css('cursor', 'default').unbind('click.makeTreeClickable');
