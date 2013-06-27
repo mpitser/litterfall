@@ -350,10 +350,10 @@ $(document).ready(function(){
 				<%= tree.distance %>\
 			</td>\
 			<td>\
-				<%= tree.latestDBHMessage %>\
+				<%= tree.latest_DBH_message %>\
 			</td>\
 			<td>\
-				<%= tree.latestComment %>\
+				<%= tree.latest_comment %>\
 			</td>',
 		initialize: function(){
 			if (document.location.hash.search("update") === -1) {
@@ -417,10 +417,10 @@ $(document).ready(function(){
 		renderUpdate: function(){
 			var this_tree = this.model.toJSON();
 			/*
-			this_tree.thisDate = "";
+			this_tree.this_date = "";
 			for (date in this_tree.diameter){                      //loop through the list of existing dates and store the most recent
-				if (date > this_tree.thisDate){					  //Date format is YYYYMMDD (reformated in template html above)
-					this_tree.thisDate = date;
+				if (date > this_tree.this_date){					  //Date format is YYYYMMDD (reformated in template html above)
+					this_tree.this_date = date;
 				}
 			}*/
 			
@@ -441,18 +441,6 @@ $(document).ready(function(){
 			
 			console.log(this_tree);
 			
-			/*
-			if (this_tree.diameter.length > 0){
-				//this_tree.thisDiameter = this_tree.diameter[this_tree.thisDate].value;    //gets diameter from most recent measurement
-				//this_tree.thisComment = this_tree.diameter[this_tree.thisDate].notes;     //gets comments from most recent measurement
-				var mostRecentEntry = _.max(this_tree.diameter, function(entry) {
-					// return (entry.y _ 2000)*10000 + entry.m*100 + entry.d;
-				});
-				console.log(mostRecentEntry);
-				this_tree.latestDBHMessage = mostRecentEntry.value + " on " + toFormattedDate(mostRecentEntry.date);
-				this_tree.latestComment = mostRecentEntry.comment;
-			}*/
-			
 			if (this_tree.diameter.length > 0) {
 				
 				var most_recent_entry = _.max(this_tree.diameter, function(entry) {
@@ -463,7 +451,6 @@ $(document).ready(function(){
 				this_tree.latest_comment = most_recent_entry.comment == '' ? most_recent_entry.comment : '-';
 				
 			}
-			
 			
 			//$el --> gets the jQuery object for this view's element 
 			//*.attr('id', this_tree._id.$oid) --> sets 'id' to MongoDB value for tree's ID
@@ -895,18 +882,18 @@ $(document).ready(function(){
 			</thead>\
 			<tbody>\
 			<% _.each(tree.diameter, function(entry){ %>\
-			<% console.log("date"); %>\
-			<% console.log(entry.date); %>\
-			<tr>\
-				<td class="btn-column">\
-					<button class="display_cell btn btn-mini btn-primary edit-existing" type="button">Edit</button>\
-					<div class="edit_cell btn-group"><button class="btn-save-observation btn btn-mini btn-success" type="button">Submit</button>\
-					<button class="btn-cancel-observation btn btn-mini btn-danger" type="button">Cancel</button>\
-				</td>\
-				<td class="editable"><span class="display_cell date_select"><%= toFormattedDate(entry.date) %></span><span class="edit_cell date_select"><input title="Enter a date in mm/dd/yyyy format.  It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
-				<input type="hidden" class="formatted-date" value="<%= toFormattedDate(entry.date) %>"></span></td>\
-				<td class="editable"><span class="display_cell observers"><%= entry.observers %></span><span class="edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
-				<td class="editable"><span class="display_cell diameter"><%= entry.value %></span><span class="edit_cell diameter"><input title = "Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
+				<% console.log("date"); %>\
+				<% console.log(entry.date); %>\
+				<tr>\
+					<td class="btn-column">\
+						<button class="display_cell btn btn-mini btn-primary edit-existing" type="button">Edit</button>\
+						<div class="edit_cell btn-group"><button class="btn-save-observation btn btn-mini btn-success" type="button">Submit</button>\
+						<button class="btn-cancel-observation btn btn-mini btn-danger" type="button">Cancel</button>\
+					</td>\
+					<td class="editable"><span class="display_cell date_select"><%= toFormattedDate(entry.date) %></span><span class="edit_cell date_select"><input title="Enter a date in mm/dd/yyyy format.  It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
+					<input type="hidden" class="formatted-date" value="<%= toFormattedDate(entry.date) %>"></span></td>\
+					<td class="editable"><span class="display_cell observers"><%= entry.observers %></span><span class="edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
+					<td class="editable"><span class="display_cell diameter"><%= entry.value %></span><span class="edit_cell diameter"><input title = "Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
 				<td class="editable"><span class="display_cell notes"><%= entry.notes %></span><span class="edit_cell notes"><input type="text" value="<%= entry.notes %>"></span></span></td>\
 			</tr>\
 			<% }); %>\
@@ -940,7 +927,6 @@ $(document).ready(function(){
 			// this_tree.dates_desc = _.keys(this_tree.diameter).sort().reverse();
 
 			var dates = this_tree.diameter;
-			console.log(dates);
 			this_tree.dates_desc = dates;
 
 			this.$el.html(_.template(this.templateReport, {tree: this_tree}));
@@ -1011,7 +997,7 @@ $(document).ready(function(){
 			var today = new Date();
 			var today_date_key = [today.getFullYear(),((today.getMonth() < 9) ? 0 : ""),(today.getMonth() + 1),((today.getDate() < 10) ? 0 : ""),today.getDate()].join(""); //yes it generates the date in YYYYMMDD format
 			// if today's date already has an entry, set a template dateKey using tomorrow's date (which the user will be forced to change to pass validation)
-			newDiameter = {
+			new_diameter = {
 					date: today,
 					value: 'n/a',
 					notes: "",
@@ -1065,15 +1051,15 @@ $(document).ready(function(){
 			// Get the row that is being edited
 			row_to_save = $("#tree-observations > tbody > tr .edit_cell :visible").parents("tr");
 
-			var newDate = row_to_save.find(".formatted-date").val();
-			console.log(newDate);
-			var newValue = parseFloat(row_to_save.find(".diameter :input").val());
+			var new_date = row_to_save.find(".formatted-date").val();
+			console.log(new_date);
+			var new_value = parseFloat(row_to_save.find(".diameter :input").val());
 			// convert observers from string to array
-			var newObservers = row_to_save.find(".observers :input").val().split(",");
-			for (var i=0; i<newObservers.length; i++){
-				newObservers[i] = newObservers[i].trim(" ");
+			var new_observers = row_to_save.find(".observers :input").val().split(",");
+			for (var i=0; i<new_observers.length; i++){
+				new_observers[i] = new_observers[i].trim(" ");
 			}
-			var newNotes = row_to_save.find(".notes :input").val();
+			var new_notes = row_to_save.find(".notes :input").val();
 
 			/* final validation before saving to database */
 			if (! (this.validateDate(row_to_save) && this.validateObservers(row_to_save) && this.validateDiameter(row_to_save))){
@@ -1098,9 +1084,9 @@ $(document).ready(function(){
 			// Add in the new data
 			diameters.push( {
 			
-					value: newValue,
-					notes: newNotes,
-					observers: newObservers
+					value: new_value,
+					notes: new_notes,
+					observers: new_observers
 				});
 
 			// Set the diameter to be the new list of observations and save the object	
@@ -1326,13 +1312,13 @@ $(document).ready(function(){
 			console.log(this.validationError);
 		},
 		plotViewInitialize: function(){
-			var plotRow = new plotRowView({
+			var plot_row = new plotRowView({
 				targetEl: $("#plot-table"),
 				model: this
 			});
 		},
 		editViewInitialize: function(){
-			var editForm = new treeEditView({
+			var edit_form = new treeEditView({
 				el: $('#treeEditView'),
 				model: this
 			});
@@ -1722,8 +1708,8 @@ $(document).ready(function(){
 				.bind('click.makeTreeClickable', function() {
 				
 					// add sub-tree
-					var this_treeId = Math.floor(parseFloat($(this).children("td").eq(1).text()));
-					this_plot.addSubTree(this_treeId);
+					var this_tree_id = Math.floor(parseFloat($(this).children("td").eq(1).text()));
+					this_plot.addSubTree(this_tree_id);
 				});
 				
 				//$('.btn-update').attr("disabled", "disabled");
@@ -1849,8 +1835,6 @@ $(function(){
 function toFormattedDate(date){
 	
 	var return_string = "";
-	
-	console.log(date);
 	
 	function looper(num, i, num_digit, string) {
 		
