@@ -56,16 +56,16 @@ $(document).ready(function(){
 	});
 
 	//build a Bootstrap modal
-	var newTreeModel = Backbone.View.extend({
+	var newTreeModal = Backbone.View.extend({
 		tagName: 'div',
-		className: 'model hide fade',
-		id: 'add-new-tree-model',
+		className: 'modal hide fade',
+		id: 'add-new-tree-modal',
 		template: '\
-		<div class="model-header">\
-			<button type="button" class="close" data-dismiss="model" aria-hidden="true">&times;</button>\
+		<div class="modal-header">\
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>\
 			<h3>Add a new tree</h3>\
 		</div>\
-		<div class="model-body"><p>\
+		<div class="modal-body"><p>\
 			<form class="form-horizontal">\
 				<div class="control-group">\
 					<label class="control-label" for="new-tree-species">Species</label>\
@@ -94,8 +94,8 @@ $(document).ready(function(){
 				</div>\
 			</form>\
 		</p></div>\
-		<div class="model-footer">\
-			<a class="btn btn-danger" data-dismiss="model">Cancel</a>\
+		<div class="modal-footer">\
+			<a class="btn btn-danger" data-dismiss="modal">Cancel</a>\
 			<a class="btn btn-save-and-back">Save and Go Back</a>\
 			<a class="btn btn-primary btn-save-and-update">Save and Add Observations</a>\
 		</div>\
@@ -111,7 +111,7 @@ $(document).ready(function(){
 
 			// This is a bit ugly--to be fixed later
 			if (this.isSubTree) {
-				this.$el.find(".model-header h3").html("Add a new sub-tree <small>Tree ID:  "+this.model.get("tree_id")+"</small>");
+				this.$el.find(".modal-header h3").html("Add a new sub-tree <small>Tree ID:  "+this.model.get("tree_id")+"</small>");
 				this.$el.find("#new-tree-species").tooltip({title: "The species of all sub-trees should be the same, no?"})
 					.attr("disabled", "disabled").val(this.model.get("species"));
 				this.$el.find('#new-tree-angle').val(this.model.get("angle"));
@@ -121,7 +121,7 @@ $(document).ready(function(){
 
 			// Append it to the body
 			$("body").append(this.el);
-			this.$el.model();
+			this.$el.modal();
 
 			// Add autocomplete to the species field
 			this.addAutocomplete();
@@ -132,7 +132,7 @@ $(document).ready(function(){
 			this.$el.on("hidden", function() {
 				this.remove();
 				if (self.isSubTree) {
-					$('.add-new-sub-tree').eq(0).trigger("notChoosingParentTreeAnymore");
+					$('.add-new-sub-tree').eq(0).trigger("not_choosing_parent_tree");
 				}
 			});
 
@@ -155,7 +155,7 @@ $(document).ready(function(){
 			$("#new-tree-species").autocomplete({
 				minLength: 0,
 				source: all_species,
-				appendTo: "#add-new-tree-model" // so that the list moves along with the model
+				appendTo: "#add-new-tree-modal" // so that the list moves along with the model
 			})
 			.focus(function() { // when focus, trigger autocomplete
 				$(this).autocomplete("search");
@@ -255,7 +255,7 @@ $(document).ready(function(){
 				}
 			}
 			this.model.on("invalid", function() {
-				$('addNewTreeModel .error').eq(0).focus();
+				$('#add-modal .error').eq(0).focus();
 			});
 
 
@@ -1629,7 +1629,7 @@ $(document).ready(function(){
 
   		},
 		addSubTree: function(tree_id) {
-  			var parentTree = this.find(function (tree) {return tree.get('tree_id') == treeId;});
+  			var parent_tree = this.find(function (tree) {return tree.get('tree_id') == tree_id;});
   			
   			var new_tree = new Tree({
   				tree_id: tree_id,
@@ -1641,7 +1641,7 @@ $(document).ready(function(){
   				distance: parent_tree.get('distance')
   			});
   			
-  			var new_model = new newTreeModel({
+  			var new_model = new newTreeModal({
   				model: new_tree
   			});
   			
