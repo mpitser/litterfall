@@ -1614,7 +1614,7 @@ $(document).ready(function(){
   				plot: random_tree.get('plot'),
   				site: random_tree.get('site')
   			});
-  			var new_model = new newTreeModel({
+  			var new_model = new newTreeModal({
   				model: new_tree
   			});
   			var this_plot = this;
