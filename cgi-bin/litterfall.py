@@ -303,24 +303,7 @@ def getdata(obs, site, plot, treeid, subtreeid):
 		data = obs.find({'collection_type':'tree'}, {'fields':'diameter.observers'}).distinct('diameter.observers')
 		data.sort()
 		n = len(data)
-	'''elif site == 'reformatTheDate':
-		allTrees = obs.find()
-		
-		for (i, tree) in enumerate(allTrees):
-		
-			newEntryArray = []
-			
-			for (j, entry) in enumerate(tree['diameter']):
-				newEntry = entry
-				newEntry['year'] = newEntry['date']['y']
-				newEntryArray.append(newEntry)
-			
-			obs.update({'_id': tree['_id']}, {'$set': {'diameter': newEntryArray}})
-		
-		data = obs.find({'collection_type':'tree'}, {'fields':'diameter.year'}).distinct('diameter.year')
-		n = len(data)
-				
-	'''
+
 	else:
 		# then the query is about a particular site and plot
 		findQuery = {
@@ -336,7 +319,7 @@ def getdata(obs, site, plot, treeid, subtreeid):
 				findQuery['sub_tree_id'] = int(subtreeid)			
 		# get the data 
 		data = obs.find(findQuery).sort([("angle",1)])
-		n = -1
+		n = data.count()
 
 	# validate the return data
 	# if only a treeid is given and
@@ -347,7 +330,7 @@ def getdata(obs, site, plot, treeid, subtreeid):
 	elif n == 0:
 		#return diameter objects
 		json_data = data
-	elif n == -1:
+	elif n == 1:
 		# return one single tree
 		json_data = data[0]
 	else:
