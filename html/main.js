@@ -244,7 +244,7 @@ $(document).ready(function(){
 				return true;
 			}
 		},
-		addAndSaveTree: function(backToPlot) {
+		addAndSaveTree: function(back_to_plot) {
 
 			// Set the URL--don't you think we should not have to specify the URL every time we call the server?
 			this.model.url = app.config.cgiDir + 'litterfall.py';
@@ -267,7 +267,7 @@ $(document).ready(function(){
 			},
 			{
 				success: function() {
-					self.$el.model("hide");
+					self.$el.modal("hide");
 					if (back_to_plot == true) {
 						/* if (self.isSubTree === true) {
 							$(".add-new-sub-tree").trigger("click");
@@ -1391,7 +1391,7 @@ $(document).ready(function(){
 			site: '',
 			plot: '',
 			//_id: '',
-			tree_id: 0,
+			tree_id: -1,
 			sub_tree_id: 0,
 			angle: 0.0,
 			distance: 0,
@@ -1566,7 +1566,7 @@ $(document).ready(function(){
 							});
 						});
 					// adds formatted data to a hidden input on the page
-					$("#CSV").append(CSV);
+					$("#CSV").empty().append(CSV);
 					$(".export").val("Click to open file");
 					$(".export").addClass("btn-success");
 					j = 1;
