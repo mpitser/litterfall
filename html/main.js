@@ -437,31 +437,17 @@ $(document).ready(function(){
 				}
 			}*/
 			
-			var isFormerDateMoreRecent = function(formerdate, latterdate) {
-				
-				if (former_date.y > latter_date.y) return true;
-				if (former_date.y < latter_date.y) return false;
-				
-				if (former_date.m > latter_date.m) return true;
-				if (former_date.m < latter_date.m) return false;
-				
-				return former_date.d > former_date.d;
-				
-			};
-			
 			this_tree.latest_DBH_message = "-";
 			this_tree.latest_comment = "-";
 			
-			console.log(this_tree);
-			
 			if (this_tree.diameter.length > 0) {
 				
-				var most_recent_entry = _.max(this_tree.diameter, function(entry) {
-					return (entry.date.y - 2000)*10000 + entry.date.m*100 + entry.date.d;
-				});
+				// get most recent entry
+				// already sorted (the latest comes first) by Tree.parse()
+				var most_recent_entry = _.first(this_tree.diameter);
 				
-				this_tree.latest_DBH_message = most_recent_entry.value + " on " + toFormattedDate(most_recent_entry.date);
-				this_tree.latest_comment = most_recent_entry.comment == '' ? most_recent_entry.comment : '-';
+				this_tree.latest_DBH_message = most_recent_entry.value + " in " + most_recent_entry.year;
+				this_tree.latest_comment = _.isEmpty(most_recent_entry.notes) ? '-' : most_recent_entry.notes;
 				
 			}
 			
@@ -927,11 +913,6 @@ $(document).ready(function(){
 		',
 		initialize: function(){
 			
-			// sort, the latest goes to the top
-			this.model.set('diameter', _.sortBy(this.model.get('diameter'), function (entry) {
-				return 0 - entry.year;
-			}));
-			
 			this.render();
 			
 		},
@@ -1137,11 +1118,17 @@ $(document).ready(function(){
 				
 			} else { // if we are editing a row
 				
+				// get the index from the id (id="entry-#")
 				var target_index = parseInt(($row_to_save.attr("id")).split("-")[1]);
+				// set the entry at the target index to the new one
 				entries_array[target_index] = new_entry;
+				// sort it, because why not?
+				// well, really though, why not?
 				entries_array = _.sortBy(this.model.get('diameter'), function (entry) {
-					return 0 - (entry.date.y*366 + entry.date.m*32 + entry.date.d);
+					return 0 - year;
 				});
+				
+				// set the new diameter
 				this.model.set('diameter', entries_array);
 				
 			}
@@ -1384,16 +1371,14 @@ $(document).ready(function(){
 			});
 		},
 		parse: function(response){
-		
-			function formatSubTreeId(sub_tree_id, i) {
-				if (i === undefined) i = 1;
-				else i++;
-				sub_tree_id *= .1;
-				if (sub_tree_id < 1) return sub_tree_id;
-				return formatSubTreeId(sub_tree_id, i);
-			}
 			
-			response.full_tree_id = response.tree_id + formatSubTreeId(response.sub_tree_id);
+			// sort, the latest goes to the top
+			this.set('diameter', _.sortBy(this.get('diameter'), function (entry) {
+				return 0 - entry.year;
+			}));
+			
+			// format full tree ID for display
+			response.full_tree_id = response.tree_id + ((response.sub_tree_id == 0) ? '' : ('.' + response.sub_tree_id));
 			
 			/*
 			var newEntryArray = [];
