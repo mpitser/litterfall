@@ -168,16 +168,17 @@ class Tree:
 	
 	def format(self):
 		
-		'''if not 'tree_id' in self.tree:
+		'''
+		if not 'tree_id' in self.tree:
 			return False
 		else:
-			if self.tree['tree_id'] <= 0:
+			if self.tree['tree_id'] <= 0 or self.tree['tree_id'] != -1:
 				return False
 		
 		if not 'sub_tree_id' in self.tree:
 			return False
 		else:
-			if self.tree['sub_tree_id'] < 0:
+			if self.tree['sub_tree_id'] < 0 or self.tree['sub_tree_id'] != -1:
 				return False
 		
 		if not 'plot' in self.tree:
@@ -213,7 +214,8 @@ class Tree:
 				self.tree['angle'] = (self.tree['angle'] + 180) % 360
 		
 		if 'full_tree_id' in self.tree:
-			del self.tree['full_tree_id']'''
+			del self.tree['full_tree_id']
+		'''
 		
 		return True
 	
@@ -297,7 +299,28 @@ def getdata(obs, site, plot, treeid, subtreeid):
 		data = obs.find({'collection_type':'tree'}, {'fields':'diameter'}).distinct('diameter')
 		data.sort()
 		n = 0 # n is not important, just helps up in decigin which data to assign to json_data
-	
+	elif site == 'allObservers':
+		data = obs.find({'collection_type':'tree'}, {'fields':'diameter.observers'}).distinct('diameter.observers')
+		data.sort()
+		n = len(data)
+	'''elif site == 'reformatTheDate':
+		allTrees = obs.find()
+		
+		for (i, tree) in enumerate(allTrees):
+		
+			newEntryArray = []
+			
+			for (j, entry) in enumerate(tree['diameter']):
+				newEntry = entry
+				newEntry['year'] = newEntry['date']['y']
+				newEntryArray.append(newEntry)
+			
+			obs.update({'_id': tree['_id']}, {'$set': {'diameter': newEntryArray}})
+		
+		data = obs.find({'collection_type':'tree'}, {'fields':'diameter.year'}).distinct('diameter.year')
+		n = len(data)
+				
+	'''
 	else:
 		# then the query is about a particular site and plot
 		findQuery = {
@@ -313,7 +336,7 @@ def getdata(obs, site, plot, treeid, subtreeid):
 				findQuery['sub_tree_id'] = int(subtreeid)			
 		# get the data 
 		data = obs.find(findQuery).sort([("angle",1)])
-		n = data.count()
+		n = -1
 
 	# validate the return data
 	# if only a treeid is given and
@@ -321,15 +344,10 @@ def getdata(obs, site, plot, treeid, subtreeid):
 	# then return nothing
 	if  treeid != None and n > 1 and subtreeid != 'all':
 		json_data = None
-	elif n == -1:
-		#return maxID
-		json_data = data[n]
 	elif n == 0:
 		#return diameter objects
 		json_data = data
-	elif treeid == 'allIDs':
-		json_data = data
-	elif n == 1:
+	elif n == -1:
 		# return one single tree
 		json_data = data[0]
 	else:
