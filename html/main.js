@@ -70,7 +70,7 @@ $(document).ready(function(){
 				<div class="control-group">\
 					<label class="control-label" for="new-tree-species">Species</label>\
 					<div class="controls">\
-						<input type="text" id="new-tree-species" placeholder="Species" style="font-style: italic;">\
+						<input type="text" id="new-tree-species" placeholder="Species">\
 						<span class="help-block"></span>\
 					</div>\
 				</div>\
@@ -225,7 +225,7 @@ $(document).ready(function(){
 				error = "This cannot be empty.";
 			} else if (!number_regex.test($distance.val())) {
 				error = "A distance should be a number.";
-			} else if (parseInt($distance.val()) > 30 || parseInt($distance.val()) < 0) {
+			} else if (parseInt($distance.val()) > 18 || parseInt($distance.val()) < 0) {
 				error = "Do you think it is a bit too far?";
 			}
 
@@ -290,7 +290,7 @@ $(document).ready(function(){
 			<td class="tree-id">\
 				<%= tree.full_tree_id %>\
 			</td>\
-			<td>\
+			<td class="species">\
 				<%= tree.species %>\
 			</td>\
 			<td>\
@@ -315,7 +315,7 @@ $(document).ready(function(){
 			<td>\
 				<%= tree.full_tree_id %>\
 			</td>\
-			<td>\
+			<td class="species">\
 				<%= tree.species %>\
 			</td>\
 			<td>\
@@ -345,7 +345,7 @@ $(document).ready(function(){
 			//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
 			this.$el.attr('id', this_tree._id.$oid).html(_.template(this.templateReports, {tree: this_tree}));
 			this.$el.addClass("tree-cluster-" + this_tree.tree_id);
-			this.$el.children().eq(2).css("font-style","italic");
+			//this.$el.children().eq(2).css("font-style","italic");
 			this.options.targetEl.append(this.el);
 			
 			// find start and end Year by select buttons
@@ -406,7 +406,7 @@ $(document).ready(function(){
 			//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
 			this.$el.attr('id', this_tree._id.$oid).html(_.template(this.templateUpdate, {tree: this_tree}));
 			this.$el.addClass("tree-cluster-" + this_tree.tree_id);
-			this.$el.children().eq(2).css("font-style","italic");
+			//this.$el.children().eq(2).css("font-style","italic");
 			this.options.targetEl.append(this.el);	
 
 		},
@@ -1791,7 +1791,7 @@ $(document).ready(function(){
 				}
 			});
 			
-			
+
 			//DBH Tooltip 
 			updateFunctions();
 		});

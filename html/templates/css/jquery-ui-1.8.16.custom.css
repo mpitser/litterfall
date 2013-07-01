@@ -11,6 +11,7 @@
 ----------------------------------*/
 .edit_cell .alert_invalid { background-color: #ffe9e8;}
 #current.alert-valid  { background-color: #ffe9e8;}
+.species { font-style: italic; }
 
 
 /* Layout helpers
