@@ -225,7 +225,7 @@ $(document).ready(function(){
 				error = "This cannot be empty.";
 			} else if (!number_regex.test($distance.val())) {
 				error = "A distance should be a number.";
-			} else if (parseInt($distance.val()) > 30 || parseInt($distance.val()) < 0) {
+			} else if (parseInt($distance.val()) > 18 || parseInt($distance.val()) < 0) {
 				error = "Do you think it is a bit too far?";
 			}
 
