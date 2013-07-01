@@ -60,42 +60,6 @@ $(document).ready(function(){
 			</td>\
 			<td>\
 				<%= tree.distance %>\
-			</td>\
-			<td class="date-entry 2002">\
-				<%= tree.diameter2 %>\
-			</td>\
-			<td class="date-entry 2003">\
-				<%= tree.diameter3 %>\
-			</td>\
-			<td class="date-entry 2004">\
-				<%= tree.diameter4 %>\
-			</td>\
-			<td class="date-entry 2005">\
-				<%= tree.diameter5 %>\
-			</td>\
-			<td class="date-entry 2006">\
-				<%= tree.diameter6 %>\
-			</td>\
-			<td class="date-entry 2007">\
-				<%= tree.diameter7 %>\
-			</td>\
-			<td class="date-entry 2008">\
-				<%= tree.diameter8 %>\
-			</td>\
-			<td class="date-entry 2009">\
-				<%= tree.diameter9 %>\
-			</td>\
-			<td class="date-entry 2010">\
-				<%= tree.diameter10 %>\
-			</td>\
-			<td class="date-entry 2011">\
-				<%= tree.diameter11 %>\
-			</td>\
-			<td class="date-entry 2012">\
-				<%= tree.diameter12 %>\
-			</td>\
-			<td class="date-entry 2013">\
-				<%= tree.diameter13 %>\
 			</td>',
 		templateUpdate:	'\
 			<td>\
@@ -137,7 +101,15 @@ $(document).ready(function(){
 		renderReport: function(){
 			var thisTree = this.model.toJSON();
 			
-			thisTree.diameter2 = "-";
+			//$el --> gets the jQuery object for this view's element 
+			//*.attr('id', thisTree._id.$oid) --> sets 'id' to MongoDB value for tree's ID
+			//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
+			this.$el.attr('id', thisTree._id.$oid).html(_.template(this.templateReports, {tree: thisTree}));
+			this.$el.addClass("tree-cluster-" + thisTree.tree_id);
+			this.$el.children().eq(2).css("font-style","italic");
+			this.options.targetEl.append(this.el);	
+			
+			/*thisTree.diameter2 = "-";
 			thisTree.diameter3 = "-";
 			thisTree.diameter4 = "-";
 			thisTree.diameter5 = "-";
@@ -148,9 +120,76 @@ $(document).ready(function(){
 			thisTree.diameter10 = "-";
 			thisTree.diameter11 = "-";
 			thisTree.diameter12 = "-";
-			thisTree.diameter13 = "-";
-			for (date in thisTree.diameter){                      //loop through the list of existing dates and store the most recent
+			thisTree.diameter13 = "-";*/
+			
+			// find start and end Year by select buttons
+			// make that number of columns
+			// if tree has entry, add it, otherwise just add -
+			
+			var start_year = $('#start-year').val();
+			var end_year = $('#end-year').val();
+			
+			var thisRow = $(this.el);
+			// for each 
+			//var x = thisRow[0].insertCell(-1);
+			//x.innerHTML="newcell";
+			//$("<td>3</td>").appendTo(thisRow);
+			//console.log(thisRow);
+			console.log(thisTree);
+			var entryAdded = false;
+			//console.log(thisTree.diameter);
+			//console.log("this--", this);
+			$("#sub-header").children().each(function(index, value){
+				//console.log($('tbody :nth-child('+index+')'));
+				// this is the year of the column $(value).text());
+				for (i in thisTree.diameter){
+					//console.log(thisTree.diameter[i].year);
+					//console.log($(value).text());
+					if (thisTree.diameter[i].year === parseInt($(value).text())) {
+						// add diameter entry as cell to the thingy
+						//console.log($('tr:nth-child('+index+')'));
+						//console.log(thisTree);
+						//$('tr:nth-child('+index+')').append($("<td></td>").attr("value", thisTree.diameter[i].value).text(thisTree.diameter[i].value));
+						$("<td></td>").attr("value", thisTree.diameter[i].value).text(thisTree.diameter[i].value).appendTo(thisRow);
+
+						//onsole.log(this);
+						entryAdded = true;
+						break;
+						// add comment as the value for hovering
+					} 
+				}
+				if (entryAdded == false) {
+						//$('tr:nth-child('+index+')').append($("<td></td>").attr("value", "no entry").text("-"));
+						$("<td></td>").attr("value", "no entry").text("-").appendTo(thisRow);
+
+				}
+				entryAdded=false;
+			});
+			/*for (col in yearCols) {
+				for (i in thisTree.diameter){
+					if (thisTree.diameter[i].year == colYear) {
+						// add diameter entry as cell to the thingy
+						// add comment as the value for hovering
+					}
+				}
+				//if (row cell is not existing(based on year in subheader col)?) {
+				//	add a cell with just "-"
+				//}
+			}*/
+			/*for (i in thisTree.diameter){                      //loop through the list of existing dates and store the most recent
+				console.log(thisTree.diameter[i].year);
+					
+					if (thisTree.diameter[i].year >= start_year && thisTree.diameter[i].year <= end_year) {
+						// add diameter entry as cell to the thingy
+					} else {
+						
+					}
+				
+				//if (thisTree.diameter[i].date !== null){console.log(new Date(thisTree.diameter[i].date['$date']).getFullYear())}
 				if (date.slice(0,4) === '2002') {
+				<td class="date-entry 2013">\
+				<%= tree.diameter13 %>\
+			</td>'
 					thisTree.diameter2 = thisTree.diameter[date].value;
 				} else if (date.slice(0,4) === '2003') {
 					thisTree.diameter3 = thisTree.diameter[date].value;
@@ -174,16 +213,10 @@ $(document).ready(function(){
 					thisTree.diameter12 = thisTree.diameter[date].value;
 				} else if (date.slice(0,4) === '2013') {
 					thisTree.diameter13 = thisTree.diameter[date].value;
-				}
-			}
+				}*/
+			//}
 			
-			//$el --> gets the jQuery object for this view's element 
-			//*.attr('id', thisTree._id.$oid) --> sets 'id' to MongoDB value for tree's ID
-			//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
-			this.$el.attr('id', thisTree._id.$oid).html(_.template(this.templateReports, {tree: thisTree}));
-			this.$el.addClass("tree-cluster-" + thisTree.tree_id);
-			this.$el.children().eq(2).css("font-style","italic");
-			this.options.targetEl.append(this.el);	
+			
 				
 		},
 		renderUpdate: function(){
@@ -598,10 +631,10 @@ $(document).ready(function(){
 		console.log("here");
 			if (document.location.hash.search("update") === -1) {
 				this.renderReport();
-				this.model.on('change', this.renderReport, this); //re-render when the model is saved (new observation, or an edit)
+				//this.model.on('change', this.renderReport, this); //re-render when the model is saved (new observation, or an edit)
 			} else {
-				this.renderReport();
-				this.model.on('change', this.renderUpdate, this); //re-render when the model is saved (new observation, or an edit)
+				this.renderUpdate();
+				//this.model.on('change', this.renderUpdate, this); //re-render when the model is saved (new observation, or an edit)
 			}
 		},
 		renderReport: function(){
@@ -612,6 +645,11 @@ $(document).ready(function(){
 			this.$el.html(_.template(this.templateReport, {tree: thisTree}));
 			$(".title").text("Analyzing Tree Data ");
 			$("#tree_observations").tablesorter(); 
+			$('.back').click(function(){
+				console.log("clicked once");
+				//console.log(document.location.hash.slice(0, document.location.hash.search("/treeid")));
+				app_router.navigate(document.location.hash.slice(0, document.location.hash.search("/treeid")), {trigger: true});
+			});
 			this.postRender();
 		},
 		renderUpdate: function(){
@@ -622,6 +660,12 @@ $(document).ready(function(){
 			this.$el.html(_.template(this.templateUpdate, {tree: thisTree}));
 			$(".title").text("Updating Tree Data ");
 			$("#tree_observations").tablesorter({headers: { 0: { sorter: false}}}); 
+			$('.back').click(function(){
+							console.log("clicked once");
+
+			console.log(document.location.hash.slice(0, document.location.hash.search("/treeid")));
+				app_router.navigate(document.location.hash.slice(0, document.location.hash.search("/treeid")), {trigger: true});
+			});
 			this.postRender();
 		},
 		postRender: function(){
@@ -718,7 +762,7 @@ $(document).ready(function(){
 		cancelEditObservation: function() {
 			// user wants to cancel any edits made, or is canceling after adding a new entry
 			this.model.fetch(); // retrieves recent data
-			this.render();      // NOTE: this is sort of a hack to exit the editing view
+			this.renderUpdate();      // NOTE: this is sort of a hack to exit the editing view
 		},
 
 		saveObservation: function(event) {
@@ -1064,6 +1108,18 @@ $(document).ready(function(){
   					maxDiam = numObvs;
   				}
   			}, this);
+  			
+  			
+  			var dataStartYear = 2002;					// data began collection in 2002
+			var dataEndYear = new Date().getFullYear();	// data collection continues through current year (in theory)
+			//console.log("dataStart = "+ dataStartYear + " and dataEnd = "+ dataEndYear);
+  			//$('.tbody').append("<td class='date-entry 2014'>Hello</td>");
+			/*$('#sub-header').append("<th class='date-entry " + dataEndYear + " header'>" + dataEndYear+ "</th>");
+			$('.date-entry 2014').style.display = "table-cell";*/
+			
+						
+						
+						
   			// populate the treeIDs dropdown menu for adding new subtrees
   			this.populateTreeIDs();
   			$(".dbh").attr("href", document.location.hash);
@@ -1129,13 +1185,13 @@ $(document).ready(function(){
 				endYear = tempYear;
 			}
 			
-			$('.date-entry').hide();
+			//$('.date-entry').hide();
 			for (var i=parseInt(startYear); i<=parseInt(endYear); i++){
 				$('.'+i).show();
 			}
 
 			//format header row to make the DBH cell span all the years specified
-  			document.getElementById("DBH").colSpan = numYears;
+  			//document.getElementById("DBH").colSpan = numYears;
     	},
   		addTree: function(){
   			this.newTreeRowViewInitialize();	
