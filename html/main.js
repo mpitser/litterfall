@@ -197,15 +197,16 @@ $(document).ready(function(){
 		validateAngle: function() {
 
 			var $angle = $('#new-tree-angle');
+			// What do I need to do to change the angle?
 
 			// It should only be numbers
-			var number_regex = /^[0-9]*$/;
+			var numberRegex = /^[0-9]*$/;
 
 			var error = false;
 
 			if ($angle.val() == '') {
 				error = "This cannot be empty.";
-			} else if (!number_regex.test($angle.val())) {
+			} else if (!numberRegex.test($angle.val())) {
 				error = "An angle should be a number.";
 			} else if (parseInt($angle.val()) > 360 || parseInt($angle.val()) < 0) {
 				error = "It should be between 0-360 degrees!";
@@ -252,24 +253,25 @@ $(document).ready(function(){
 				if (!(self.validateAngle() || self.validateDistance() || self.validateSpecies())) {
 					return "Invalid data";
 				}
-				
 			}
 			this.model.on("invalid", function() {
 				$('#add-modal .error').eq(0).focus();
 			});
 
+
 			// save!
 			this.model.save({
 				species: $('#new-tree-species').val(),
 				angle: parseInt($('#new-tree-angle').val()),
-				distance: parseInt($('#new-tree-distance').val()),
+				distance: parseInt($('#new-tree-distance').val())
+			},
+			{
 				success: function() {
 					self.$el.modal("hide");
 					if (back_to_plot == true) {
 						/* if (self.isSubTree === true) {
 							$(".add-new-sub-tree").trigger("click");
 						} */
-						console.log("we're saving a new tree now??");
 						self.trigger("tree_saved");
 					} else {
 						app_router.navigate(document.location.hash + "/treeid/" + self.model.get("tree_id"), {trigger: true});
@@ -784,9 +786,9 @@ $(document).ready(function(){
 				</tr>\
 			</thead>\
 			<tbody>\
-			<% _.each(tree.dates_desc, function(obs){ %>\
+			<% $.each(tree.dates_desc, function(obs){ %>\
 			<tr>\
-				<td><span class="display_cell year"><%= obs.year %></span>\
+				<td><span class="display_cell date_select"><%= obs.year %></span>\
 				<td><span class="display_cell observers"><%= obs.observers %></span>\
 				<td><span class="display_cell diameter"><%= obs.value %></span>\
 				<td><span class="display_cell notes"><%= obs.notes %></span>\
@@ -794,17 +796,6 @@ $(document).ready(function(){
 			<% }); %>\
 			</tbody>\
 			</table>\
-		',
-		rowEntryTemplateUpdate: '\
-				<td class="btn-column">\
-					<button class="show-obs-info display_cell btn btn-mini btn-primary edit-existing" type="button">Edit</button>\
-					<div class="edit-obs-info edit_cell btn-group"><button class="btn-save-observation btn btn-mini btn-success" type="button">Submit</button>\
-					<button class="btn-cancel-observation btn btn-mini btn-danger" type="button">Cancel</button>\
-				</td>\
-				<td class="editable"><span class ="show-obs-info display_cell year" text="<%= entry.year %>"><%= entry.year %></span><span class="edit-obs-info year select"><select></select></span></td> \
-				<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers %></span><span class="edit-obs-info edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
-				<td class="editable"><span class="show-obs-info display_cell diameter"><%= entry.value %></span><span class="edit-obs-info edit_cell diameter"><input title = "Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
-				<td class="editable"><span class="show-obs-info display_cell notes"><%= entry.notes %></span><span class="edit-obs-info edit_cell notes"><input type="text" value="<%= entry.notes %>"></span></span></td>\
 		',
 		templateUpdate: '\
 		<div id="tree-info">\
@@ -836,24 +827,39 @@ $(document).ready(function(){
 				</tr>\
 			</thead>\
 			<tbody>\
-			<% _.each(tree.dates_desc, function(entry, index){ %>\
-				<tr id="entry-<%= index %>">\
-					<td class="btn-column">\
-						<button class="show-obs-info display_cell btn btn-mini btn-primary edit-existing" type="button">Edit</button>\
-						<div class="edit-obs-info edit_cell btn-group"><button class="btn-save-observation btn btn-mini btn-success" type="button">Submit</button>\
-						<button class="btn-cancel-observation btn btn-mini btn-danger" type="button">Cancel</button>\
-					</td>\
-					<td class="editable"><span class ="show-obs-info display_cell year" text="<%= entry.year %>"><%= entry.year %></span><span class="edit-obs-info year select"><select></select></span></td> \
-					<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers %></span><span class="edit-obs-info edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
-					<td class="editable"><span class="show-obs-info display_cell diameter"><%= entry.value %></span><span class="edit-obs-info edit_cell diameter"><input title = "Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
-				<td class="editable"><span class="show-obs-info display_cell notes"><%= entry.notes %></span><span class="edit-obs-info edit_cell notes"><input type="text" value="<%= entry.notes %>"></span></span></td>\
-				</tr>\
+			<% _.each(tree.diameter, function(entry, index){ %>\
+			<tr id="entry-<%= index %>">\
+				<td class="btn-column">\
+					<button class="display_cell btn btn-mini btn-primary edit-existing" type="button">Edit</button>\
+					<div class="edit_cell btn-group"><button class="btn-save-observation btn btn-mini btn-success" type="button">Submit</button>\
+					<button class="btn-cancel-observation btn btn-mini btn-danger" type="button">Cancel</button>\
+				</td>\
+				<td class="editable"><span class="display_cell date_select"><%= entry.year %></span><span class="edit_cell date_select"><input title="Enter a date in mm/dd/yyyy format.  It may not already have an associated diameter entry or be in the future." type="text" value="<%= entry.year %>">\
+				<input type="hidden" class="formatted_date" value="<%= toFormattedDate(entry.date) %>">\
+				<input type="hidden" class="unix-time" value="<%= toUnixTime(entry.date) %>"></span></td>\
+				<td class="editable"><span class="display_cell observers"><%= entry.observers %></span><span class="edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
+				<td class="editable"><span class="display_cell diameter"><%= entry.value %></span><span class="edit_cell diameter"><input title = "Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
+				<td class="editable"><span class="display_cell notes"><%= entry.notes %></span><span class="edit_cell notes"><input type="text" value="<%= entry.notes %>"></span></span></td>\
+			</tr>\
 			<% }); %>\
 			</tbody>\
 			</table>\
 			<div class="button-row">\
 				<button class="btn-new-observation btn btn-mini btn-success pull-left" type="button">+ New Entry</button>\
 			</div>\
+		',
+		rowEntryTemplateUpdate: '\
+				<td class="btn-column">\
+					<button class="display_cell btn btn-mini btn-primary edit-existing" type="button">Edit</button>\
+					<div class="edit_cell btn-group"><button class="btn-save-observation btn btn-mini btn-success" type="button">Submit</button>\
+					<button class="btn-cancel-observation btn btn-mini btn-danger" type="button">Cancel</button>\
+				</td>\
+				<td class="editable"><span class="display_cell date_select"><%= toFormattedDate(entry.date) %></span><span class="edit-cell date_select"><input title="Enter a date in mm/dd/yyyy format.  It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
+				<input type="hidden" class="formatted_date" value="">\
+				<input type="hidden" class="unix-time" value="<%= toUnixTime(entry.date) %>"></span></td>\
+				<td class="editable"><span class="display_cell observers"><%= entry.observers %></span><span class="edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
+				<td class="editable"><span class="display_cell diameter"><%= entry.value %></span><span class="edit_cell diameter"><input title = "Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
+				<td class="editable"><span class="display_cell notes"><%= entry.notes %></span><span class="edit_cell notes"><input type="text" value="<%= entry.notes %>"></span></span></td>\
 		',
 		initialize: function(){
 			
@@ -880,8 +886,11 @@ $(document).ready(function(){
 			
 			var this_tree = this.model.toJSON();
 			//get the dates in descending order
-			var dates = this_tree.diameter.sort(function(a,b){return (b.year-a.year)});
+			// this_tree.dates_desc = _.keys(this_tree.diameter).sort().reverse();
+
+			var dates = this_tree.diameter;
 			this_tree.dates_desc = dates;
+
 			this.$el.html(_.template(this.templateReport, {tree: this_tree}));
 			$(".back").attr("href", "#data/reports/trees/site/" + $(".site-name").text() + "/plot/" + $(".plot-number").text());
 			$(".title").text("Analyzing Tree Data ");
@@ -891,15 +900,14 @@ $(document).ready(function(){
 		
 			var this_tree = this.model.toJSON();
 			//get the dates in descending order
-			var dates = this_tree.diameter.sort(function(a,b){return (b.year-a.year)});
+			
+			var dates = this_tree.diameter;
+
 			this_tree.dates_desc = dates;
 			this.$el.html(_.template(this.templateUpdate, {tree: this_tree}));
 			$(".title").text("Updating Tree Data ");
 			$("#tree-observations").tablesorter({headers: { 0: { sorter: false}}}); 
-			$(".show-obs-info").show();
-			$(".edit-obs-info").hide();
 			this.postRender();
-	
 		},
 		postRender: function(){
 			//add any methods/functions that need to be call after redendering the Tree edit view
@@ -952,13 +960,12 @@ $(document).ready(function(){
 			});
 		},
 		newObservation: function(){
-			$(".btn-new-observation").hide()
 			//add a new blank row to the observation table
 			var today = new Date();
 
 			// if today's date already has an entry, set a template dateKey using tomorrow's date (which the user will be forced to change to pass validation)
 			var new_entry = {
-				//date: today.toLitterfallDateObject(),
+				// date: today.toLitterfallDateObject(),
 				year: today.getFullYear(),
 				value: 'n/a',
 				notes: "",
@@ -967,82 +974,49 @@ $(document).ready(function(){
 			
 			// new jQuery row to be prepended
 			// class="new" to mark the row as new
-			
 			var $new_entry_row = $('<tr></tr>').addClass("new").html(_.template(this.rowEntryTemplateUpdate, {entry: new_entry}));
-			$("#tree-observations .btn.display_cell").hide();
-			var existing_years = [];
-			$.each($(".show-obs-info.year"), function(i, obs) {
-				existing_years.push($(obs).text());
-			});
-			// Show edit content, hide display content, show "Submit/cancel button", add date_picker		
-			$new_entry_row.find(".edit-obs-info").show();
-			$new_entry_row.find(".show-obs-info").hide();
-			$new_entry_row.find(".select-info").show();
-			//populate dropdown menu with years not yet recorded
-			$("#tree-observations > tbody").prepend($new_entry_row);
-			for (var i = new_entry.year; i >= 2002; i--) {
-				already = false;
-				for (var j = 0; j < existing_years.length; j++) {
-					if (i == parseInt(existing_years[j])) {
-						already = true;
-					}
-				} 				
-				$(".year select").append($("<option></option>").attr("value", i).text(i).attr("id", i));
-				if (already == true) {
-					$("#" + i).addClass("already");
-				}
-			}
-			$(".already").remove();
-			if ($(".year select").length === 0) {
-				alert("already all years");
-			}
-			
 			// prepend it to the table
+			$("#tree-observations > tbody").prepend($new_entry_row);
 			
 			// Disable all the other edit buttons
 			// Why do we need to do that though?
-			
+			$("#tree-observations .btn.display_cell").hide();
+
+			// Show edit content, hide display content, show "Submit/cancel button", add date_picker		
+			$new_entry_row.find(".edit_cell").show();
+			$new_entry_row.find(".display_cell").hide();
+			/*
+			$new_entry_row.find(".edit_cell.date_select :input").datepicker({
+				maxDate: 0,
+				changeYear: true,
+				changeMonth: true,
+				constrainInput: true
+			});	*/
 			//var existingObs = this.model.findAllObservers();
 			var all_observers = this.getAllObservers();
 			$new_entry_row.find(".edit_cell.observers :input").typeahead({source: all_observers});
 		},
 
 		editObservation: function(event) {
-			$(".btn-new-observation").hide()
+
 			// User wants to edit an existing observation.  
-			$row_to_edit = $(event.target).parents("tr");		// Get the row of edit button 
+			$row_to_edit = $(event.target).parents("tr");		// Get the row of edit button
 			$row_to_edit.addClass("edit");
 			// Hide any existing edit modes
 			$("#tree-observations .btn.display_cell").hide();
-			var curr_year = new Date().getFullYear();
-			var existing_years = [];
-			$.each($(".show-obs-info.year"), function(i, obs) {
-				existing_years.push($(obs).text());
-			});
-			// Show edit content, hide display content, show "Submit/cancel button"
-			$row_to_edit.find(".edit-obs-info").show();
-			$row_to_edit.find(".show-obs-info").hide();
-			$row_to_edit.find(".select-info").show();
-			//populate dropdown menu with years not yet recorded
-			for (var i = curr_year; i >= 2002; i--) {
-				already = false;
-				for (var j = 0; j < existing_years.length; j++) {
-					if (i == parseInt(existing_years[j])) {
-						already = true;
-					}
-				} 				
-				$(".edit > td > span > select").append($("<option></option>").attr("value", i).text(i).attr("id", i));
-				if (already == true) {
-					$("#" + i).addClass("already");
-				}
-			}
-			var y = $(".edit > td > .show-obs-info.display_cell.year").text();
-			$("#" + y).after($("<option></option>").attr("value", y).text(y).attr("selected", "selected"));
+
+			// Show edit content, hide display content, show "Submit/cancel button", add date_picker		
+			$row_to_edit.find(".edit_cell").show();
+			$row_to_edit.find(".display_cell").hide();
+			
+			// $row_to_edit.find(".edit_cell.date_select :input").datepicker({dateFormat: "yy/mm/dd", altFormat: "@" , altField: "#tree_observations > tbody > tr .unix-time" , maxDate: 0, changeYear: true , changeMonth: true , constrainInput: true });
+			
+			$row_to_edit.addClass("old");
+			
 			// get all observers existing in database, feed them into an autocomplete for the observers field
 			var all_observers = this.getAllObservers();
-			$row_to_edit.find(".edit_cell.observers :input").typeahead({source: all_observers});
-			$(".already").remove();
-			
+			$row_to_edit.find(".edit_cell.observers :input").typeahead({source: all_observers});			
+
 		},
 
 		cancelEditObservation: function() {
@@ -1050,7 +1024,6 @@ $(document).ready(function(){
 			this.model.fetch(); // retrieves recent data
 			$("#tree-observations > tr").removeClass("new");
 			$("#tree-observations > tr").removeClass("edit");
-			$(".btn-new-observation").show();
 			this.render();      // NOTE: this is sort of a hack to exit the editing view
 		},
 
@@ -1076,19 +1049,20 @@ $(document).ready(function(){
 			
 			// new entry object
 			var new_entry = {
-				year: $row_to_save.find(".year select").val(),
+				// date: ($row_to_save.find(".edit_cell.date_select :input").datepicker("getDate")).toLitterfallDateObject(),
+				year: parseInt(($row_to_save.find(".edit_cell.date_select :input")).val()),
 				value: parseFloat($row_to_save.find(".diameter :input").val()),
 				observers: new_observers,
 				notes: $row_to_save.find(".notes :input").val(),
 			};
-			console.log(new_entry);
+			
 			// if it is a new one
 			if (is_this_row_new === true) {
 				
 				
 				// add a new entry to the list, to where it should be
 				var target_index = _.sortedIndex(entries_array, new_entry, function(entry) {
-					return entry.year;
+					return 0 - entry.year;
 				});
 				
 				// then insert it
@@ -1104,7 +1078,7 @@ $(document).ready(function(){
 				// sort it, because why not?
 				// well, really though, why not?
 				entries_array = _.sortBy(this.model.get('diameter'), function (entry) {
-					return 0 - entry.year;
+					return 0 - year;
 				});
 				
 				// set the new diameter
@@ -1112,11 +1086,8 @@ $(document).ready(function(){
 				
 			}
 			
-			$("#tree-observations > tr > td > select").removeClass("already");
-			$("#tree-observations > tr").removeClass("edit");
 			this.model.save();
 			this.render();		
-			
 
 		},
 
@@ -1142,11 +1113,12 @@ $(document).ready(function(){
 		},
 
 		validateDate: function(current_row) {
-
-			/* get date to validate */
+			
+			/*
+			// get date to validate
 			var date_entered = current_row.find(".formatted-date").val();
 
-			/* make sure date isn't in future */
+			// make sure date isn't in future
 			var today = new Date();
 		    var today_formatted = today.getFullYear().toString() + 
 		    				     ((today.getMonth()+1).toString().length == 1 ? "0"+(today.getMonth()+1) : (today.getMonth()+1).toString()) + 
@@ -1160,7 +1132,7 @@ $(document).ready(function(){
 				return false;
 			} 
 
-			/* make sure date isn't already added */		
+			// make sure date isn't already added	
 			// get all dates listed in model for diam entries
 			var existing_diams_object = this.model.attributes.diameter;
 			var existing_dates_array = existing_diams_object.date.reverse();
@@ -1178,10 +1150,11 @@ $(document).ready(function(){
 				}
 			}
 
-			/* if date field passes all tests, make sure it is not highlighted anymore */
+			// if date field passes all tests, make sure it is not highlighted anymore
 			$(".edit_cell.date_select :input" ).removeClass("alert_invalid");
 			$(".edit_cell.date_select :input" ).tooltip("destroy");
 			console.log("date validation passed");
+			*/
 			return true;
 		},
 
@@ -1354,23 +1327,26 @@ $(document).ready(function(){
 		},
 		parse: function(response){
 			
+			
 			// sort, the latest goes to the top
-			this.set('diameter', _.sortBy(this.get('diameter'), function (entry) {
-				return entry.year;
-			}));
+			response.diameter = _.sortBy(response.diameter, function (entry) {
+				return (0 - entry.year);
+			});
+			
 			// format full tree ID for display
 			response.full_tree_id = response.tree_id + ((response.sub_tree_id == 0) ? '' : ('.' + response.sub_tree_id));
 			
+			/*
+			var newEntryArray = [];
 			
-		//	var newEntryArray = [];
-			
-		//	console.log(response.diameter);
-		//	_.each(response.diameter, function(entry, key) {
-		//		console.log(new Date(response.diameter[key].date.$date));
-			//	response.diameter[key].date = new Date(response.diameter[key].date.$date);
-		///		console.log(response.diameter[key]);
-		//		console.log(response.diameter[key].date.getFullYear());
-		//	});
+			console.log(response.diameter);
+			_.each(response.diameter, function(entry, key) {
+				console.log(new Date(response.diameter[key].date.$date));
+				response.diameter[key].date = new Date(response.diameter[key].date.$date);
+				console.log(response.diameter[key]);
+				console.log(response.diameter[key].date.getFullYear());
+			});
+			*/
 			
 			return response;
 		},
@@ -1856,8 +1832,8 @@ $(function(){
   });
 });
 // End Active Nav Tracking
-/*
-function  (date){
+
+function toFormattedDate(date){
 	
 	var return_string = "";
 	
