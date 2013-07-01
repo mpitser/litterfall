@@ -43,87 +43,40 @@
  	</div>
  	     
     <h3>View data from:
-		<select id="startYear" class="dropdown"> 
-			<option >
-				2002
-			</option>
-      		<option >
-      			2003
-  			</option>	
-  			<option >
-      			2004
-  			</option>
-  			<option >
-      			2005
-  			</option>
-  			<option >
-      			2006
-  			</option>
-  			<option >
-      			2007
-  			</option>
-  			<option >
-      			2008
-  			</option>
-  			<option >
-      			2009
-  			</option>
-  			<option >
-      			2010
-  			</option>
-  			<option >
-      			2011
-  			</option>
-  			<option >
-      			2012
-  			</option>
-  			<option >
-      			2013
-  			</option>
-  			
-  		</select>
+		<select id="start-year" class="dropdown"></select>
   		to
-  		<select id="endYear" class="dropdown"> 
-			<option >
-				2002
-			</option>
-      		<option >
-      			2003
-  			</option>	
-  			<option >
-      			2004
-  			</option>
-  			<option >
-      			2005
-  			</option>
-  			<option >
-      			2006
-  			</option>
-  			<option >
-      			2007
-  			</option>
-  			<option >
-      			2008
-  			</option>
-  			<option >
-      			2009
-  			</option>
-  			<option >
-      			2010
-  			</option>
-  			<option >
-      			2011
-  			</option>
-  			<option >
-      			2012
-  			</option>
-  			<option selected="selected">
-      			2013
-  			</option>
-  		</select>
+  		<select id="end-year" class="dropdown"></select>
       	<button id="btn-go" class="btn btn-mini" type="button">Go!</button>
-      </h3>
-      
+    </h3>
+    
+    <script> 
+    
+    	// add selection options for data viewing based on years data is available
+  			var startYear = 2002; // year that data began collection
+  			var endYear = new Date().getFullYear();	// data collection continues through current year (in theory)
+  			for (var cur=startYear; cur<=endYear; cur++){
+  				// add selection options
+  				if (cur == startYear){
+  					$("#start-year").append($("<option></option>").attr({selected: "selected", value: cur}).text(cur));
+  					$("#end-year").append($("<option></option>").attr("value",cur).text(cur));
+  				} else if (cur == endYear){
+  					$("#start-year").append($("<option></option>").attr("value",cur).text(cur));
+  					$("#end-year").append($("<option></option>").attr({selected: "selected", value: cur}).text(cur));
+  				} else {
+  					$("#start-year").append($("<option></option>").attr("value",cur).text(cur));
+  					$("#end-year").append($("<option></option>").attr("value",cur).text(cur));
+  				}
+  				
+  				// add sub-header columns for the years we have data for
+  				$("#sub-header").append($("<th></th>").attr("class","date-entry "+cur).text(cur));
+  			}
+			
+			// make the DBH heading span all the year subheadings
+  			var numYears = endYear - startYear + 1;
+  			document.getElementById("DBH").colSpan = numYears;
+  			
+  	</script>  
+  	
  	<table class="table-striped tablesorter" id="plot-table">
 	<thead>
 		<tr>
@@ -143,22 +96,8 @@
 			<th id="DBH" class="{sorter:false}">
 				DBH (cm) <a href="#" class="dbh" rel="tooltip" data-placement="top" data-original-title="Diameter at Breast Height"><small>info</small></a>
 			</th>
-
 		</tr>
-		<tr id="sub-header">
-			<th class="date-entry 2002">2002</th>
-			<th class="date-entry 2003">2003</th>
-			<th class="date-entry 2004">2004</th>
-			<th class="date-entry 2005">2005</th>
-			<th class="date-entry 2006">2006</th>
-			<th class="date-entry 2007">2007</th>
-			<th class="date-entry 2008">2008</th>
-			<th class="date-entry 2009">2009</th>
-			<th class="date-entry 2010">2010</th>
-			<th class="date-entry 2011">2011</th>
-			<th class="date-entry 2012">2012</th>
-			<th class="date-entry 2013">2013</th>
-		</tr>
+		<tr id="sub-header"></tr>
 	</thead>
 	<tbody>
 	
