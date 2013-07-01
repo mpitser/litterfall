@@ -70,7 +70,7 @@ $(document).ready(function(){
 				<div class="control-group">\
 					<label class="control-label" for="new-tree-species">Species</label>\
 					<div class="controls">\
-						<input type="text" id="new-tree-species" placeholder="Species">\
+						<input type="text" id="new-tree-species" placeholder="Species" style="font-style: italic;">\
 						<span class="help-block"></span>\
 					</div>\
 				</div>\
@@ -225,7 +225,7 @@ $(document).ready(function(){
 				error = "This cannot be empty.";
 			} else if (!number_regex.test($distance.val())) {
 				error = "A distance should be a number.";
-			} else if (parseInt($distance.val()) > 18 || parseInt($distance.val()) < 0) {
+			} else if (parseInt($distance.val()) > 30 || parseInt($distance.val()) < 0) {
 				error = "Do you think it is a bit too far?";
 			}
 
@@ -290,7 +290,7 @@ $(document).ready(function(){
 			<td class="tree-id">\
 				<%= tree.full_tree_id %>\
 			</td>\
-			<td class="species">\
+			<td>\
 				<%= tree.species %>\
 			</td>\
 			<td>\
@@ -315,7 +315,7 @@ $(document).ready(function(){
 			<td>\
 				<%= tree.full_tree_id %>\
 			</td>\
-			<td class="species">\
+			<td>\
 				<%= tree.species %>\
 			</td>\
 			<td>\
@@ -345,7 +345,7 @@ $(document).ready(function(){
 			//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
 			this.$el.attr('id', this_tree._id.$oid).html(_.template(this.templateReports, {tree: this_tree}));
 			this.$el.addClass("tree-cluster-" + this_tree.tree_id);
-			//this.$el.children().eq(2).css("font-style","italic");
+			this.$el.children().eq(2).css("font-style","italic");
 			this.options.targetEl.append(this.el);
 			
 			// find start and end Year by select buttons
@@ -406,7 +406,7 @@ $(document).ready(function(){
 			//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
 			this.$el.attr('id', this_tree._id.$oid).html(_.template(this.templateUpdate, {tree: this_tree}));
 			this.$el.addClass("tree-cluster-" + this_tree.tree_id);
-			//this.$el.children().eq(2).css("font-style","italic");
+			this.$el.children().eq(2).css("font-style","italic");
 			this.options.targetEl.append(this.el);	
 
 		},
@@ -753,9 +753,11 @@ $(document).ready(function(){
 					<div class="edit-obs-info edit_cell btn-group"><button class="btn-save-observation btn btn-mini btn-success" type="button">Submit</button>\
 					<button class="btn-cancel-observation btn btn-mini btn-danger" type="button">Cancel</button>\
 				</td>\
-				<td class="editable"><span class ="show-obs-info display_cell year" text="<%= entry.year %>"><%= entry.year %></span><span class="edit-obs-info year select"><select></select></span></td> \
-				<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers %></span><span class="edit-obs-info edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
-				<td class="editable"><span class="show-obs-info display_cell diameter"><%= entry.value %></span><span class="edit-obs-info edit_cell diameter"><input title = "Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
+				<td class="editable">\
+					<span class="display_cell date_select"><%= toFormattedDate(entry.date) %></span>\
+					<span class="edit_cell date_select"><input title="Enter a date in yyyy/mm/dd format. It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
+				</td>\<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers %></span><span class="edit-obs-info edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
+				<td class="editable"><span class="show-obs-info display_cell diameter"><%= entry.value %></span><span class="edit-obs-info edit_cell diameter"><input title="Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
 				<td class="editable"><span class="show-obs-info display_cell notes"><%= entry.notes %></span><span class="edit-obs-info edit_cell notes"><input type="text" value="<%= entry.notes %>"></span></span></td>\
 		',
 		templateUpdate: '\
@@ -956,6 +958,8 @@ $(document).ready(function(){
 			
 			// prepend it to the table
 			*/
+			$('#tree-observations tbody').append($new_entry_row);
+			
 			
 			$new_entry_row.find(".edit_cell").show();
 			$new_entry_row.find(".display_cell").hide();
@@ -1088,7 +1092,7 @@ $(document).ready(function(){
 				// sort it, because why not?
 				// well, really though, why not?
 				entries_array = _.sortBy(this.model.get('diameter'), function (entry) {
-					return 0 - entry.year;
+					return entry.date.y*366 + entry.date.m*32 + entry.date.d;
 				});
 				
 				// set the new diameter
@@ -1128,22 +1132,20 @@ $(document).ready(function(){
 
 			/* get date to validate */
 			// var date_entered = current_row.find(".formatted-date").val();
-			var date_entered = $current_row.find(".edit_cell.date_select :input").datepicker();
+			var date_entered = ($current_row.find(".edit_cell.date_select :input")).datepicker("getDate");
+			
+			console.log(date_entered);
+			
+			/* if date is not valid */
+			if (_.isDate(date_entered) === false) {
+				$(".edit_cell.date_select :input" ).addClass("alert_invalid");
+				alert("Date format invalid!");
+				console.log("date validation failed");
+				($current_row.find('.edit-existing')).trigger('click');
+				return false;
+			}
 
 			/* make sure date isn't in future */
-			/*
-			var today = new Date();
-		    var today_formatted = today.getFullYear().toString() + 
-		    				     ((today.getMonth()+1).toString().length == 1 ? "0"+(today.getMonth()+1) : (today.getMonth()+1).toString()) + 
-		    					 ((today.getDate()+1).toString().length == 1 ? "0"+today.getDate() : today.getDate().toString());
-			if (date_entered > today_formatted) {
-				// trigger the edit Observation button to prevent saving
-				$(".edit_cell.date_select :input" ).addClass("alert_invalid");
-				alert("Can't have date past today!");
-				console.log("date validation failed");
-				$(current_row.find('.edit-existing')).trigger('click');
-				return false;
-			} */
 			var today = new Date();
 			
 			/* make sure date isn't in future */
@@ -1157,7 +1159,7 @@ $(document).ready(function(){
 						$(".edit_cell.date_select :input" ).addClass("alert_invalid");
 						alert("Can't have date past today!");
 						console.log("date validation failed");
-						$(current_row.find('.edit-existing')).trigger('click');
+						($current_row.find('.edit-existing')).trigger('click');
 						return false;
 					}
 				}
@@ -1174,7 +1176,7 @@ $(document).ready(function(){
 			// alert user if the date already has an associated entry
 			*/
 			
-			var this_row_index = parseInt(($row_to_save.attr("id")).split("-")[1]);
+			var this_row_index = parseInt(($current_row.attr("id")).split("-")[1]);
 			var existing_entries = this.model.get('diameter');
 			
 			/*
@@ -1791,7 +1793,7 @@ $(document).ready(function(){
 				}
 			});
 			
-
+			
 			//DBH Tooltip 
 			updateFunctions();
 		});
