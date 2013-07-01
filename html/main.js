@@ -784,9 +784,9 @@ $(document).ready(function(){
 				</tr>\
 			</thead>\
 			<tbody>\
-			<% $.each(tree.dates_desc, function(obs){ %>\
+			<% _.each(tree.dates_desc, function(obs){ %>\
 			<tr>\
-				<td><span class="display_cell date_select"><%= obs.year %></span>\
+				<td><span class="display_cell year"><%= obs.year %></span>\
 				<td><span class="display_cell observers"><%= obs.observers %></span>\
 				<td><span class="display_cell diameter"><%= obs.value %></span>\
 				<td><span class="display_cell notes"><%= obs.notes %></span>\
@@ -952,6 +952,7 @@ $(document).ready(function(){
 			});
 		},
 		newObservation: function(){
+			$(".btn-new-observation").hide()
 			//add a new blank row to the observation table
 			var today = new Date();
 
@@ -1007,7 +1008,7 @@ $(document).ready(function(){
 		},
 
 		editObservation: function(event) {
-
+			$(".btn-new-observation").hide()
 			// User wants to edit an existing observation.  
 			$row_to_edit = $(event.target).parents("tr");		// Get the row of edit button 
 			$row_to_edit.addClass("edit");
@@ -1032,7 +1033,6 @@ $(document).ready(function(){
 				} 				
 				$(".edit > td > span > select").append($("<option></option>").attr("value", i).text(i).attr("id", i));
 				if (already == true) {
-					console.log($("#" + i));
 					$("#" + i).addClass("already");
 				}
 			}
@@ -1050,6 +1050,7 @@ $(document).ready(function(){
 			this.model.fetch(); // retrieves recent data
 			$("#tree-observations > tr").removeClass("new");
 			$("#tree-observations > tr").removeClass("edit");
+			$(".btn-new-observation").show();
 			this.render();      // NOTE: this is sort of a hack to exit the editing view
 		},
 
@@ -1351,29 +1352,28 @@ $(document).ready(function(){
 				model: this
 			});
 		},
-		/*parse: function(response){
+		parse: function(response){
 			
 			// sort, the latest goes to the top
 			this.set('diameter', _.sortBy(this.get('diameter'), function (entry) {
 				return entry.year;
 			}));
-			console.log(response);
 			// format full tree ID for display
 			response.full_tree_id = response.tree_id + ((response.sub_tree_id == 0) ? '' : ('.' + response.sub_tree_id));
 			
-			/*
-			var newEntryArray = [];
 			
-			console.log(response.diameter);
-			_.each(response.diameter, function(entry, key) {
-				console.log(new Date(response.diameter[key].date.$date));
-				response.diameter[key].date = new Date(response.diameter[key].date.$date);
-				console.log(response.diameter[key]);
-				console.log(response.diameter[key].date.getFullYear());
-			});
+		//	var newEntryArray = [];
+			
+		//	console.log(response.diameter);
+		//	_.each(response.diameter, function(entry, key) {
+		//		console.log(new Date(response.diameter[key].date.$date));
+			//	response.diameter[key].date = new Date(response.diameter[key].date.$date);
+		///		console.log(response.diameter[key]);
+		//		console.log(response.diameter[key].date.getFullYear());
+		//	});
 			
 			return response;
-		},*/
+		},
 		// overriding the save method, so that when the model saves it updates its inside to match what the server sends back
 		save: function(attrs, options) {
 			
