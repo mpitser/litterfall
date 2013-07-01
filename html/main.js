@@ -836,7 +836,7 @@ $(document).ready(function(){
 				</tr>\
 			</thead>\
 			<tbody>\
-			<% _.each(tree.diameter, function(entry, index){ %>\
+			<% _.each(tree.dates_desc, function(entry, index){ %>\
 				<tr id="entry-<%= index %>">\
 					<td class="btn-column">\
 						<button class="show-obs-info display_cell btn btn-mini btn-primary edit-existing" type="button">Edit</button>\
@@ -880,11 +880,8 @@ $(document).ready(function(){
 			
 			var this_tree = this.model.toJSON();
 			//get the dates in descending order
-			// this_tree.dates_desc = _.keys(this_tree.diameter).sort().reverse();
-
-			var dates = this_tree.diameter;
+			var dates = this_tree.diameter.sort(function(a,b){return (b.year-a.year)});
 			this_tree.dates_desc = dates;
-
 			this.$el.html(_.template(this.templateReport, {tree: this_tree}));
 			$(".back").attr("href", "#data/reports/trees/site/" + $(".site-name").text() + "/plot/" + $(".plot-number").text());
 			$(".title").text("Analyzing Tree Data ");
@@ -894,10 +891,7 @@ $(document).ready(function(){
 		
 			var this_tree = this.model.toJSON();
 			//get the dates in descending order
-			console.log("hi");
-
-			var dates = this_tree.diameter;
-
+			var dates = this_tree.diameter.sort(function(a,b){return (b.year-a.year)});
 			this_tree.dates_desc = dates;
 			this.$el.html(_.template(this.templateUpdate, {tree: this_tree}));
 			$(".title").text("Updating Tree Data ");
@@ -975,7 +969,6 @@ $(document).ready(function(){
 			
 			var $new_entry_row = $('<tr></tr>').addClass("new").html(_.template(this.rowEntryTemplateUpdate, {entry: new_entry}));
 			$("#tree-observations .btn.display_cell").hide();
-			$(".select-info").hide();
 			var existing_years = [];
 			$.each($(".show-obs-info.year"), function(i, obs) {
 				existing_years.push($(obs).text());
@@ -1037,7 +1030,7 @@ $(document).ready(function(){
 						already = true;
 					}
 				} 				
-				$(".year select").append($("<option></option>").attr("value", i).text(i).attr("id", i));
+				$(".edit > td > span > select").append($("<option></option>").attr("value", i).text(i).attr("id", i));
 				if (already == true) {
 					console.log($("#" + i));
 					$("#" + i).addClass("already");
@@ -1082,12 +1075,12 @@ $(document).ready(function(){
 			
 			// new entry object
 			var new_entry = {
-				year: $row_to_save.find(".edit-obs-info.year").val(),
+				year: $row_to_save.find(".year select").val(),
 				value: parseFloat($row_to_save.find(".diameter :input").val()),
 				observers: new_observers,
 				notes: $row_to_save.find(".notes :input").val(),
 			};
-			
+			console.log(new_entry);
 			// if it is a new one
 			if (is_this_row_new === true) {
 				
@@ -1110,7 +1103,7 @@ $(document).ready(function(){
 				// sort it, because why not?
 				// well, really though, why not?
 				entries_array = _.sortBy(this.model.get('diameter'), function (entry) {
-					return 0 - year;
+					return 0 - entry.year;
 				});
 				
 				// set the new diameter
@@ -1118,8 +1111,11 @@ $(document).ready(function(){
 				
 			}
 			
+			$("#tree-observations > tr > td > select").removeClass("already");
+			$("#tree-observations > tr").removeClass("edit");
 			this.model.save();
 			this.render();		
+			
 
 		},
 
