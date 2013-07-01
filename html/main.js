@@ -298,42 +298,6 @@ $(document).ready(function(){
 			</td>\
 			<td>\
 				<%= tree.distance %>\
-			</td>\
-			<td class="date-entry 2002">\
-				<%= tree.diameter2 %>\
-			</td>\
-			<td class="date-entry 2003">\
-				<%= tree.diameter3 %>\
-			</td>\
-			<td class="date-entry 2004">\
-				<%= tree.diameter4 %>\
-			</td>\
-			<td class="date-entry 2005">\
-				<%= tree.diameter5 %>\
-			</td>\
-			<td class="date-entry 2006">\
-				<%= tree.diameter6 %>\
-			</td>\
-			<td class="date-entry 2007">\
-				<%= tree.diameter7 %>\
-			</td>\
-			<td class="date-entry 2008">\
-				<%= tree.diameter8 %>\
-			</td>\
-			<td class="date-entry 2009">\
-				<%= tree.diameter9 %>\
-			</td>\
-			<td class="date-entry 2010">\
-				<%= tree.diameter10 %>\
-			</td>\
-			<td class="date-entry 2011">\
-				<%= tree.diameter11 %>\
-			</td>\
-			<td class="date-entry 2012">\
-				<%= tree.diameter12 %>\
-			</td>\
-			<td class="date-entry 2013">\
-				<%= tree.diameter13 %>\
 			</td>',
 		templateUpdate:	'\
 			<td>\
@@ -376,53 +340,41 @@ $(document).ready(function(){
 		renderReport: function(){
 			var this_tree = this.model.toJSON();
 			
-			this_tree.diameter2 = "-";
-			this_tree.diameter3 = "-";
-			this_tree.diameter4 = "-";
-			this_tree.diameter5 = "-";
-			this_tree.diameter6 = "-";
-			this_tree.diameter7 = "-";
-			this_tree.diameter8 = "-";
-			this_tree.diameter9 = "-";
-			this_tree.diameter10 = "-";
-			this_tree.diameter11 = "-";
-			this_tree.diameter12 = "-";
-			this_tree.diameter13 = "-";
-			for (date in this_tree.diameter){                      //loop through the list of existing dates and store the most recent
-				if (date.slice(0,4) === '2002') {
-					this_tree.diameter2 = this_tree.diameter[date].value;
-				} else if (date.slice(0,4) === '2003') {
-					this_tree.diameter3 = this_tree.diameter[date].value;
-				} else if (date.slice(0,4) === '2004') {
-					this_tree.diameter4 = this_tree.diameter[date].value;
-				} else if (date.slice(0,4) === '2005') {
-					this_tree.diameter5 = this_tree.diameter[date].value;
-				} else if (date.slice(0,4) === '2006') {
-					this_tree.diameter6 = this_tree.diameter[date].value.toFixed(2);
-				} else if (date.slice(0,4) === '2007') {
-					this_tree.diameter7 = this_tree.diameter[date].value;
-				} else if (date.slice(0,4) === '2008') {
-					this_tree.diameter8 = this_tree.diameter[date].value;
-				} else if (date.slice(0,4) === '2009') {
-					this_tree.diameter9 = this_tree.diameter[date].value;
-				} else if (date.slice(0,4) === '2010') {
-					this_tree.diameter10 = this_tree.diameter[date].value;
-				} else if (date.slice(0,4) === '2011') {
-					this_tree.diameter11 = this_tree.diameter[date].value;
-				} else if (date.slice(0,4) === '2012') {
-					this_tree.diameter12 = this_tree.diameter[date].value;
-				} else if (date.slice(0,4) === '2013') {
-					this_tree.diameter13 = this_tree.diameter[date].value;
-				}
-			}
-			
 			//$el --> gets the jQuery object for this view's element 
 			//*.attr('id', this_tree._id.$oid) --> sets 'id' to MongoDB value for tree's ID
 			//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
 			this.$el.attr('id', this_tree._id.$oid).html(_.template(this.templateReports, {tree: this_tree}));
 			this.$el.addClass("tree-cluster-" + this_tree.tree_id);
 			this.$el.children().eq(2).css("font-style","italic");
-			this.options.targetEl.append(this.el);	
+			this.options.targetEl.append(this.el);
+			
+			// find start and end Year by select buttons
+
+			// if tree has entry, add it, otherwise just add -
+		      
+		        var start_year = $('#start-year').val();
+		        var end_year = $('#end-year').val();
+		     
+		        var this_row = $(this.el);
+			var entry_added = false;
+
+			$("#sub-header").children().each(function(index, value){
+
+				for (i in this_tree.diameter){
+					// this is the year of the column $(value).text());
+					if (this_tree.diameter[i].year === parseInt($(value).text())) {
+						$("<td></td>").attr("value", this_tree.diameter[i].value).text(this_tree.diameter[i].value).appendTo(this_row);
+						entry_added = true;
+						break;
+					}
+				}
+				// if no entry for that date was found, add a '-' in that cell
+				if (entry_added == false) {
+					$("<td></td>").attr("value", "no entry").text("-").appendTo(this_row);
+				}
+				// reset variable for next year
+				entry_added=false;
+			});
 				
 		},
 		renderUpdate: function(){
