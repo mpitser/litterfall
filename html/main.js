@@ -1351,6 +1351,8 @@ $(document).ready(function(){
 			for (var i=parseInt(start_year); i<=parseInt(end_year); i++){
 				$('.y-'+i).show();
 			}
+			
+			$("#DBH").attr("colspan", num_years);
 
 			//format header row to make the DBH cell span all the years specified
   		//	document.getElementById("DBH").colSpan = num_years;
