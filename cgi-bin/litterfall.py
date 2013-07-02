@@ -89,8 +89,10 @@ class Tree:
 			self.updateData(data)
 			
 		# format the data
-		if not self.format():
-			raise RuntimeError("Illegal data")
+		result = self.format()
+		if type(result) is StringType:
+			self.printError(result)
+			return
 		
 		# ---- dealing with a possible new tree ----
 		
@@ -104,7 +106,10 @@ class Tree:
 			}
 			
 			maxIdTree = self.obs.find(maxIdQuery).sort([('tree_id',pymongo.DESCENDING)]).limit(1)
-			maxId = maxIdTree[0]['tree_id']
+			if maxIdTree.count() == 0:
+				maxId = 0
+			else:
+				maxId = maxIdTree[0]['tree_id']
 			
 			self.tree['tree_id'] = maxId + 1
 			self.tree['sub_tree_id'] = 0
@@ -165,58 +170,121 @@ class Tree:
 		self.obs.save(self.tree)
 		self.updateTreeUniversal()
 		return self.tree
+		
+	def printError(self, msg):
+		print 'Status:406\n'
+		print msg
 	
 	def format(self):
 		
-		'''
 		if not 'tree_id' in self.tree:
-			return False
+			msg = "No tree ID specified"
 		else:
 			if self.tree['tree_id'] <= 0 or self.tree['tree_id'] != -1:
-				return False
+				msg = "Tree ID is invalid"
 		
 		if not 'sub_tree_id' in self.tree:
-			return False
+			return "No sub-tree ID specified"
 		else:
 			if self.tree['sub_tree_id'] < 0 or self.tree['sub_tree_id'] != -1:
-				return False
+				msg = "Sub-tree ID is invalid"
+				
 		
 		if not 'plot' in self.tree:
-			return False
+			return "No plot specified"
 		if not 'site' in self.tree:
-			return False
+			return "No site specified"
+			
 		
-		if not 'collection_type' in self.tree:
-			return False
-		elif self.tree['collection_type'] != 'tree':
+		if not 'collection_type' in self.tree or self.tree['collection_type'] != 'tree':
 			self.tree['collection_type'] = 'tree'
 		
 		if not 'species' in self.tree:
-			return False
+			return "No species specified"
 		elif self.tree['species'] == '':
-			return False
+			return "No species specified"
+		
 		
 		if not 'angle' in self.tree:
-			return False
+			return "No angle specified"
 		else:
 			if type(self.tree['angle']) is not IntType:
-				return False
+				return "Invalid angle"
 			else:
 				self.tree['angle'] = self.tree['angle'] % 360
 		
+		
 		if not 'distance' in self.tree:
-			return False
+			return "No distance specified"
 		else:
 			if type(self.tree['distance']) is not IntType:
-				return False
+				return "Invalid distance"
 			elif self.tree['distance'] < 0:
 				self.tree['distance'] = -1 * self.tree['distance']
 				self.tree['angle'] = (self.tree['angle'] + 180) % 360
 		
 		if 'full_tree_id' in self.tree:
 			del self.tree['full_tree_id']
-		'''
-		
+			
+		# check the observation data
+		if not 'diameter' in self.tree:
+			self.tree['diameter'] = []
+		elif type(self.tree['diameter']) is not ListType:
+			return "Invalid diameter"
+		else:
+			i = -1
+			for observationEntry in self.tree['diameter']:
+				i = i+1
+				# check date
+				if not 'date' in observationEntry:
+					return "Observation date unspecified"
+				
+				
+				elif not 'y' in observationEntry['date'] or not 'm' in observationEntry['date'] or not 'd' in observationEntry['date']:
+					return "Invalid date"
+				elif type(observationEntry['date']['y']) is not IntType or type(observationEntry['date']['m']) is not IntType or type(observationEntry['date']['d']) is not IntType:
+					return "Invalid date"
+				else:
+					if observationEntry['date']['m'] > 12 or observationEntry['date']['m'] < 1:
+						return "Invalid date"
+					elif observationEntry['date']['d'] > 31 or observationEntry['date']['d'] < 1:
+						return "Invalid date"
+					elif observationEntry['date']['m'] in [4, 6, 9, 11]:
+						if observationEntry['date']['d'] == 31:
+							return "Invalid date"
+					elif observationEntry['date']['m'] == 2:
+						if observationEntry['date']['d'] > 29:
+							return "Invalid date"
+						elif observationEntry['date']['d'] == 29:
+							# check if leap year
+							if observationEntry['date']['y'] % 400 != 0: # if divisible by 400, it is a leap year
+								if observationEntry['date']['y'] % 100 == 0: # if divisible by 100, it is NOT a leap year
+									return "Invalid date"
+								elif observationEntry['date']['y'] % 4 != 0:
+									return "Invalid date"
+				
+				# check observers
+				# if not 'observers' in observationEntry:
+				#	self.tree['diameter'][i]['observers'] = []
+				# elif type(observationEntry['observers']) is not ListType:
+				#	return "Invalid observers"
+				# else:
+				#	for observer in observationEntry['observers']:
+				#		if type(observer) is not StringType:
+				#			return "Invalid observers"
+				
+				# check value
+				if not 'value' in observationEntry:
+					return "Value not specified in observation entry"
+				elif type(observationEntry['value']) is not IntType and type(observationEntry['value']) is not FloatType and type(observationEntry['value']) is not LongType:
+					return "Invalid value in observation entry"
+				
+				# check notes
+				if not 'notes' in observationEntry:
+					return "Notes not specified in observation entry"
+				# elif type(observationEntry['notes']) is not StringType:
+				#	return "Invalid notes in observation entry"
+				
 		return True
 	
 	def updateTreeUniversal(self):
@@ -296,6 +364,7 @@ def getdata(obs, site, plot, treeid, subtreeid):
 	elif site == 'allDiameters':
 		# get all diameter fields from database
 		# from each diam field, get all observers (within date range eventually)
+		
 		data = obs.find({'collection_type':'tree'}, {'fields':'diameter'}).distinct('diameter')
 		data.sort()
 		n = 0 # n is not important, just helps up in decigin which data to assign to json_data
