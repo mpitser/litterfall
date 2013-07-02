@@ -76,34 +76,6 @@
 	</tbody>
 	</table>
 	
-	<script> 
-    
-    	// add selection options for data viewing based on years data is available
-  			var startYear = 2002; // year that data began collection
-  			var endYear = new Date().getFullYear();	// data collection continues through current year (in theory)
-  			for (var cur=startYear; cur<=endYear; cur++){
-  				// add selection options
-  				if (cur == startYear){
-  					$("#start-year").append($("<option></option>").attr({selected: "selected", value: cur}).text(cur));
-  					$("#end-year").append($("<option></option>").attr("value",cur).text(cur));
-  				} else if (cur == endYear){
-  					$("#start-year").append($("<option></option>").attr("value",cur).text(cur));
-  					$("#end-year").append($("<option></option>").attr({selected: "selected", value: cur}).text(cur));
-  				} else {
-  					$("#start-year").append($("<option></option>").attr("value",cur).text(cur));
-  					$("#end-year").append($("<option></option>").attr("value",cur).text(cur));
-  				}
-  				
-  				// add sub-header columns for the years we have data for
-  				$("#sub-header").append($("<th></th>").attr("class","date-entry "+cur).text(cur));
-  			}
-			
-			// make the DBH heading span all the year subheadings
-  			var numYears = endYear - startYear + 1;
-  			document.getElementById("DBH").colSpan = numYears;
-  			
-  	</script>
-	
 	<div class="button-row">
 	<input type="button" class="btn btn-mini btn-primary export pull-right" value="Export Data">
 		<a href="#" class="dbh pull-right" rel="tooltip" data-placement="top" data-original-title="Once downloaded, save as a .csv file and open with MS Excel"><small>info</small></a>

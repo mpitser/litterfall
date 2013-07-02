@@ -28,14 +28,12 @@ $(document).ready(function(){
 	var AppRouter = Backbone.Router.extend({
         routes: {
             "data": "accessObservations", //inits the add record "wizard", leads to the edit pages
-            "data/update": "accessObservations", //inits the add record "wizard", leads to the edit pages
-            "data/reports": "accessObservations",
-            "data/update/trees/site/:location/plot/:plot": "goToPlot",
-            "data/reports/trees/site/:location/plot/:plot": "goToPlot",
-          	//"update/trees/site/:location/plot/:plot/treeid/new": "newTree",
-            "data/update/trees/site/:location/plot/:plot/treeid/:tree_id/subtreeid/new": "newSubTree",
-            "data/update/trees/site/:location/plot/:plot/treeid/:tree_id(/subtreeid/:sub_tree_id)": "goToTree",
-            "data/reports/trees/site/:location/plot/:plot/treeid/:tree_id(/subtreeid/:sub_tree_id)": "goToTree",
+            "data/:mode": "accessObservations", //inits the add record "wizard", leads to the edit pages
+            //"data/reports": "accessObservations",
+            "data/:mode/trees/site/:location/plot/:plot": "goToPlot",
+            // "data/reports/trees/site/:location/plot/:plot": "goToPlot",
+            "data/:mode/trees/site/:location/plot/:plot/treeid/:tree_id(/subtreeid/:sub_tree_id)": "goToTree",
+            // "data/reports/trees/site/:location/plot/:plot/treeid/:tree_id(/subtreeid/:sub_tree_id)": "goToTree",
             "*actions": "defaultRoute" // Backbone will try match the route above first
         }
 	});
@@ -352,25 +350,32 @@ $(document).ready(function(){
 
 			// if tree has entry, add it, otherwise just add -
 		      
-		        var start_year = $('#start-year').val();
-		        var end_year = $('#end-year').val();
-		     
-		        var this_row = $(this.el);
+			var start_year = $('#start-year').val();
+			var end_year = $('#end-year').val();
+		 
+			var this_row = $(this.el);
+		        
 			var entry_added = false;
+			
+			/*
+			var unique_year_entries = _.uniq(this_tree.diameter, true, function(entry) {
+				return 0 - entry.date.y;
+			});
+			*/
 
 			$("#sub-header").children().each(function(index, value){
 
 				for (i in this_tree.diameter){
 					// this is the year of the column $(value).text());
-					if (this_tree.diameter[i].year === parseInt($(value).text())) {
-						$("<td></td>").attr("value", this_tree.diameter[i].value).text(this_tree.diameter[i].value).appendTo(this_row);
+					if (this_tree.diameter[i].date.y === parseInt($(value).text())) {
+						$("<td></td>").addClass("date-entry y-"+$(value).text()).attr("value", this_tree.diameter[i].value).text(this_tree.diameter[i].value).appendTo(this_row);
 						entry_added = true;
 						break;
 					}
 				}
 				// if no entry for that date was found, add a '-' in that cell
 				if (entry_added == false) {
-					$("<td></td>").attr("value", "no entry").text("-").appendTo(this_row);
+					$("<td></td>").addClass("date-entry y-"+$(value).text()).attr("value", "no entry").text("-").appendTo(this_row);
 				}
 				// reset variable for next year
 				entry_added=false;
@@ -415,7 +420,8 @@ $(document).ready(function(){
 			'click .btn-update': 'goToTree',								//if update button is clicked, runs updateTree function
 			'click .btn-analyze': 'goToTree',								//if update button is clicked, runs updateTree function
 			'click .add-new-sub-tree-from-row': function() {
-				this.model.trigger("addNewSubTreeFromRow");
+				$('.add-new-sub-tree').eq(0).trigger("choosing_parent_tree");
+				this.addSubTree(this.model.get("tree_id"));
 			}
 		},
 		goToTree: function(){
@@ -475,242 +481,7 @@ $(document).ready(function(){
 			}
 		}
 	});
-/*
-	// Adding new row for inserting a new tree
-	var new_treeRowView = Backbone.View.extend({
-		tagName: 'tr',
-		template: '\
-			<td>\
-				<div class="new-tree btn-group"><button class="btn-save-new-tree btn btn-mini btn-success" type="button">Submit</button>\
-				<button class="btn-cancel-new-tree btn btn-mini btn-danger" type="button">Cancel</button>\
-				</div>\
-			</td>\
-			<td>\
-			</td>\
-			<td>\
-				<span class="species"><select></select></span>\
-			</td>\
-			<td class="editable">\
-				<span class="edit_cell new-tree angle"><input value="" title="Angle must be a number between 0 and 360." type="text"></input></span>\
-			</td>\
-			<td class="editable">\
-				<span class="edit_cell new-tree distance"><input value="" title="Distance must be a number between 0 and 1000." type="text"></input></span>\
-			</td>\
-			<td>\
-			</td>\
-			<td>\
-		</td>',
-		initialize: function() {
-			this.render();
-		},
-		render: function(){
-			//caling the template
-			this.$el.html(this.template);
-			//prepend the new tree row to the table
-			$(".tree-row-goaway").remove();
-			$(".sub-tree-row-goaway").remove();
-			this.$el.addClass("tree-row-goaway");
-			this.options.targetEl.prepend(this.el);
-			$("#plot-table > tbody > tr:first .edit_cell").show();
 
-			this.postRender();
-		},
-		postRender: function() {
-			this.populateSpecies();
-		},
-		populateSpecies: function(){
-			// creates list of all distinct species to fill dropdown menu
-			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allSpecies', function(data) {
-			
-				$.each(data, function(index, value) {
-					$("#plot-table .species select").append($("<option></option>").attr("value",value).text(value));
-				});
-
-			});
-		},
-		events: {
-			'click .btn-save-new-tree': 'saveTree',
-			'click .btn-cancel-new-tree': 'deleteRow',
-			'change .new-tree': 'validateField'
-
-		},
-		saveTree: function() {
-			//calculate treeID
-			//save tree to database
-			var plot_number = $(".plot-number").text();
-			var site_name = $(".site-name").text();
-			
-			// create a new Tree object and set the data
-			var new_tree = new Tree();
-			new_tree.url = app.config.cgiDir + 'litterfall.py';
-			new_tree.set({
-				"plot": parseInt(plot_number),
-				"site": site_name,
-				"tree_id": -1, // -1 means it's new
-				'species': $("#plot-table .species select").val(),
-				'angle': parseInt($("#plot-table .angle input").val(), 10),
-				'distance': parseFloat($("#plot-table .distance input").val(), 10),
-				'diameter': {},
-				'dead': false
-			});
-			if (! (this.validateDistance() && this.validateAngle())){
-				console.log("didn't save");
-				return; // user will remain in edit view until their data passes validation
-			}
-
-			// save the new tree
-			var result = new_tree.save({}, {
-				'success': function(data) {if (result != null){ console.log(result);
-					app_router.navigate(document.location.hash + "/treeid/" + new_tree.get("tree_id"), {trigger: true});
-				}}
-			});
-			
-		},
-		validateField: function(event){
-
-			var field_to_validate = event.currentTarget.className;
-			console.log(field_to_validate);
-			// if angle field lost focus
-			if (field_to_validate == "edit_cell new-tree angle"){		
-				this.validateAngle();
-			// if distance field lost focus
-			} else if (field_to_validate == "edit_cell new-tree distance"){
-				this.validateDistance();
-			} else {
-				return;
-			}
-
-		},
-		validateAngle: function() {
-
-			// get angle entry
-			var angleEntered = parseFloat($("#plot-table .angle input").val());
-
-			// make sure the angle is in correct format and range
-			if (isNaN(angleEntered)|| angleEntered < 0 || angleEntered > 360) {
-				console.log("returned NaN");
-				$(".edit_cell.new-tree.angle :input").tooltip(); // NOTE: the text shown on the tooltip is listed as the title attribute of the template for NewTreeRiwView.
-				$(".edit_cell.new-tree.angle :input").tooltip("show");				
-				$(".edit_cell.new-tree.angle :input").addClass("alert_invalid");
-				return false;
-			} else { 
-				$(".edit_cell.new-tree.angle :input").removeClass("alert_invalid");
-				$(".edit_cell.new-tree.angle :input").tooltip("destroy");
-				console.log("angle validation passed");
-				return true;
-			}
-		},
-		validateDistance: function() {
-
-			// get distance entry
-			var distanceEntered = parseFloat($("#plot-table .angle input").val());
-
-			// make sure the distance is in correct format and range
-			if (isNaN(distanceEntered) || distanceEntered < 0 || distanceEntered > 999) {
-				console.log("returned NaN");
-				$(".edit_cell.new-tree.distance :input").tooltip(); // NOTE: the text shown on the tooltip is listed as the title attribute of the template for NewTreeRowView.
-				$(".edit_cell.new-tree.distance :input").tooltip("show");				
-				$(".edit_cell.new-tree.distance :input").addClass("alert_invalid");
-				return false;
-			} else { 
-				$(".edit_cell.new-tree.distance :input").removeClass("alert_invalid");
-				$(".edit_cell.new-tree.distance :input").tooltip("destroy");
-				console.log("distance validation passed");
-				return true;
-			}
-		},
-		deleteRow: function() {
-			
-			this.$el.fadeOut("slow", function() {
-				$(this).remove();
-			});
-		}
-	});
-
-	// Adding new row for inserting a new SUBtree
-	var newSubTreeRowView = Backbone.View.extend({
-		tagName: 'tr',
-		template: '\
-			<td>\
-				<div class="new-tree btn-group"><button class="btn-save-new-subtree btn btn-mini btn-success" type="button">Submit</button>\
-				<button class="btn-cancel-new-subtree btn btn-mini btn-danger" type="button">Cancel</button>\
-				</div>\
-			</td>\
-			<td class="tree-id">\
-			\
-			</td>\
-			<td>\
-				<%= tree.species %>\
-			</td>\
-			<td>\
-				<%= tree.angle %>\
-			</td>\
-			<td>\
-				<%= tree.distance %>\
-			</td>\
-			<td>\
-			</td>\
-			<td>\
-		</td>',
-		initialize: function() {
-			this.render();
-		},
-		render: function(){
-
-			var this_tree = this.model.toJSON();
-			//console.log("What's this_tree?");
-			//console.log(this_tree);
-			this.$el.html(_.template(this.template, {tree: this_tree}));
-
-			//delete all the other ones so user can't add multiple subtrees at once
-			$(".sub-tree-row-goaway").remove();
-			$(".tree-row-goaway").remove();
-			this.$el.addClass("sub-tree-row-goaway");
-			//insert the new tree row to the table next to its fellow subtrees
-			$('.tree-cluster-'+this_tree.tree_id).eq(-1).after(this.el);
-			
-			$('html, body').animate({
-				scrollTop: $(".sub-tree-row-goaway").offset().top-100
-			}, 2000);
-
-		},
-
-		events: {
-			'click .btn-save-new-subtree': 'saveSubtree',
-			'click .btn-cancel-new-subtree': 'deleteRow'
-		},
-		saveSubtree: function() {
-			var newSubTree = new Tree();
-			
-			newSubTree.url = app.config.cgiDir + 'litterfall.py';
-			
-			// sets newSubTree's information to match the parent tree's information
-			newSubTree.set({
-				"plot": parseInt($(".plot-number").text()),
-				"site": $(".site-name").text(),
-				"tree_id": this.model.get("tree_id"),
-				"sub_tree_id": -1,
-				"species": this.model.get("species"),
-				"angle": this.model.get("angle"),
-				"distance": this.model.get("distance"),
-				"diameter": {},
-				"dead": false
-			});
-
-			result = newSubTree.save({}, {success: function() {
-				//redirect to page where user can add entries for the newSubTree
-				app_router.navigate(document.location.hash + "/treeid/" + newSubTree.get("tree_id") + "/subtreeid/" + newSubTree.get("sub_tree_id"), {trigger: true});
-			}});
-			
-						
-		}, 
-
-		deleteRow: function() {
-			this.$el.remove();
-		}
-
-	});
-*/
 
 	var treeEditView = Backbone.View.extend({
 		tagName: 'div',
@@ -736,12 +507,12 @@ $(document).ready(function(){
 				</tr>\
 			</thead>\
 			<tbody>\
-			<% _.each(tree.dates_desc, function(obs){ %>\
+			<% _.each(tree.diameter, function(entry){ %>\
 			<tr>\
-				<td><span class="display_cell year"><%= obs.year %></span>\
-				<td><span class="display_cell observers"><%= obs.observers %></span>\
-				<td><span class="display_cell diameter"><%= obs.value %></span>\
-				<td><span class="display_cell notes"><%= obs.notes %></span>\
+				<td><span class="display_cell year"><%= toFormattedDate(entry.date) %></span>\
+				<td><span class="display_cell observers"><%= entry.observers.join(", ") %></span>\
+				<td><span class="display_cell diameter"><%= entry.value %></span>\
+				<td><span class="display_cell notes"><%= entry.notes %></span>\
 			</tr>\
 			<% }); %>\
 			</tbody>\
@@ -749,9 +520,14 @@ $(document).ready(function(){
 		',
 		rowEntryTemplateUpdate: '\
 				<td class="btn-column">\
-					<button class="show-obs-info display_cell btn btn-mini btn-primary edit-existing" type="button">Edit</button>\
-					<div class="edit-obs-info edit_cell btn-group"><button class="btn-save-observation btn btn-mini btn-success" type="button">Submit</button>\
-					<button class="btn-cancel-observation btn btn-mini btn-danger" type="button">Cancel</button>\
+					<div class="show-obs-info display_cell btn-group">\
+						<button class="btn btn-mini btn-primary edit-existing" type="button">Edit</button>\
+						<button class="btn-delete-observation btn btn-mini btn-danger" type="button">Cancel</button>\
+					</div>\
+					<div class="edit-obs-info edit_cell btn-group">\
+						<button class="btn-save-observation btn btn-mini btn-success" type="button">Submit</button>\
+						<button class="btn-cancel-observation btn btn-mini btn-danger" type="button">Cancel</button>\
+					</div>\
 				</td>\
 				<td class="editable">\
 					<span class="display_cell date_select"><%= toFormattedDate(entry.date) %></span>\
@@ -790,20 +566,24 @@ $(document).ready(function(){
 				</tr>\
 			</thead>\
 			<tbody>\
-			<% _.each(tree.dates_desc, function(entry, index){ %>\
+			<% _.each(tree.diameter, function(entry, index) { %>\
 				<tr id="entry-<%= index %>">\
 					<td class="btn-column">\
-						<button class="show-obs-info display_cell btn btn-mini btn-primary edit-existing" type="button">Edit</button>\
-						<div class="edit-obs-info edit_cell btn-group"><button class="btn-save-observation btn btn-mini btn-success" type="button">Submit</button>\
-						<button class="btn-cancel-observation btn btn-mini btn-danger" type="button">Cancel</button>\
+						<div class="show-obs-info display_cell btn-group">\
+							<button class="btn btn-mini btn-primary edit-existing" type="button">Edit</button>\
+							<button class="btn-delete-observation btn btn-mini btn-danger" type="button">Delete</button>\
+						</div>\
+						<div class="edit-obs-info edit_cell btn-group">\
+							<button class="btn-save-observation btn btn-mini btn-success" type="button">Submit</button>\
+							<button class="btn-cancel-observation btn btn-mini btn-danger" type="button">Cancel</button>\
+						</div>\
 					</td>\
 					<td class="editable">\
 						<span class="display_cell date_select"><%= toFormattedDate(entry.date) %></span>\
 						<span class="edit_cell date_select"><input title="Enter a date in yyyy/mm/dd format. It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
-					</td>\
-					<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers %></span><span class="edit-obs-info edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
-					<td class="editable"><span class="show-obs-info display_cell diameter"><%= entry.value %></span><span class="edit-obs-info edit_cell diameter"><input title = "Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
-				<td class="editable"><span class="show-obs-info display_cell notes"><%= entry.notes %></span><span class="edit-obs-info edit_cell notes"><input type="text" value="<%= entry.notes %>"></span></span></td>\
+					</td>\<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers %></span><span class="edit-obs-info edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
+					<td class="editable"><span class="show-obs-info display_cell diameter"><%= entry.value %></span><span class="edit-obs-info edit_cell diameter"><input title="Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
+					<td class="editable"><span class="show-obs-info display_cell notes"><%= entry.notes %></span><span class="edit-obs-info edit_cell notes"><input type="text" value="<%= entry.notes %>"></span></span></td>\
 				</tr>\
 			<% }); %>\
 			</tbody>\
@@ -880,6 +660,7 @@ $(document).ready(function(){
 			'click .edit-existing': 'editObservation',
 			'click .btn-save-observation': 'saveObservation',
 			'click .btn-cancel-observation': 'cancelEditObservation',
+			'click .btn-delete-observation': 'deleteObservation',
 			'click .edit-tree-info-btn': 'editTreeInfo',
 			'click .btn-cancel-tree-info': 'cancelEditTreeInfo',
 			'click .btn-save-tree-info': 'saveTreeInfo',
@@ -1105,7 +886,56 @@ $(document).ready(function(){
 			
 
 		},
-
+		deleteObservation: function(event) {
+			
+			// ask the user whether they're absolutely sure...
+			var $alert_modal = $('<div></div>').addClass("modal hide face").attr({
+				'tabindex': '-1',
+				'role': 'dialog',
+				'aria-labelledby': 'dialog',
+				'aria-hidden': 'true'
+			}).html('\
+				<div class="modal-header">\
+					<h3>Are you sure...</h3>\
+				</div>\
+				<div class="modal-body">\
+					<p>...you want to delete this observation entry? </p>\
+				</div>\
+				<div class="modal-footer">\
+					<button class="btn" data-dismiss="modal" aria-hidden="true">Nah, just kidding</button>\
+					<button class="btn btn-danger" id="no-remorse">Yes, I won\'t feel remorse</button>\
+				</div>\
+			');
+			
+			$('body').append($alert_modal);
+			$alert_modal.modal();
+			$alert_modal.modal('show');
+			var is_user_sure = true;
+			$alert_modal.on('hidden', function() {
+				$alert_modal.remove();
+			});
+			
+			var self = this;
+			
+			$alert_modal.find('#no-remorse').on('click', function() {
+			
+				$alert_modal.modal("hide");
+			
+				// get the row to delete
+				var $row_to_delete = $(event.target).parents("tr");
+				
+				// get the target index
+				var target_index = parseInt(($row_to_delete.attr("id")).split("-")[1]);
+				var entries_array = self.model.get('diameter');
+				
+				// delete it! HAHAHAHAHA
+				self.model.set('diameter', _.without(entries_array, entries_array[target_index]));
+				self.model.save();
+				self.render();
+				
+			});
+			
+		},
 		validateField: function(event){
 
 			var field_to_validate = event.currentTarget.className;
@@ -1424,6 +1254,10 @@ $(document).ready(function(){
   			//this.on('change', this.renderTrees);
 
   		},
+  		render: function() {
+  			this.renderTrees();
+  			return this;
+  		},
   		renderTrees: function(){
   			var site_name = "";
   			var plot_number = 0;
@@ -1432,18 +1266,6 @@ $(document).ready(function(){
   			this.each(function(tree){
   				tree.plotViewInitialize();
   				var num_obvs = tree.get("diameter").length;
-  				
-
-
-
-  				this.listenTo(tree, 'addNewSubTreeFromRow', function() {			
-  				
-					// add sub-tree
-					// var this_treeId = Math.floor(parseFloat(this.$el.children("td").eq(1).text()));
-					$('.add-new-sub-tree').eq(0).trigger("choosing_parent_tree");
-					this.addSubTree(tree.get("tree_id"));
-
-				});
 
   				
   				// determine the maximum number of observations for any tree in this plot
@@ -1452,8 +1274,8 @@ $(document).ready(function(){
   					max_diam = num_obvs;
   				}
   			}, this);
-  			// populate the treeIDs dropdown menu for adding new subtrees
-  			// this.populateTreeIDs();
+
+
   			$(".dbh").attr("href", document.location.hash);
   			$(".btn").css("display", "inline-block");
     		
@@ -1461,9 +1283,6 @@ $(document).ready(function(){
   			$("#plot-table").tablesorter({headers: { 0: { sorter: false}}}); 
   			// populate the diameter entries based on user's given years
   			this.populateTreeDiameters();
-  			
-  			// re-populate (really just showing/hiding columns) corresponding to the date range desired when user clicks Go!
-  			$("#btn-go").click(this.populateTreeDiameters);
 
   			// set up column headers for CSV
   			var CSV = "Full Tree ID,Species,Angle,Distance"
@@ -1526,7 +1345,7 @@ $(document).ready(function(){
 			
 			$('.date-entry').hide();
 			for (var i=parseInt(start_year); i<=parseInt(end_year); i++){
-				$('.'+i).show();
+				$('.y-'+i).show();
 			}
 
 			//format header row to make the DBH cell span all the years specified
@@ -1581,65 +1400,7 @@ $(document).ready(function(){
   				$('#plot-table tbody').empty();
   				this_plot.fetch({reset: true});
   			});
-  		} /*
-  		populateTreeIDs: function(){
-
-			// Get all the ids
-			var ids = [];
-			
-			// Populate the ids array
-			this.each(function(tree){
-				var tree_id = tree.get("tree_id");
-				// Avoiding duplicates
-				if (ids.length == 0 || ids.indexOf(treeid) < 0) {
-					ids.push(tree_id);
-				}
-			});
-
-			// Sort the array IDs
-			ids.sort(function(a,b){return a - b;});
-
-			var tree_collection = this;
-
-			// populate tree IDs
-			for (var i = 0; i < ids.length; i++) {
-				var id = ids[i];
-				$(".id-list").append( 
-					$("<li></li>").append( 
-						$("<a></a>").text(id)
-					)
-				);
-
-			}
-			
-			$(".id-list li a").click(function(){
-
-				var aTag = $(this);
-
-				var parent_tree = tree_collection.find(function(tree) {
-					return tree.get("tree_id") == parseInt(aTag.text());
-				});
-
-				//console.log(parent_trees[parent_trees.length - 1]);
-				parent_tree.newSubTreeRowViewInitialize();
-				
-			});
-
-
-
-
-
-
-		} */
-		/*,
-
-		new_treeRowViewInitialize: function(){
-  			console.log("newTreeRowViewInitialize");
-			var newTreeRow = new newTreeRowView({
-				targetEl: $("#plot-table"),
-				model: this.model
-			});
-		}*/
+  		}
   	});
 
     // Instantiate the router
@@ -1681,96 +1442,143 @@ $(document).ready(function(){
     });
     
     //Plot view
-    app_router.on('route:goToPlot', function(site, plot) {		
+    app_router.on('route:goToPlot', function(mode, site, plot) {		
     	//reloads page based on selected location (site) and plot
 		$(".data").addClass("active");
     	$(".home").removeClass("active");
-		// load different template depending on whether we are updating or analyzing data
-		var template_file;		
-		if (document.location.hash.search("update") === -1) { //if url does not contain 'update' (i.e. it must contain 'reports')
-			console.log("should be reporting");
-			template_file = 'reports2.html';
-		} else {		
-			console.log("should be updating");									  // url contains 'update'
-			template_file = 'update2.html';
-		}
-		require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){			//<WHAT DOES THIS FUNCTION DO?> [ ] (some sort of require wrapper)
-			$('#main').html(_.template(templateHTML, {
-				site: decodeURI(site), 
-				plot: plot
-			}));
-
-			//jQuery calls for, DBH Tooltip and updating functionality
-			updateFunctions();
-
-
-			var this_plot = new Plot;
-			//need to use site and plot variable to build url to python script
-			this_plot.url = app.config.cgiDir + 'litterfall.py?site=' + site + '&plot=' + plot;
-			this_plot.fetch();
+    	
+		var this_plot = new Plot;
+		//need to use site and plot variable to build url to python script
+		this_plot.url = app.config.cgiDir + 'litterfall.py?site=' + site + '&plot=' + plot;
+    	
+		// load different template depending on whether we are updating or analyzing data	
+		if (mode == 'reports') { //if url does not contain 'update' (i.e. it must contain 'reports')
 			
-			var $addNewSubTree = $('.add-new-sub-tree');
+			console.log("reporting");
 			
-			// adding new tree
-			$('.add-new-tree').click(function(){
-				if (this_plot.choosing_parent_tree === true) {
-					$addNewSubTree.eq(0).trigger("not_choosing_parent_tree");
-				}
-				this_plot.addTree();
-			});
-			
-
-			// add popover
-			
-			$('.add-new-sub-tree')
-			.popover({
-				title: 'Add a new sub-tree',
-				content: 'Choose the parent tree from below'
-			});
-			// add the toggling functions
-			$addNewSubTree.bind("choosing_parent_tree", function() {
-				this_plot.choosing_parent_tree = true;
-				$addNewSubTree.popover('show').addClass('active');
-					
-				$('#plot-table tr').css('cursor', 'pointer')
-				.bind('click.makeTreeClickable', function() {
+			require(['lib/text!templates/reports2.html!strip'], function(templateHTML) {
+				$('#main').html(_.template(templateHTML, {
+					site: decodeURI(site), 
+					plot: plot
+				}));
+	
+				//jQuery calls for, DBH Tooltip and updating functionality
+				updateFunctions();
+	
+				// fetch the data. if successful, will trigger 'reset' event. 'reset' event triggers renderTrees
+				this_plot.fetch();
 				
-					// add sub-tree
-					var this_tree_id = Math.floor(parseFloat($(this).children("td").eq(1).text()));
-					this_plot.addSubTree(this_tree_id);
+				
+				/* --------- Mallory's codes for dynamically populating the years ---------- */
+				
+				// add selection options for data viewing based on years data is available
+				var startYear = 2002; // year that data began collection
+				var endYear = new Date().getFullYear();	// data collection continues through current year (in theory)
+				for (var cur=startYear; cur<=endYear; cur++){
+					// add selection options
+					if (cur == startYear){
+						$("#start-year").append($("<option></option>").attr({selected: "selected", value: cur}).text(cur));
+						$("#end-year").append($("<option></option>").attr("value",cur).text(cur));
+					} else if (cur == endYear){
+						$("#start-year").append($("<option></option>").attr("value",cur).text(cur));
+						$("#end-year").append($("<option></option>").attr({selected: "selected", value: cur}).text(cur));
+					} else {
+						$("#start-year").append($("<option></option>").attr("value",cur).text(cur));
+						$("#end-year").append($("<option></option>").attr("value",cur).text(cur));
+					}
+					
+					// add sub-header columns for the years we have data for
+					$("#sub-header").append($("<th></th>").addClass("date-entry y-"+cur).text(cur));
+				}
+				
+				// make the DBH heading span all the year subheadings
+				var numYears = endYear - startYear + 1;
+				$("#DBH").attr("colspan", numYears);
+				
+				// re-populate (really just showing/hiding columns) corresponding to the date range desired when user clicks Go!
+  				$("#btn-go").click(this_plot.populateTreeDiameters);
+				
+	
+			});
+
+		} else if (mode == 'update') {		
+			
+			console.log("updating");
+			
+			require(['lib/text!templates/update2.html!strip'], function(templateHTML) {
+				$('#main').html(_.template(templateHTML, {
+					site: decodeURI(site), 
+					plot: plot
+				}));
+	
+				//jQuery calls for, DBH Tooltip and updating functionality
+				updateFunctions();
+	
+				this_plot.fetch();
+				
+				var $add_new_sub_tree = $('.add-new-sub-tree');
+				
+				// adding new tree
+				$('.add-new-tree').click(function(){
+					if (this_plot.choosing_parent_tree === true) {
+						$addNewSubTree.eq(0).trigger("not_choosing_parent_tree");
+					}
+					this_plot.addTree();
 				});
 				
-				//$('.btn-update').attr("disabled", "disabled");
-				$('#plot-table tr .btn').attr("disabled", "disabled");
-			})
-			.bind("not_choosing_parent_tree", function() {
-				this_plot.choosing_parent_tree = false;
-				$addNewSubTree.popover('hide').removeClass('active');
+	
+				// add popover
+				
+				$('.add-new-sub-tree')
+				.popover({
+					title: 'Add a new sub-tree',
+					content: 'Choose the parent tree from below'
+				});
+				// add the toggling functions
+				$add_new_sub_tree.bind("choosing_parent_tree", function() {
+					this_plot.choosing_parent_tree = true;
+					$add_new_sub_tree.popover('show').addClass('active');
+						
+					$('#plot-table tr').css('cursor', 'pointer')
+					.bind('click.makeTreeClickable', function() {
 					
-				$('#plot-table tr').css('cursor', 'default').unbind('click.makeTreeClickable');
-				$('#plot-table tr .btn').removeAttr("disabled");
-			})
-			.click(function() {
-				if (this_plot.choosing_parent_tree === false) {
-					$(this).trigger("choosing_parent_tree");
-				} else {
-					$(this).trigger("not_choosing_parent_tree");
-				}
+						// add sub-tree
+						var this_tree_id = Math.floor(parseFloat($(this).children("td").eq(1).text()));
+						this_plot.addSubTree(this_tree_id);
+					});
+					
+					//$('.btn-update').attr("disabled", "disabled");
+					$('#plot-table tr .btn').attr("disabled", "disabled");
+				})
+				.bind("not_choosing_parent_tree", function() {
+					this_plot.choosing_parent_tree = false;
+					$add_new_sub_tree.popover('hide').removeClass('active');
+						
+					$('#plot-table tr').css('cursor', 'default').unbind('click.makeTreeClickable');
+					$('#plot-table tr .btn').removeAttr("disabled");
+				})
+				.click(function() {
+					if (this_plot.choosing_parent_tree === false) {
+						$(this).trigger("choosing_parent_tree");
+					} else {
+						$(this).trigger("not_choosing_parent_tree");
+					}
+				});
+				
+	
 			});
 			
-
-		});
-
+		}
     });
     
     //Edit tree view
-    app_router.on('route:goToTree', function(site, plot, tree_id, sub_tree_id) {						//reloads page based on selected location (site) and plot
+    app_router.on('route:goToTree', function(mode, site, plot, tree_id, sub_tree_id) {						//reloads page based on selected location (site) and plot
     	$(".data").addClass("active");
     	$(".home").removeClass("active");
     	var  template_file = 'update-tree.html';
 		require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){			//<WHAT DOES THIS FUNCTION DO?> [ ] (some sort of require wrapper)
 
-			if(typeof sub_tree_id === 'undefined'){
+			if (typeof sub_tree_id === 'undefined'){
    				sub_tree_id = '0';
  			} else {
  				sub_tree_id = sub_tree_id;
@@ -1797,43 +1605,6 @@ $(document).ready(function(){
 			updateFunctions();
 		});
     });
-    
-    // Add new sub-tree
-    /*
-    app_router.on('route:newSubTree', function(site, plot, tree_id) {
-    	var template_file = 'update-tree.html';
-    	// create a new tree object in the database
-    	// connect the newly created object to a tree model here
-    	// emulate the edit tree view
-    }*/
-    
-    //
-    
-     //Add new tree view
-     /*
-    app_router.on('route:new_tree', function(site, plot) {						//reloads page based on selected location (site) and plot
-    	var  template_file = 'update-tree.html';
-		require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){			//<WHAT DOES THIS FUNCTION DO?> [ ] (some sort of require wrapper)
-
-			$('#main').html(_.template(templateHTML, {
-				site: decodeURI(site), 
-				plot: plot,
-				tree-id: "New",
-				sub-tree-id: "0"
-			}));
-
-
-			var this_tree = new Tree();
-			this_tree.url = app.config.cgiDir + 'litterfall.py';
-			this_tree.set("site", site);
-			this_tree.set("plot", plot);
-			console.log(this_tree);
-
-			//DBH Tooltip 
-			updateFunctions();
-		});
-    });
-    */
     
     // Start Backbone history a necessary step for bookmarkable URL's; enables user to click BACK without navigating to entirely different domain
     Backbone.history.start();
