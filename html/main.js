@@ -433,6 +433,44 @@ $(document).ready(function(){
 			app_router.navigate(document.location.hash + tree_url, {trigger: true});
 		},
 		deleteTree: function(){
+		
+			// ask the user whether they're absolutely sure...
+			var $alert_modal = $('<div></div>').addClass("modal hide face").attr({
+				'tabindex': '-1',
+				'role': 'dialog',
+				'aria-labelledby': 'dialog',
+				'aria-hidden': 'true'
+			}).html('\
+				<div class="modal-header">\
+					<h3>Are you sure?</h3>\
+				</div>\
+				<div class="modal-body">\
+					<p>Do you really want to delete this observation entry? Do you? Because once it is gone, it will stay gone.</p>\
+				</div>\
+				<div class="modal-footer">\
+					<button class="btn" data-dismiss="modal" aria-hidden="true">Nah, just kidding</button>\
+					<button class="btn btn-danger" id="no-remorse">Yes, I won\'t feel remorse</button>\
+				</div>\
+			');
+			
+			$('body').append($alert_modal);
+			$alert_modal.modal();
+			$alert_modal.modal('show');
+			var is_user_sure = true;
+			$alert_modal.on('hidden', function() {
+				$alert_modal.remove();
+			});
+			
+			var self = this;
+			
+			$alert_modal.find('#no-remorse').on('click', function() {
+				$alert_modal.modal("hide");
+				self.deleteTreeFunction();
+			});
+			
+		},
+		deleteTreeFunction: function() {
+		
 			var this_tree_el = this.$el;
 			this.model.url = app.config.cgiDir + 'litterfall.py';
 			var result = this.model.destroy();
@@ -465,7 +503,7 @@ $(document).ready(function(){
 							updated_tree.url = app.config.cgiDir + 'litterfall.py?oid=' + $(this).attr('id');
 							updated_tree.fetch({
 								success: function() {
-									console.log(updated_tree);
+									
 									// update it, only the full tree id, for now
 									console.log("tree_id: " + updated_tree.get('tree_id'));
 									updated_full_tree_id = updated_tree.get('tree_id') + (updated_tree.get('sub_tree_id') * .1);
@@ -481,6 +519,7 @@ $(document).ready(function(){
 					});
 				});
 			}
+			
 		}
 	});
 
