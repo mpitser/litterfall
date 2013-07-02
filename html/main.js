@@ -1073,7 +1073,6 @@ $(document).ready(function(){
 			// if it is a new one
 			if (is_this_row_new === true) {
 				
-				
 				// add a new entry to the list, to where it should be
 				var target_index = _.sortedIndex(entries_array, new_entry, function(entry) {
 					return entry.year;
@@ -1358,9 +1357,9 @@ $(document).ready(function(){
 		parse: function(response){
 			
 			// sort, the latest goes to the top
-			this.set('diameter', _.sortBy(this.get('diameter'), function (entry) {
+			response.diameter = _.sortBy(response.diameter, function (entry) {
 				return entry.year;
-			}));
+			});
 			// format full tree ID for display
 			response.full_tree_id = response.tree_id + ((response.sub_tree_id == 0) ? '' : ('.' + response.sub_tree_id));
 			
