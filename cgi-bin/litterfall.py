@@ -264,14 +264,14 @@ class Tree:
 									return "Invalid date"
 				
 				# check observers
-				if not 'observers' in observationEntry:
-					self.tree['diameter'][i]['observers'] = []
-				elif type(observationEntry['observers']) is not ListType:
-					return "Invalid observers"
-				else:
-					for observer in observationEntry['observers']:
-						if type(observer) is not StringType:
-							return "Invalid observers"
+				# if not 'observers' in observationEntry:
+				#	self.tree['diameter'][i]['observers'] = []
+				# elif type(observationEntry['observers']) is not ListType:
+				#	return "Invalid observers"
+				# else:
+				#	for observer in observationEntry['observers']:
+				#		if type(observer) is not StringType:
+				#			return "Invalid observers"
 				
 				# check value
 				if not 'value' in observationEntry:
@@ -282,8 +282,8 @@ class Tree:
 				# check notes
 				if not 'notes' in observationEntry:
 					return "Notes not specified in observation entry"
-				elif type(observationEntry['notes']) is not StringType:
-					return "Invalid notes in observation entry"
+				# elif type(observationEntry['notes']) is not StringType:
+				#	return "Invalid notes in observation entry"
 				
 		return True
 	
