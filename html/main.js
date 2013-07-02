@@ -260,7 +260,9 @@ $(document).ready(function(){
 			this.model.save({
 				species: $('#new-tree-species').val(),
 				angle: parseInt($('#new-tree-angle').val()),
-				distance: parseInt($('#new-tree-distance').val()),
+				distance: parseInt($('#new-tree-distance').val())
+			},
+			{
 				success: function() {
 					self.$el.modal("hide");
 					if (back_to_plot == true) {
@@ -896,10 +898,10 @@ $(document).ready(function(){
 				'aria-hidden': 'true'
 			}).html('\
 				<div class="modal-header">\
-					<h3>Are you sure...</h3>\
+					<h3>Are you sure?</h3>\
 				</div>\
 				<div class="modal-body">\
-					<p>...you want to delete this observation entry? </p>\
+					<p>Do you really want to delete this observation entry? Do you? Because once it is gone, it will stay gone.</p>\
 				</div>\
 				<div class="modal-footer">\
 					<button class="btn" data-dismiss="modal" aria-hidden="true">Nah, just kidding</button>\
@@ -1190,6 +1192,8 @@ $(document).ready(function(){
 			response.diameter = _.sortBy(response.diameter, function (entry) {
 				return 0 - (entry.date.y*366 + entry.date.m*32 + entry.date.d);
 			});
+			
+			
 			// format full tree ID for display
 			response.full_tree_id = response.tree_id + ((response.sub_tree_id == 0) ? '' : ('.' + response.sub_tree_id));
 			
@@ -1354,11 +1358,21 @@ $(document).ready(function(){
   		addTree: function(){
 
   			
-  			var random_tree = this.find(function(){return true;});
+  			if (this.length == 0) {
+  				var plot_number = parseInt($('.plot-number').text());
+  				var site_name = $('.site-name').text();
+  			} else {
+  			
+  				var random_tree = this.find(function(){return true;});
+  				
+  				var plot_number = random_tree.get('plot');
+  				var site_name = random_tree.get('site');
+  				
+  			}
   			
   			var new_tree = new Tree({
-  				plot: random_tree.get('plot'),
-  				site: random_tree.get('site')
+  				plot: plot_number,
+  				site: site_name
   			});
   			var new_model = new newTreeModal({
   				model: new_tree

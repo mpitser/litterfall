@@ -104,7 +104,10 @@ class Tree:
 			}
 			
 			maxIdTree = self.obs.find(maxIdQuery).sort([('tree_id',pymongo.DESCENDING)]).limit(1)
-			maxId = maxIdTree[0]['tree_id']
+			if maxIdTree.count() == 0:
+				maxId = 0
+			else:
+				maxId = maxIdTree[0]['tree_id']
 			
 			self.tree['tree_id'] = maxId + 1
 			self.tree['sub_tree_id'] = 0
@@ -296,6 +299,7 @@ def getdata(obs, site, plot, treeid, subtreeid):
 	elif site == 'allDiameters':
 		# get all diameter fields from database
 		# from each diam field, get all observers (within date range eventually)
+		
 		data = obs.find({'collection_type':'tree'}, {'fields':'diameter'}).distinct('diameter')
 		data.sort()
 		n = 0 # n is not important, just helps up in decigin which data to assign to json_data
