@@ -296,6 +296,10 @@ $(document).ready(function(){
 			</td>\
 			<td>\
 				<%= tree.distance %>\
+			</td>\
+			<td>\
+				<% console.log( "treestats ", tree.status) %>\
+				<%= tree.status %>\
 			</td>',
 		templateUpdate:	'\
 			<td>\
@@ -321,6 +325,9 @@ $(document).ready(function(){
 			</td>\
 			<td>\
 				<%= tree.distance %>\
+			</td>\
+			<td>\
+				<%= tree.status %>\
 			</td>\
 			<td>\
 				<%= tree.latest_DBH_message %>\
@@ -502,6 +509,9 @@ $(document).ready(function(){
 						DBH (cm) <a href="#" class="dbh" rel="tooltip" data-placement="top" data-original-title="Diameter at Breast Height"><small>info</small></a>\
 					</th>\
 					<th>\
+						Status\
+					</th>\
+					<th>\
 						Comments\
 					</th>\
 				</tr>\
@@ -512,6 +522,7 @@ $(document).ready(function(){
 				<td><span class="display_cell year"><%= toFormattedDate(entry.date) %></span>\
 				<td><span class="display_cell observers"><%= entry.observers.join(", ") %></span>\
 				<td><span class="display_cell diameter"><%= entry.value %></span>\
+				<td><span class="display_cell status"><%= entry.status %></span>\
 				<td><span class="display_cell notes"><%= entry.notes %></span>\
 			</tr>\
 			<% }); %>\
@@ -522,7 +533,7 @@ $(document).ready(function(){
 				<td class="btn-column">\
 					<div class="show-obs-info display_cell btn-group">\
 						<button class="btn btn-mini btn-primary edit-existing" type="button">Edit</button>\
-						<button class="btn-delete-observation btn btn-mini btn-danger" type="button">Cancel</button>\
+						<button class="btn-delete-observation btn btn-mini btn-warning" type="button">Cancel</button>\
 					</div>\
 					<div class="edit-obs-info edit_cell btn-group">\
 						<button class="btn-save-observation btn btn-mini btn-success" type="button">Submit</button>\
@@ -532,8 +543,13 @@ $(document).ready(function(){
 				<td class="editable">\
 					<span class="display_cell date_select"><%= toFormattedDate(entry.date) %></span>\
 					<span class="edit_cell date_select"><input title="Enter a date in yyyy/mm/dd format. It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
-				</td>\<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers %></span><span class="edit-obs-info edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
+				</td>\<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers.join(", ") %></span><span class="edit-obs-info edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
 				<td class="editable"><span class="show-obs-info display_cell diameter"><%= entry.value %></span><span class="edit-obs-info edit_cell diameter"><input title="Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
+				<td class="editable"><span class="show-obs-info display_cell status"><%= entry.status %></span><span class="edit-obs-info edit_cell status"><div class="edit-obs-info status" data-toggle="buttons-radio">\
+  					<button type="button" class="btn btn-mini btn-info status alive" style="width: 120px" value="alive">Alive</button><br>\
+  					<button type="button" class="btn btn-mini btn-warning status dead_standing" style="width: 120px" value="dead_standing">Dead (standing)</button><br>\
+ 					<button type="button" class="btn btn-mini btn-danger status dead_fallen" style="width: 120px" value="dead_fallen">Dead (fallen)</button><br>\
+					</div></span></td>\
 				<td class="editable"><span class="show-obs-info display_cell notes"><%= entry.notes %></span><span class="edit-obs-info edit_cell notes"><input type="text" value="<%= entry.notes %>"></span></span></td>\
 		',
 		templateUpdate: '\
@@ -561,6 +577,9 @@ $(document).ready(function(){
 						DBH (cm) <a href="#" class="dbh" rel="tooltip" data-placement="top" data-original-title="Diameter at Breast Height"><small>info</small></a>\
 					</th>\
 					<th>\
+						Status\
+					</th>\
+					<th>\
 						Comments\
 					</th>\
 				</tr>\
@@ -571,7 +590,7 @@ $(document).ready(function(){
 					<td class="btn-column">\
 						<div class="show-obs-info display_cell btn-group">\
 							<button class="btn btn-mini btn-primary edit-existing" type="button">Edit</button>\
-							<button class="btn-delete-observation btn btn-mini btn-danger" type="button">Delete</button>\
+							<button class="btn-delete-observation btn btn-mini btn-warning" type="button">Delete</button>\
 						</div>\
 						<div class="edit-obs-info edit_cell btn-group">\
 							<button class="btn-save-observation btn btn-mini btn-success" type="button">Submit</button>\
@@ -583,6 +602,11 @@ $(document).ready(function(){
 						<span class="edit_cell date_select"><input title="Enter a date in yyyy/mm/dd format. It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
 					</td>\<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers %></span><span class="edit-obs-info edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
 					<td class="editable"><span class="show-obs-info display_cell diameter"><%= entry.value %></span><span class="edit-obs-info edit_cell diameter"><input title="Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
+					<td class="editable"><span class="show-obs-info display_cell status"><%= entry.status %></span><span class="edit-obs-info edit_cell status"><div class="edit-obs-info status" data-toggle="buttons-radio">\
+  					<button type="button" class="btn btn-mini btn-info status alive" style="width: 120px" value="alive">Alive</button><br>\
+  					<button type="button" class="btn btn-mini btn-warning status dead_standing" style="width: 120px" value="dead_standing">Dead (standing)</button><br>\
+ 					<button type="button" class="btn btn-mini btn-danger status dead_fallen" style="width: 120px" value="dead_fallen">Dead (fallen)</button><br>\
+					</div></span></td>\
 					<td class="editable"><span class="show-obs-info display_cell notes"><%= entry.notes %></span><span class="edit-obs-info edit_cell notes"><input type="text" value="<%= entry.notes %>"></span></span></td>\
 				</tr>\
 			<% }); %>\
@@ -691,6 +715,7 @@ $(document).ready(function(){
 		},
 		newObservation: function(){
 			$(".btn-new-observation").hide()
+
 			//add a new blank row to the observation table
 			var today = new Date();
 
@@ -700,13 +725,14 @@ $(document).ready(function(){
 				year: today.getFullYear(),
 				value: 'n/a',
 				notes: "",
-				observers: []
+				observers: [],
+				status: ""
 			};
 			
 			// new jQuery row to be prepended
 			// class="new" to mark the row as new
 			
-			var $new_entry_row = $('<tr></tr>').addClass("new").html(_.template(this.rowEntryTemplateUpdate, {entry: new_entry}));
+			var $new_entry_row = $('<tr></tr>').addClass("new").html(_.template(this.rowEntryTemplateUpdate, {entry: new_entry, tree: this.model}));
 			
 			/*
 			// Sorry, Jocelyn!
@@ -739,9 +765,10 @@ $(document).ready(function(){
 			
 			// prepend it to the table
 			*/
-			$('#tree-observations tbody').append($new_entry_row);
+			$('#tree-observations tbody').prepend($new_entry_row);
 			
-			
+			$new_entry_row.find(".edit-obs-info").show();
+
 			$new_entry_row.find(".edit_cell").show();
 			$new_entry_row.find(".display_cell").hide();
 			$new_entry_row.find(".edit_cell.date_select :input").datepicker({
@@ -767,7 +794,9 @@ $(document).ready(function(){
 			$row_to_edit.addClass("edit");
 			// Hide any existing edit modes
 			$("#tree-observations .btn.display_cell").hide();
-			
+			$row_to_edit.find(".edit-obs-info").show();
+			console.log($row_to_edit.find("." + this.model.get("status")));
+			$row_to_edit.find("." + this.model.get("status")).addClass("active");
 			/*
 			var curr_year = new Date().getFullYear();
 			var existing_years = [];
@@ -849,8 +878,11 @@ $(document).ready(function(){
 				value: parseFloat($row_to_save.find(".diameter :input").val()),
 				observers: new_observers,
 				notes: $row_to_save.find(".notes :input").val(),
-			};
-			console.log(new_entry);
+				status: $row_to_save.find(".status.active").val()
+			};				
+			this.model.set('status', $row_to_save.find(".status.active").val());
+			console.log($row_to_save.find(".status.active").val());
+			console.log(this.model);
 			// if it is a new one
 			if (is_this_row_new === true) {
 				
@@ -902,7 +934,7 @@ $(document).ready(function(){
 					<p>...you want to delete this observation entry? </p>\
 				</div>\
 				<div class="modal-footer">\
-					<button class="btn" data-dismiss="modal" aria-hidden="true">Nah, just kidding</button>\
+					<button class="btn btn-info" data-dismiss="modal" aria-hidden="true">Nah, just kidding</button>\
 					<button class="btn btn-danger" id="no-remorse">Yes, I won\'t feel remorse</button>\
 				</div>\
 			');
@@ -1157,7 +1189,7 @@ $(document).ready(function(){
 			diameter: [],
 			species: 'Unknown',
 			species_certainty: 0,
-			dead: true,
+			status: "",
 			dbh_marked: false,
 			url: '',
 			lat: 0,
@@ -1188,10 +1220,19 @@ $(document).ready(function(){
 			
 			// sort, the latest goes to the top
 			response.diameter = _.sortBy(response.diameter, function (entry) {
-				return 0 - (entry.date.y*366 + entry.date.m*32 + entry.date.d);
+				console.log(entry);
+				return 0 - (entry.date.d + entry.date.m*32 + entry.date.y*366);
 			});
 			// format full tree ID for display
 			response.full_tree_id = response.tree_id + ((response.sub_tree_id == 0) ? '' : ('.' + response.sub_tree_id));
+			
+			// get latest status (dead or alive) and set to the model
+			if (response.diameter.length > 0) {
+				alert(response.diameter[0].status);
+				response.status = response.diameter[0].status;
+			} else {
+				response.status = "alive";
+			}
 			
 			
 		//	var newEntryArray = [];
@@ -1646,7 +1687,7 @@ function toFormattedDate(date){
 		return looper(num, i, num_digit, string);
 	}
 	
-	return looper(date.y, 1, 4, "") + "/" + looper(date.m, 1, 2, "") + "/" + looper(date.d, 1, 2, "");
+	return looper(date.m, 1, 2, "") + "/" + looper(date.d, 1, 2, "") + "/" + looper(date.y, 1, 4, "");
 	
 }
 
