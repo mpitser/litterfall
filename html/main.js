@@ -1604,7 +1604,11 @@ $(document).ready(function(){
 				tree_id: tree_id,
 				sub_tree_id: sub_tree_id
 			}));
-
+			
+			// Bind the Back to Plot button to the appropriate function
+			$('.back').click(function() {
+				app_router.navigate('#data/' + mode + '/trees/site/' + site + '/plot/' + plot, {trigger: true});
+			});
 
 			var this_tree = new Tree();
 			this_tree.url = app.config.cgiDir + 'litterfall.py?site=' + site + '&plot=' + plot + '&treeid=' + tree_id + '&subtreeid=' + sub_tree_id;
