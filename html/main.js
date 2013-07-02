@@ -775,6 +775,7 @@ $(document).ready(function(){
 		<div class="button-row">\
 			<button class="btn-new-observation btn btn-mini btn-success pull-left" type="button">+ New Entry</button>\
 		</div>\
+		<p class="edit-obs-info" id="reminder-note">Please remember to mark the DBH line on any tree you observe!</p>\
 		<table id="tree-observations" class="table-striped tablesorter">\
 			<thead>\
 				<tr>\
@@ -909,7 +910,8 @@ $(document).ready(function(){
 			});
 		},
 		newObservation: function(){
-			$(".btn-new-observation").hide()
+			$(".btn-new-observation").hide();
+			$("#reminder-note").show();
 			//add a new blank row to the observation table
 			var today = new Date();
 
@@ -1110,7 +1112,12 @@ $(document).ready(function(){
 
 			var field_to_validate = event.currentTarget.className;
 			var current_row = $("#tree-observations > tbody > tr .edit_cell :visible").parents("tr");
-
+			//var prev_row_index = parseInt(current_row.attr('id').slice(-1)) + 1;
+			//console.log(prev_row_index);
+			//var most_recent_row = $("#entry-"+prev_row_index).find('.diameter.display_cell').text();
+			//console.log(current_row);
+			//console.log(most_recent_row);
+			
 			/* if date field lost focus */
 			if (field_to_validate == "edit_cell date_select"){				
 				this.validateDate(current_row);
@@ -1496,6 +1503,7 @@ $(document).ready(function(){
 					$("#CSV").empty().append(CSV);
 					$(".export").val("Click to open file");
 					$(".export").addClass("btn-success");
+					$(".export").tooltip({title: "NOTE: data collected prior to 2013 was not collected with specific dates. All data prior to 2013 was collected in September or October of the year listed."});
 					j = 1;
 					});
 				}
