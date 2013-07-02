@@ -1261,7 +1261,7 @@ $(document).ready(function(){
 			
 			// sort, the latest goes to the top
 			response.diameter = _.sortBy(response.diameter, function (entry) {
-				console.log(entry);
+				//console.log(entry);
 				return 0 - (entry.date.d + entry.date.m*32 + entry.date.y*366);
 			});
 			
@@ -1271,7 +1271,7 @@ $(document).ready(function(){
 			
 			// get latest status (dead or alive) and set to the model
 			if (response.diameter.length > 0) {
-				alert(response.diameter[0].status);
+				//alert(response.diameter[0].status);
 				response.status = response.diameter[0].status;
 			} else {
 				response.status = "alive";
