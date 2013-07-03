@@ -260,7 +260,8 @@ $(document).ready(function(){
 			this.model.save({
 				species: $('#new-tree-species').val(),
 				angle: parseInt($('#new-tree-angle').val()),
-				distance: parseInt($('#new-tree-distance').val()),
+				distance: parseInt($('#new-tree-distance').val())
+			}, {
 				success: function() {
 					self.$el.modal("hide");
 					if (back_to_plot == true) {
@@ -438,39 +439,77 @@ $(document).ready(function(){
 			app_router.navigate(document.location.hash + tree_url, {trigger: true});
 		},
 		deleteTree: function(){
+
+			// ask the user whether they're absolutely sure...
+			var $alert_modal = $('<div></div>').addClass("modal hide face").attr({
+				'tabindex': '-1',
+				'role': 'dialog',
+				'aria-labelledby': 'dialog',
+				'aria-hidden': 'true'
+			}).html('\
+				<div class="modal-header">\
+					<h3>Are you sure?</h3>\
+				</div>\
+				<div class="modal-body">\
+					<p>Do you really want to delete this observation entry? Do you? Because once it is gone, it will stay gone.</p>\
+				</div>\
+				<div class="modal-footer">\
+					<button class="btn" data-dismiss="modal" aria-hidden="true">Nah, just kidding</button>\
+					<button class="btn btn-danger" id="no-remorse">Yes, I won\'t feel remorse</button>\
+				</div>\
+			');
+
+			$('body').append($alert_modal);
+			$alert_modal.modal();
+			$alert_modal.modal('show');
+			var is_user_sure = true;
+			$alert_modal.on('hidden', function() {
+				$alert_modal.remove();
+			});
+
+			var self = this;
+
+			$alert_modal.find('#no-remorse').on('click', function() {
+				$alert_modal.modal("hide");
+				self.deleteTreeFunction();
+			});
+
+		},
+		deleteTreeFunction: function() {
+
 			var this_tree_el = this.$el;
 			this.model.url = app.config.cgiDir + 'litterfall.py';
 			var result = this.model.destroy();
 			if (result !== false) {
-			
+
 				this_model = this.model;
-				
+
 				result.done(function() { // once done
-					
+
 					this_tree_el.fadeOut("slow", function() {						//function called after fadeOut is done
-						
+
 						// remove the row--we need this because if we just hide (using visibility:hidden) the row then the table-stripe class will not work
 						$("#"+this_model.get('_id').$oid).remove();
-						
+
 						var target_tree_id = this_model.get('tree_id');
-						
+
 						// update all the trees under the same tree_id
 						$(".tree-cluster-"+target_tree_id).each(function(i) {
-						
+
 							// only the full_tree_id would be updated
 							var updated_tree = new Tree();
-							
+
 							// grab the second child
 							var full_tree_id_td = $(this).children('td').eq(1);
 							var target_full_tree_id = parseInt(parseFloat(full_tree_id_td.text())*10);
 							console.log(target_full_tree_id);
-							
+
 							// get the data
 							// using oid, because that's the only way it's stable
 							updated_tree.url = app.config.cgiDir + 'litterfall.py?oid=' + $(this).attr('id');
 							updated_tree.fetch({
 								success: function() {
-									console.log(updated_tree);
+
 									// update it, only the full tree id, for now
 									console.log("tree_id: " + updated_tree.get('tree_id'));
 									updated_full_tree_id = updated_tree.get('tree_id') + (updated_tree.get('sub_tree_id') * .1);
@@ -480,12 +519,13 @@ $(document).ready(function(){
 									}
 							}
 							});
-							
+
 						});
-						
+
 					});
 				});
 			}
+
 		}
 	});
 
@@ -1013,7 +1053,7 @@ $(document).ready(function(){
 			// the smallest unit for time comparison is days, 
 			// so comparing the Dates (or UNIX times) wouldn't work,
 			// because the today Date would always be greater than the date picked from datepicker
-			i/*f (date_entered.getFullYear() > today.getFullYear()) {
+			/*if (date_entered.getFullYear() > today.getFullYear()) {
 				if (date_entered.getMonth() > today.getMonth()) {
 					if (date_entered.getDate() > today.getDate()) {*/
 					if (date_entered > today){
@@ -1390,18 +1430,28 @@ $(document).ready(function(){
 			for (var i=parseInt(start_year); i<=parseInt(end_year); i++){
 				$('.y-'+i).show();
 			}
-
+		$("#DBH").attr("colspan", num_years);
 			//format header row to make the DBH cell span all the years specified
   		//	document.getElementById("DBH").colSpan = num_years;
     	},
   		addTree: function(){
 
   			
-  			var random_tree = this.find(function(){return true;});
+  			if (this.length == 0) {
+  				var plot_number = parseInt($('.plot-number').text());
+  				var site_name = $('.site-name').text();
+  			} else {
+  			
+  				var random_tree = this.find(function(){return true;});
+  				
+  				var plot_number = random_tree.get('plot');
+  				var site_name = random_tree.get('site');
+  				
+  			}
   			
   			var new_tree = new Tree({
-  				plot: random_tree.get('plot'),
-  				site: random_tree.get('site')
+  				plot: plot_number,
+  				site: site_name
   			});
   			var new_model = new newTreeModal({
   				model: new_tree
@@ -1489,6 +1539,7 @@ $(document).ready(function(){
     	//reloads page based on selected location (site) and plot
 		$(".data").addClass("active");
     	$(".home").removeClass("active");
+    	
     	
 		var this_plot = new Plot;
 		//need to use site and plot variable to build url to python script
@@ -1633,7 +1684,11 @@ $(document).ready(function(){
 				tree_id: tree_id,
 				sub_tree_id: sub_tree_id
 			}));
-
+			
+ 			// Bind the Back to Plot button to the appropriate function
+			$('.back').click(function() {
+				app_router.navigate('#data/' + mode + '/trees/site/' + site + '/plot/' + plot, {trigger: true});
+			});
 
 			var this_tree = new Tree();
 			this_tree.url = app.config.cgiDir + 'litterfall.py?site=' + site + '&plot=' + plot + '&treeid=' + tree_id + '&subtreeid=' + sub_tree_id;
