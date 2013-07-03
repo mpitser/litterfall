@@ -21,6 +21,63 @@ Date.prototype.fromLitterfallDateObject = function(date) {
 	this.setDate(date.d);
 };
 
+var orig = {
+    matcher: $.fn.typeahead.Constructor.prototype.matcher,
+    updater: $.fn.typeahead.Constructor.prototype.updater,
+    select: $.fn.typeahead.Constructor.prototype.select,
+};
+
+console.log($.fn.typeahead.Constructor.prototype);
+console.log($.fn.typeahead.Constructor.prototype.select.toString());
+console.log($.fn.typeahead.Constructor.prototype.blur.toString());
+console.log($.fn.typeahead.Constructor.prototype.listen.toString());
+console.log($.fn.typeahead.Constructor.prototype.keydown.toString());
+
+$.extend($.fn.typeahead.Constructor.prototype, {
+	matcher: function(item) {
+	
+		if (this.options.type != 'observers') {
+			return orig.matcher.call(this, item);
+		}
+		
+		var observers = this.query.split(",");
+		var last_observer = observers[observers.length - 1];
+		var last_observer = last_observer.replace(/^\s+/,"");
+		
+		if (last_observer == "") return false;
+		
+		for (i = 0; i < observers.length - 2; i++) {
+			if (observers[i].replace(/^\s+|\s+$/g, '') == item) return false;
+		}
+		
+		var last_observer = last_observer.toLowerCase();
+		
+		return last_observer.length && ~item.toLowerCase().indexOf(last_observer);
+	},
+	updater: function(item) {
+		
+		if (this.options.type != 'observers') {
+			return orig.updater.call(this, item);
+		}
+		
+		if (this.query.indexOf(",") == -1) return item+", ";
+		
+		return this.query.replace(/,[^,]*$/, ", "+item+", ");
+		
+	},
+	select: function() {
+		
+		if (this.options.type != 'observers') {
+			return orig.select.call(this);
+		}
+		
+		var to_return = orig.select.call(this);
+		this.$element.focus();
+		return to_return;
+		
+	}
+});
+
 $(document).ready(function(){
 	require.config({});
 	
@@ -827,7 +884,12 @@ $(document).ready(function(){
 			
 			//var existingObs = this.model.findAllObservers();
 			var all_observers = this.getAllObservers();
-			$new_entry_row.find(".edit_cell.observers :input").typeahead({source: all_observers});
+			$new_entry_row.find(".edit_cell.observers :input").typeahead({
+				source: all_observers,
+				type: 'observers'
+			});
+			
+			console.log($.fn.typeahead.Constructor.prototype.matcher);
 		},
 
 		editObservation: function(event) {
@@ -883,7 +945,10 @@ $(document).ready(function(){
 			$row_to_edit.addClass("old");
 			
 			var all_observers = this.getAllObservers();
-			$row_to_edit.find(".edit_cell.observers :input").typeahead({source: all_observers});
+			$row_to_edit.find(".edit_cell.observers :input").typeahead({
+				source: all_observers,
+				type: 'observers'
+			});
 			$(".already").remove();
 			
 		},
@@ -910,9 +975,12 @@ $(document).ready(function(){
 			var entries_array = this.model.get("diameter");
 			
 			// convert observers from string to array
-			var new_observers = $row_to_save.find(".observers :input").val().split(",");
-			for (var i = 0; i < new_observers.length; i++){
-				new_observers[i] = new_observers[i].trim(" ");
+			var new_observers_orig = $row_to_save.find(".observers :input").val().split(",");
+			var new_observers = [];
+			var new_observer = "";
+			for (var i = 0; i < new_observers_orig.length; i++){
+				new_observer = new_observers_orig[i].trim(" ");
+				if (new_observer != "") new_observers.push(new_observer);
 			}
 			
 			// var new_date = new Date(parseInt($row_to_save.find(".unix-time").val()));
