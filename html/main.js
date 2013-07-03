@@ -815,7 +815,10 @@ $(document).ready(function(){
 				maxDate: 0,
 				changeYear: true,
 				changeMonth: true,
-				constrainInput: true
+				constrainInput: true,
+				onSelect: function() {
+					$(".ui-datepicker a").removeAttr("href");
+				}
 			});
 			
 			// Disable all the other edit buttons
@@ -872,7 +875,10 @@ $(document).ready(function(){
 				maxDate: 0, 
 				changeYear: true, 
 				changeMonth: true, 
-				constrainInput: true
+				constrainInput: true,
+				onSelect: function() {
+					$(".ui-datepicker a").removeAttr("href");
+				}
 			});
 			$row_to_edit.addClass("old");
 			
