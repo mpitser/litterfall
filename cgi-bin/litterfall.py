@@ -276,8 +276,8 @@ class Tree:
 				# check value
 				if not 'value' in observationEntry:
 					return "Value not specified in observation entry"
-				elif type(observationEntry['value']) is not IntType and type(observationEntry['value']) is not FloatType and type(observationEntry['value']) is not LongType:
-					return "Invalid value in observation entry"
+				# elif type(observationEntry['value']) is not IntType and type(observationEntry['value']) is not FloatType and type(observationEntry['value']) is not LongType:
+				#	return "Invalid value in observation entry"
 				
 				# check notes
 				if not 'notes' in observationEntry:
