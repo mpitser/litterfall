@@ -1027,6 +1027,7 @@ $(document).ready(function(){
 			}
 			
 			$("#tree-observations > tr").removeClass("edit");
+			this.model.url = app.config.cgiDir + 'litterfall.py';
 			this.model.save();
 			this.render();		
 			
@@ -1076,6 +1077,7 @@ $(document).ready(function(){
 				
 				// delete it! HAHAHAHAHA
 				self.model.set('diameter', _.without(entries_array, entries_array[target_index]));
+				this.model.url = app.config.cgiDir + 'litterfall.py';
 				self.model.save();
 				self.render();
 				
