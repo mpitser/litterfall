@@ -1345,8 +1345,8 @@ $(document).ready(function(){
 							$.each(value["diameter"], function(i) {
 								var obs = value["diameter"][i];
 								if (obs["date"] != null){
-									var parsed_date = new Date(obs["date"]["$date"]);
-									var formatted_date = $.datepicker.formatDate('m/d/yy', parsed_date)
+									var formatted_date = obs["date"]["d"] + "/" + obs["date"]["m"] + "/" + obs["date"]["y"];
+									console.log(formatted_date);
 									CSV += "," + formatted_date + "," + obs["value"] + ",";
 								}
 								if (obs["notes"] != "" && obs["notes"] != undefined){
@@ -1354,6 +1354,7 @@ $(document).ready(function(){
 								}
 							});
 						});
+					CSV += "\nDisclaimer: dates before 2013 are approximate. All data during that range was collected between September and October of the specified year.";
 					// adds formatted data to a hidden input on the page
 					$("#CSV").empty().append(CSV);
 					$(".export").val("Click to open file");
