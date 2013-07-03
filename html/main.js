@@ -448,14 +448,14 @@ $(document).ready(function(){
 				'aria-hidden': 'true'
 			}).html('\
 				<div class="modal-header">\
-					<h3>Are you sure?</h3>\
+					<h3>This tree will be gone forever.</h3>\
 				</div>\
 				<div class="modal-body">\
-					<p>Do you really want to delete this observation entry? Do you? Because once it is gone, it will stay gone.</p>\
+					<p>Take a deep breathe and think carefully. This tree will never return once it is gone. Are you sure you want to get rid of it?</p>\
 				</div>\
 				<div class="modal-footer">\
-					<button class="btn" data-dismiss="modal" aria-hidden="true">Nah, just kidding</button>\
-					<button class="btn btn-danger" id="no-remorse">Yes, I won\'t feel remorse</button>\
+					<button class="btn" data-dismiss="modal" aria-hidden="true">No&mdash;sorry, tree</button>\
+					<button class="btn btn-danger" id="no-remorse">Yes&mdash;sorry, tree</button>\
 				</div>\
 			');
 
