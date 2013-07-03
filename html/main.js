@@ -27,12 +27,6 @@ var orig = {
     select: $.fn.typeahead.Constructor.prototype.select,
 };
 
-console.log($.fn.typeahead.Constructor.prototype);
-console.log($.fn.typeahead.Constructor.prototype.select.toString());
-console.log($.fn.typeahead.Constructor.prototype.blur.toString());
-console.log($.fn.typeahead.Constructor.prototype.listen.toString());
-console.log($.fn.typeahead.Constructor.prototype.keydown.toString());
-
 $.extend($.fn.typeahead.Constructor.prototype, {
 	matcher: function(item) {
 	
@@ -889,7 +883,6 @@ $(document).ready(function(){
 				type: 'observers'
 			});
 			
-			console.log($.fn.typeahead.Constructor.prototype.matcher);
 		},
 
 		editObservation: function(event) {
