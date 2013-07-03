@@ -409,7 +409,7 @@ $(document).ready(function(){
 				// already sorted (the latest comes first) by Tree.parse()
 				var most_recent_entry = _.first(this_tree.diameter);
 				
-				this_tree.latest_DBH_message = most_recent_entry.value + " in " + most_recent_entry.year;
+				this_tree.latest_DBH_message = most_recent_entry.value + " on " + toFormattedDate(most_recent_entry.date);
 				this_tree.latest_comment = _.isEmpty(most_recent_entry.notes) ? '-' : most_recent_entry.notes;
 				
 			}
