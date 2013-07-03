@@ -599,7 +599,7 @@ $(document).ready(function(){
 					</td>\
 					<td class="editable">\
 						<span class="display_cell date_select"><%= toFormattedDate(entry.date) %></span>\
-						<span class="edit_cell date_select"><input title="Enter a date in yyyy/mm/dd format. It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
+						<span class="edit_cell date_select"><input title="Enter a date in mm/dd/yyyy format. It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
 					</td>\<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers %></span><span class="edit-obs-info edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
 					<td class="editable"><span class="show-obs-info display_cell diameter"><%= entry.value %></span><span class="edit-obs-info edit_cell diameter"><input title="Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
 					<td class="editable"><span class="show-obs-info display_cell status"><%= entry.status %></span><span class="edit-obs-info edit_cell status"><div class="edit-obs-info status" data-toggle="buttons-radio">\
@@ -1010,38 +1010,32 @@ $(document).ready(function(){
 			var today = new Date();
 			console.log(date_entered > today);
 			/* make sure date isn't in future */
-			// the smallest unit for time comparison is days, 
-			// so comparing the Dates (or UNIX times) wouldn't work,
-			// because the today Date would always be greater than the date picked from datepicker
-			i/*f (date_entered.getFullYear() > today.getFullYear()) {
-				if (date_entered.getMonth() > today.getMonth()) {
-					if (date_entered.getDate() > today.getDate()) {*/
-					if (date_entered > today){
-						// trigger the edit Observation button to prevent saving
-						$(".edit_cell.date_select :input" ).addClass("alert_invalid");
-						//alert("Can't have date past today!");
-						console.log("date validation failed");
-						($current_row.find('.edit-existing')).trigger('click');
-						return false;
-						}
-					/*}
-				}
-			}*/
-
+			if (date_entered > today){
+				$(".edit_cell.date_select :input").tooltip();   // NOTE: the text shown on the tooltip is listed as the title attribute of the template for TreeEditView.
+				$(".edit_cell.date_select :input" ).tooltip("show");
+				// trigger the edit Observation button to prevent saving
+				$(".edit_cell.date_select :input" ).addClass("alert_invalid");
+				
+				console.log("date validation failed");
+				($current_row.find('.edit-existing')).trigger('click');
+				return false;
+			}
+			
 			/* make sure date isn't already added */
-			/*	
-			// get all dates listed in model for diam entries
+				
+			/*// get all dates listed in model for diam entries
 			var existing_diams_object = this.model.attributes.diameter;
 			var existing_dates_array = existing_diams_object.date.reverse();
 			// remove the date previously listed in the date field from the list of dates to check against
-			var prev_dateindex = $("#tree-observations tbody tr").index(current_row);
+			var prev_date_index = $("#tree-observations tbody tr").index(current_row);
 			existing_dates_array.splice(prev_date_index, 1);
-			// alert user if the date already has an associated entry
-			*/
+			// alert user if the date already has an associated entry*/
+			
 			
 			var this_row_index = parseInt(($current_row.attr("id")).split("-")[1]);
+			console.log(this_row_index);
 			var existing_entries = this.model.get('diameter');
-			
+			console.log(existing_entries);
 			/*
 			var today_days = today.getFullYear()*366 + today.getMonth()*32 + today.getDate();
 			
@@ -1070,11 +1064,13 @@ $(document).ready(function(){
 			}
 			*/
 			
-			for (i in existing_entries) {
 			
-				/*if (i == this_row_index) {
+			for (i in existing_entries) {
+				console.log(i, " ", this_row_index, " ")
+				//console.log(
+				if (i == this_row_index) {
 					break;
-				}*/
+				}
 				
 				if (existing_entries[i].date.y == today.getFullYear() && existing_entries[i].date.m == today.getMonth() && existing_entries[i].date.d == today.getDate()) {
 					
