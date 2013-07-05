@@ -27,11 +27,11 @@ var orig = {
     select: $.fn.typeahead.Constructor.prototype.select,
 };
 
-console.log($.fn.typeahead.Constructor.prototype);
+/*console.log($.fn.typeahead.Constructor.prototype);
 console.log($.fn.typeahead.Constructor.prototype.select.toString());
 console.log($.fn.typeahead.Constructor.prototype.blur.toString());
 console.log($.fn.typeahead.Constructor.prototype.listen.toString());
-console.log($.fn.typeahead.Constructor.prototype.keydown.toString());
+console.log($.fn.typeahead.Constructor.prototype.keydown.toString());*/
 
 $.extend($.fn.typeahead.Constructor.prototype, {
 	matcher: function(item) {
@@ -639,7 +639,7 @@ $(document).ready(function(){
 				</td>\
 				<td class="editable">\
 					<span class="display_cell date_select"><%= toFormattedDate(entry.date) %></span>\
-					<span class="edit_cell date_select"><input title="Enter a date in mm/dd/yyyy format. It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
+					<span class="edit_cell date_select"><input data-original-title="Enter a date in mm/dd/yyyy format. It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
 				</td>\<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers.join(", ") %></span><span class="edit-obs-info edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
 				<td class="editable"><span class="show-obs-info display_cell diameter"><%= entry.value %></span><span class="edit-obs-info edit_cell diameter"><input title="Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
 				<td class="editable"><span class="show-obs-info display_cell status"><%= entry.status %></span><span class="edit-obs-info edit_cell status"><div class="edit-obs-info status" data-toggle="buttons-radio">\
@@ -696,7 +696,7 @@ $(document).ready(function(){
 					</td>\
 					<td class="editable">\
 						<span class="display_cell date_select"><%= toFormattedDate(entry.date) %></span>\
-						<span class="edit_cell date_select"><input title="Enter a date in mm/dd/yyyy format. It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
+						<span class="edit_cell date_select"><input data-original-title="Enter a date in mm/dd/yyyy format. It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
 					</td>\<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers %></span><span class="edit-obs-info edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
 					<td class="editable"><span class="show-obs-info display_cell diameter"><%= entry.value %></span><span class="edit-obs-info edit_cell diameter"><input title="Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
 					<td class="editable"><span class="show-obs-info display_cell status"><%= entry.status %></span><span class="edit-obs-info edit_cell status"><div class="edit-obs-info status" data-toggle="buttons-radio">\
@@ -872,7 +872,8 @@ $(document).ready(function(){
 				maxDate: 0,
 				changeYear: true,
 				changeMonth: true,
-				constrainInput: true,
+				yearRange: '2000:c', // allow years to be edited back to the start of collection, and up to current year
+				//constrainInput: true,
 				onSelect: function() {
 					$(".ui-datepicker a").removeAttr("href");
 				}
@@ -937,7 +938,8 @@ $(document).ready(function(){
 				maxDate: 0, 
 				changeYear: true, 
 				changeMonth: true, 
-				constrainInput: true,
+				yearRange: '2000:c', // allow years to be edited back to the start of collection, and up to current year
+				//constrainInput: true,
 				onSelect: function() {
 					$(".ui-datepicker a").removeAttr("href");
 				}
@@ -995,8 +997,8 @@ $(document).ready(function(){
 				status: $row_to_save.find(".status.active").val()
 			};				
 			this.model.set('status', $row_to_save.find(".status.active").val());
-			console.log($row_to_save.find(".status.active").val());
-			console.log(this.model);
+			//console.log($row_to_save.find(".status.active").val());
+			//console.log(this.model);
 			// if it is a new one
 			if (is_this_row_new === true) {
 				
@@ -1104,107 +1106,70 @@ $(document).ready(function(){
 		},
 
 		validateDate: function($current_row) {
-
-			/* get date to validate */
-			// var date_entered = current_row.find(".formatted-date").val();
-			var date_entered = ($current_row.find(".edit_cell.date_select :input")).datepicker("getDate");
+		
+			var validInput = true;		/* will be set to false if any validation fails */
+			var errorMessage;			/* and the errorMessage will be displayed as tooltip */
 			
-			console.log(date_entered);
-			
-			/* if date is not valid */
-			if (_.isDate(date_entered) === false) {
-				$(".edit_cell.date_select :input" ).addClass("alert_invalid");
-				alert("Date format invalid!");
-				console.log("date validation failed");
-				($current_row.find('.edit-existing')).trigger('click');
-				return false;
-			}
-
-			/* make sure date isn't in future */
+			/*  get date to validate  */
+			// date shown in input box -- will be what was chosen in datepicker OR whatever the user manually enters
+			var date_entered = new Date(($current_row.find(".edit_cell.date_select :input")).val());
+			var date_parts = ($current_row.find(".edit_cell.date_select :input")).val().split("/"); // splits into mm dd and yyyy
 			var today = new Date();
-			console.log(date_entered > today);
-			/* make sure date isn't in future */
 
-			if (date_entered > today){
-				$(".edit_cell.date_select :input").tooltip();   // NOTE: the text shown on the tooltip is listed as the title attribute of the template for TreeEditView.
-				$(".edit_cell.date_select :input" ).tooltip("show");
-				// trigger the edit Observation button to prevent saving
-				$(".edit_cell.date_select :input" ).addClass("alert_invalid");
-				
-				console.log("date validation failed");
-				($current_row.find('.edit-existing')).trigger('click');
-				return false;
+			/* make sure entry is a valid date format (mm/dd/yyyy) */
+			if (date_parts.length != 3 || 
+				date_parts[0].length != 2 || 			
+				date_parts[0] > 12 ||
+				date_parts[1].length != 2 || 
+				date_parts[1] > 31 ||
+				date_parts[2].length != 4){		
+				errorMessage = "Enter a date in mm/dd/yyyy format or choose your date from the DatePicker.";
+				validInput = false;
+			} 
+			/* make sure date isn't in future*/
+			else if (date_entered > today){  
+				validInput = false;
+				errorMessage = "A data collection date may not be in the future... Don't fake the data, man.";
+			} 
+			/* make sure date isn't befre data collection began */
+			else if (date_entered.getFullYear() < 2002) {
+				validInput = false;
+				errorMessage = "Data was not collected before 2002... Why are you adding entries for earlier dates?";
 			}
 			
-
-			/* make sure date isn't already added */
-				
-			/*// get all dates listed in model for diam entries
-			var existing_diams_object = this.model.attributes.diameter;
-			var existing_dates_array = existing_diams_object.date.reverse();
-			// remove the date previously listed in the date field from the list of dates to check against
-			var prev_date_index = $("#tree-observations tbody tr").index(current_row);
-			existing_dates_array.splice(prev_date_index, 1);
-			// alert user if the date already has an associated entry*/
-			
-			
+			/* make sure date doesn't already have a measurement listed for this tree */			
 			var this_row_index = parseInt(($current_row.attr("id")).split("-")[1]);
-			console.log(this_row_index);
 			var existing_entries = this.model.get('diameter');
-			console.log(existing_entries);
-			/*
-			var today_days = today.getFullYear()*366 + today.getMonth()*32 + today.getDate();
-			
-			var doBinarySearch = function(i, begin, end) {
-				var days = existing_entries[i].date.y*366 + existing_entries[i].date.m*32 + existing_entries[i].date.d;
-				
-				if (days == today_days) {
-					if (i == this_row_index) return false;
-					return true;
-				}
-				else if (days < today_days) {
-					if (i == begin && i == end) return false;
-					return doBinarySearch(Math.floor(i/2), i+1, end);
-				} else {
-					if (i == begin && i == end) return false;
-					return doBinarySearch(Math.floor(i/2), begin, i-1);
-				}
-			};
-			
-			if (doBinarySearch(Math.floor((existing_entries.length - 1)/2), 0, existing_entries.length - 1) === true) {
-				// show user a tooltip about the proper entry
-				$(".edit_cell.date_select :input").tooltip();   // NOTE: the text shown on the tooltip is listed as the title attribute of the template for TreeEditView.
-				$(".edit_cell.date_select :input" ).tooltip("show");
-				$(".edit_cell.date_select :input" ).addClass("alert_invalid");
-				return false;
-			}
-			*/
-			
-			
 			for (i in existing_entries) {
-				console.log(i, " ", this_row_index, " ")
-				//console.log(
-				if (i == this_row_index) {
-					break;
+				if (existing_entries[i].date.y == date_entered.getFullYear()
+						&& existing_entries[i].date.m == (date_entered.getMonth() + 1)
+			 			&& existing_entries[i].date.d == date_entered.getDate()) {
+					errorMessage = "Trees don't grow that quickly... why are you entering a date that already has an\
+									associated diameter measurement?  Please make sure you are entering the correct\
+									date, or edit the existing entry.";
+					validInput = false;
 				}
-				
-				if (existing_entries[i].date.y == today.getFullYear() && existing_entries[i].date.m == today.getMonth() && existing_entries[i].date.d == today.getDate()) {
-					
-					// show user a tooltip about the proper entry
-					$(".edit_cell.date_select :input").tooltip();   // NOTE: the text shown on the tooltip is listed as the title attribute of the template for TreeEditView.
-					$(".edit_cell.date_select :input" ).tooltip("show");
-					$(".edit_cell.date_select :input" ).addClass("alert_invalid");
-					return false;
-					
-				}
-				
 			}
-
-			/* if date field passes all tests, make sure it is not highlighted anymore */
-			$(".edit_cell.date_select :input" ).removeClass("alert_invalid");
-			$(".edit_cell.date_select :input" ).tooltip("destroy");
-			console.log("date validation passed");
-			return true;
+			
+			/* take action (display error message/highlight field) based on whether input was valid or not */
+			if (! validInput) {
+				/* flag the field as invalid with a tooltip and highlighted color */
+				// change the title that will be displayed in the tooltip
+				$(".edit_cell.date_select :input").attr("data-original-title", errorMessage);	
+				$(".edit_cell.date_select :input").tooltip();
+				$(".edit_cell.date_select :input" ).tooltip("show");
+				$(".edit_cell.date_select :input" ).addClass("alert_invalid");	// highlight invalid field
+				return false;
+			} else {
+				/* if date field passes all tests, make sure it is not highlighted anymore */
+				// change the title that will be displayed on hovering
+				$(".edit_cell.date_select :input").attr("data-original-title", "Enter a date in mm/dd/yyyy format. It may not already\
+																  have an associated diameter entry or be in the future." );	
+				$(".edit_cell.date_select :input" ).removeClass("alert_invalid");
+				$(".edit_cell.date_select :input" ).tooltip("destroy");
+				console.log("date validation passed");
+				return true;
+			}
 		},
 
 		validateObservers: function(current_row) {
