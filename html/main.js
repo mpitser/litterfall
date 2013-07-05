@@ -27,12 +27,6 @@ var orig = {
     select: $.fn.typeahead.Constructor.prototype.select,
 };
 
-/*console.log($.fn.typeahead.Constructor.prototype);
-console.log($.fn.typeahead.Constructor.prototype.select.toString());
-console.log($.fn.typeahead.Constructor.prototype.blur.toString());
-console.log($.fn.typeahead.Constructor.prototype.listen.toString());
-console.log($.fn.typeahead.Constructor.prototype.keydown.toString());*/
-
 $.extend($.fn.typeahead.Constructor.prototype, {
 	matcher: function(item) {
 	
@@ -185,7 +179,7 @@ $(document).ready(function(){
 
 			// Remove the model when done
 			this.$el.on("hidden", function() {
-				this.remove();
+				$(this).remove();
 				if (self.isSubTree) {
 					$('.add-new-sub-tree').eq(0).trigger("not_choosing_parent_tree");
 				}
@@ -303,12 +297,14 @@ $(document).ready(function(){
 			// Set the URL--don't you think we should not have to specify the URL every time we call the server?
 			this.model.url = app.config.cgiDir + 'litterfall.py';
 			var self = this;
+			
 			this.model.validate = function() {
 				if (!(self.validateAngle() || self.validateDistance() || self.validateSpecies())) {
 					return "Invalid data";
 				}
 				
-			}
+			};
+			
 			this.model.on("invalid", function() {
 				$('#add-modal .error').eq(0).focus();
 			});
@@ -319,17 +315,22 @@ $(document).ready(function(){
 				angle: parseInt($('#new-tree-angle').val()),
 				distance: parseInt($('#new-tree-distance').val())
 			}, {
-				success: function() {
+				success: function(model) {
 					self.$el.modal("hide");
 					if (back_to_plot == true) {
 						/* if (self.isSubTree === true) {
 							$(".add-new-sub-tree").trigger("click");
 						} */
-						console.log("we're saving a new tree now??");
 						self.trigger("tree_saved");
 					} else {
-						app_router.navigate(document.location.hash + "/treeid/" + self.model.get("tree_id"), {trigger: true});
+						app_router.navigate(document.location.hash + "/treeid/" + model.get("tree_id") + (self.isSubTree ? ("/subtreeid/" + model.get("sub_tree_id")) : ""), {trigger: true});
 					}
+				},
+				error: function(model, xhr) {
+					
+					var saveTreeError = new errorView({xhr: xhr});
+					saveTreeError.render().$el.prependTo("#add-new-tree-modal > .modal-body");
+					
 				}
 			});
 
@@ -486,7 +487,8 @@ $(document).ready(function(){
 			'click .btn-analyze': 'goToTree',								//if update button is clicked, runs updateTree function
 			'click .add-new-sub-tree-from-row': function() {
 				$('.add-new-sub-tree').eq(0).trigger("choosing_parent_tree");
-				this.addSubTree(this.model.get("tree_id"));
+				this.model.trigger("add_new_sub_tree_from_row");
+				//this.addSubTree(this.model.get("tree_id"));
 			}
 		},
 		goToTree: function(){
@@ -536,19 +538,18 @@ $(document).ready(function(){
 
 			var this_tree_el = this.$el;
 			this.model.url = app.config.cgiDir + 'litterfall.py';
-			var result = this.model.destroy();
-			if (result !== false) {
-
-				this_model = this.model;
-
-				result.done(function() { // once done
-
+			var result = this.model.destroy({
+			
+				success: function(model) { // once done
+					
+					var this_model = model;
+					
 					this_tree_el.fadeOut("slow", function() {						//function called after fadeOut is done
 
 						// remove the row--we need this because if we just hide (using visibility:hidden) the row then the table-stripe class will not work
-						$("#"+this_model.get('_id').$oid).remove();
+						$("#"+model.get('_id').$oid).remove();
 
-						var target_tree_id = this_model.get('tree_id');
+						var target_tree_id = model.get('tree_id');
 
 						// update all the trees under the same tree_id
 						$(".tree-cluster-"+target_tree_id).each(function(i) {
@@ -580,8 +581,15 @@ $(document).ready(function(){
 						});
 
 					});
-				});
-			}
+				}, 
+				error: function(model, xhr) {
+					
+					var deleteTreeError = new errorView({xhr: xhr});
+					deleteTreeError.render().$el.insertAfter($("h1").eq(0));
+					
+				}
+				
+			});
 
 		}
 	});
@@ -704,7 +712,7 @@ $(document).ready(function(){
   					<button type="button" class="btn btn-mini btn-warning status dead_standing" style="width: 120px" value="dead_standing">Dead (standing)</button><br>\
  					<button type="button" class="btn btn-mini btn-danger status dead_fallen" style="width: 120px" value="dead_fallen">Dead (fallen)</button><br>\
 					</div></span></td>\
-					<td class="editable"><span class="show-obs-info display_cell notes"><%= entry.notes %></span><span class="edit-obs-info edit_cell notes"><input type="text" value="<%= entry.notes %>"></span></span></td>\
+					<td class="editable"><span class="show-obs-info display_cell notes"><%= entry.notes %></span><span class="edit-obs-info edit_cell notes"><input type="text" value="<%= htmlEntities(entry.notes) %>"></span></span></td>\
 				</tr>\
 			<% }); %>\
 			</tbody>\
@@ -890,7 +898,6 @@ $(document).ready(function(){
 				type: 'observers'
 			});
 			
-			console.log($.fn.typeahead.Constructor.prototype.matcher);
 		},
 
 		editObservation: function(event) {
@@ -1028,9 +1035,23 @@ $(document).ready(function(){
 				
 			}
 			
+			var self = this;
+			
 			$("#tree-observations > tr").removeClass("edit");
-			this.model.save();
-			this.render();		
+			this.model.url = app.config.cgiDir + 'litterfall.py';
+			this.model.save({}, {
+				success: function() {
+					self.render();
+				},
+				error: function(model, xhr) {
+					var saveError = new errorView({
+						xhr: xhr
+					});
+					
+					saveError.render().$el.insertBefore('#tree-observations');
+					
+				}
+			});	
 			
 
 		},
@@ -1078,6 +1099,7 @@ $(document).ready(function(){
 				
 				// delete it! HAHAHAHAHA
 				self.model.set('diameter', _.without(entries_array, entries_array[target_index]));
+				this.model.url = app.config.cgiDir + 'litterfall.py';
 				self.model.save();
 				self.render();
 				
@@ -1253,6 +1275,29 @@ $(document).ready(function(){
     		return parsed_options;
     	}
 	});
+	
+	var errorView = Backbone.View.extend({
+		
+		tagName: 'div',
+		className: 'alert alert-error fade in',
+		defaults: {
+			title: "Error",
+			message: "Hey, something just did go wrong."
+		},
+		initialize: function() {},
+		render: function() {
+		
+			var has_xhr = this.options.xhr !== undefined;
+		
+			this.$el.html('<button type="button" class="close" data-dismiss="alert">&times;</button>\
+			<h4>' + (has_xhr ? ("Error " + this.options.xhr.status + ": " + this.options.xhr.statusText) : this.options.title) + '</h4>\
+			' + (has_xhr ? this.options.xhr.responseText : this.options.message) + '\
+			');
+		
+			return this;
+		}
+		
+	});
 
 
 	//Declare the tree object (Model)
@@ -1342,9 +1387,8 @@ $(document).ready(function(){
 		},
 		// ** Normally, it would not have to go through save, but somehow destroy doesn't work
 		// I think there is something wrong with the DELETE request method
-		destroy: function() {
-			this.set('delete', true);
-			return this.save();
+		destroy: function(options) {
+			return this.save({delete: true}, options);
 		},
 		validate: function(attrs, options){
 			//this is where we validate the model's data
@@ -1383,10 +1427,13 @@ $(document).ready(function(){
   			var plot_number = 0;
   			var max_diam = 0;
   			
+  			var this_plot = this;
+  			
   			this.each(function(tree){
   				tree.plotViewInitialize();
   				var num_obvs = tree.get("diameter").length;
 
+  				this_plot.listenTo(tree, 'add_new_sub_tree_from_row', function() {this_plot.addSubTree(tree.get('tree_id'));});
   				
   				// determine the maximum number of observations for any tree in this plot
   				// to allocate enough columns in the CSV file
@@ -1785,12 +1832,8 @@ function toFormattedDate(date){
 	
 }
 
-function toUnixTime(date) {
-	
-	var theDate = new Date(date.y, date.m - 1, date.d);
-	return theDate.getTime();
-	
-	
+function htmlEntities(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/\'/g, '&#39;');
 }
 
 /*
