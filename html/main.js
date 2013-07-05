@@ -705,7 +705,7 @@ $(document).ready(function(){
 					<td class="editable">\
 						<span class="display_cell date_select"><%= toFormattedDate(entry.date) %></span>\
 						<span class="edit_cell date_select"><input data-original-title="Enter a date in mm/dd/yyyy format. It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
-					</td>\<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers %></span><span class="edit-obs-info edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
+					</td>\<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers %></span><span class="edit-obs-info edit_cell observers"><input title="Who collected this data" type="text" value="<%= entry.observers %>"></span></td>\
 					<td class="editable"><span class="show-obs-info display_cell diameter"><%= entry.value %></span><span class="edit-obs-info edit_cell diameter"><input title="Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
 					<td class="editable"><span class="show-obs-info display_cell status"><%= entry.status %></span><span class="edit-obs-info edit_cell status"><div class="edit-obs-info status" data-toggle="buttons-radio">\
   					<button type="button" class="btn btn-mini btn-info status alive" style="width: 120px" value="alive">Alive</button><br>\
@@ -998,7 +998,7 @@ $(document).ready(function(){
 			var new_entry = {
 				date: ($row_to_save.find(".edit_cell.date_select :input").datepicker("getDate")).toLitterfallDateObject(),
 				year: ($row_to_save.find(".edit_cell.date_select :input").datepicker("getDate")).getFullYear(),
-				value: parseFloat($row_to_save.find(".diameter :input").val()),
+				value: parseFloat($row_to_save.find(".diameter :input").val()).toFixed(1), //round the diameter measurement to 1 decimal place
 				observers: new_observers,
 				notes: $row_to_save.find(".notes :input").val(),
 				status: $row_to_save.find(".status.active").val()
@@ -1110,30 +1110,47 @@ $(document).ready(function(){
 
 			var field_to_validate = event.currentTarget.className;
 			var current_row = $("#tree-observations > tbody > tr .edit_cell :visible").parents("tr");
-			console.log("in validation");
-			console.log(field_to_validate.search("observers"));
 
+			var error_message = false;	// on a validation error this is populated with string to display
+			var field_to_highlight;		
+			
 			/* if date field lost focus */
 			if (field_to_validate.search("date_select") != -1){	     // search the box that was changed to see which class it is
-				this.validateDate(current_row);
+				error_message = this.validateDate(current_row);	
+				if (error_message) field_to_highlight="date_select";			
 			/* if observers field lost focus */				
 			} else if (field_to_validate.search("observers") != -1){
-				this.validateObservers(current_row);
+				error_message = this.validateObservers(current_row);
+				if (error_message) field_to_highlight="observers";
 			/* if diameter field lost focus */				
 			} else if (field_to_validate.search("diameter") != -1){
-				this.validateDiameter(current_row);
+				error_message = this.validateDiameter(current_row);
+				if (error_message) field_to_highlight="observers";
 			} else {
 				// field left was comments, which don't need to be validated (and should be allowed to be empty!)
 				return;
 			}
+						
+			if (error_message) {				
+				/* flag the field as invalid with a tooltip and highlighted color */
+				// change the title that will be displayed in the tooltip
+				$(".edit_cell."+field_to_highlight+" :input").attr("data-original-title", error_message);	
+				$(".edit_cell."+field_to_highlight+" :input").tooltip();
+				$(".edit_cell."+field_to_highlight+" :input" ).tooltip("show");
+				$(".edit_cell."+field_to_highlight+" :input" ).addClass("alert_invalid");	// highlight invalid field
+			} else {
+				/* if field passes all tests, make sure nothing is highlighted anymore */
+				// change the title that will be displayed on hovering
+				$(".edit_cell :input").attr("data-original-title", "");	
+				$(".edit_cell :input").removeClass("alert_invalid");
+				$(".edit_cell :input").tooltip("destroy");
+			}
+			
 
 		},
 
 		validateDate: function($current_row) {
 		
-			var validInput = true;		/* will be set to false if any validation fails */
-			var errorMessage;			/* and the errorMessage will be displayed as tooltip */
-			
 			/*  get date to validate  */
 			// date shown in input box -- will be what was chosen in datepicker OR whatever the user manually enters
 			var date_entered = new Date(($current_row.find(".edit_cell.date_select :input")).val());
@@ -1147,18 +1164,15 @@ $(document).ready(function(){
 				date_parts[1].length != 2 || 
 				date_parts[1] > 31 ||
 				date_parts[2].length != 4){		
-				errorMessage = "Enter a date in mm/dd/yyyy format or choose your date from the DatePicker.";
-				validInput = false;
+				return "Enter a date in mm/dd/yyyy format or choose your date from the DatePicker.";
 			} 
 			/* make sure date isn't in future*/
 			else if (date_entered > today){  
-				validInput = false;
-				errorMessage = "A data collection date may not be in the future... Don't fake the data, man.";
+				return "A data collection date may not be in the future... Don't fake the data, man.";
 			} 
 			/* make sure date isn't befre data collection began */
 			else if (date_entered.getFullYear() < 2002) {
-				validInput = false;
-				errorMessage = "Data was not collected before 2002... Why are you adding entries for earlier dates?";
+				return "Data was not collected before 2002... Why are you adding entries for earlier dates?";
 			}
 			
 			/* make sure date doesn't already have a measurement listed for this tree */			
@@ -1168,56 +1182,25 @@ $(document).ready(function(){
 				if (existing_entries[i].date.y == date_entered.getFullYear()
 						&& existing_entries[i].date.m == (date_entered.getMonth() + 1)
 			 			&& existing_entries[i].date.d == date_entered.getDate()) {
-					errorMessage = "Trees don't grow that quickly... why are you entering a date that already has an\
+					return "Trees don't grow that quickly... why are you entering a date that already has an\
 									associated diameter measurement?  Please make sure you are entering the correct\
 									date, or edit the existing entry.";
-					validInput = false;
 				}
 			}
-			
-			/* take action (display error message/highlight field) based on whether input was valid or not */
-			if (! validInput) {
-				/* flag the field as invalid with a tooltip and highlighted color */
-				// change the title that will be displayed in the tooltip
-				$(".edit_cell.date_select :input").attr("data-original-title", errorMessage);	
-				$(".edit_cell.date_select :input").tooltip();
-				$(".edit_cell.date_select :input" ).tooltip("show");
-				$(".edit_cell.date_select :input" ).addClass("alert_invalid");	// highlight invalid field
-				return false;
-			} else {
-				/* if date field passes all tests, make sure it is not highlighted anymore */
-				// change the title that will be displayed on hovering
-				$(".edit_cell.date_select :input").attr("data-original-title", "Enter a date in mm/dd/yyyy format. It may not already\
-																  have an associated diameter entry or be in the future." );	
-				$(".edit_cell.date_select :input" ).removeClass("alert_invalid");
-				$(".edit_cell.date_select :input" ).tooltip("destroy");
-				console.log("date validation passed");
-				return true;
-			}
+			return false;
 		},
 
 		validateObservers: function(current_row) {
 
 			// get observers entry and format
-			var obs_entered = current_row.find(".observers :input").val().split(",");
-			console.log(obs_entered);
-			for (var i=0; i<obs_entered.length; i++){
-				obs_entered[i] = obs_entered[i].trim(" ");
-			}	
+			var obs_entered = current_row.find(".observers :input").val().split(",");	
 
-			// make sure an observer was entered
+			// make sure some observers were entered
 			if (obs_entered[0] === "") {
-				console.log("empty list");
-				$(".edit_cell.observers :input").tooltip(); // NOTE: the text shown on the tooltip is listed as the title attribute of the template for TreeEditView.
-				$(".edit_cell.observers :input" ).tooltip("show");
-				$(".edit_cell.observers :input" ).addClass("alert_invalid");
-				return false;
-			} else { 
-				$(".edit_cell.observers :input" ).removeClass("alert_invalid");
-				$(".edit_cell.observers :input" ).tooltip("destroy");
-				console.log("observers validation passed");
-				return true;
+				return "Observers field may not be empty.";
 			}
+			
+			return false;
 
 		},
 
@@ -1228,17 +1211,11 @@ $(document).ready(function(){
 
 			// make sure the diameter is in correct format (can be parsed as float)
 			if (isNaN(diam_entered)) {
-				console.log("returned NaN");
-				$(".edit_cell.diameter :input").tooltip(); // NOTE: the text shown on the tooltip is listed as the title attribute of the template for TreeEditView.
-				$(".edit_cell.diameter :input").tooltip("show");				
-				$(".edit_cell.diameter :input").addClass("alert_invalid");
-				return false;
-			} else { 
-				$(".edit_cell.diameter :input" ).removeClass("alert_invalid");
-				$(".edit_cell.diameter :input" ).tooltip("destroy");
-				console.log("diameter validation passed");
-				return true;
-			}
+				return "Please enter an integer or floating point number such as 5, 6.1, 10.33";
+			} 
+			
+			return false;
+			
 		},
 
 		getAllObservers: function() {
