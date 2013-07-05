@@ -92,7 +92,7 @@ class Tree:
 		result = self.format()
 		if type(result) is StringType:
 			self.printError(result)
-			return
+			return False
 		
 		# ---- dealing with a possible new tree ----
 		
@@ -178,16 +178,16 @@ class Tree:
 	def format(self):
 		
 		if not 'tree_id' in self.tree:
-			msg = "No tree ID specified"
+			return "No tree ID specified"
 		else:
-			if self.tree['tree_id'] <= 0 or self.tree['tree_id'] != -1:
-				msg = "Tree ID is invalid"
+			if self.tree['tree_id'] <= 0 and self.tree['tree_id'] != -1:
+				return "Tree ID is invalid"
 		
 		if not 'sub_tree_id' in self.tree:
 			return "No sub-tree ID specified"
 		else:
-			if self.tree['sub_tree_id'] < 0 or self.tree['sub_tree_id'] != -1:
-				msg = "Sub-tree ID is invalid"
+			if self.tree['sub_tree_id'] < 0 and self.tree['sub_tree_id'] != -1:
+				return "Sub-tree ID is invalid"
 				
 		
 		if not 'plot' in self.tree:
@@ -561,27 +561,14 @@ def main():
 	elif method == 'POST' or method == 'PUT':
 		form = cgi.FieldStorage()
 		data = json.loads(form.file.read(), object_hook=json_util.object_hook)	
-		result = validate(obs, data)
-		flag = result['flag']
-		msg = result['msg']
-		if flag:
-			newTree = Tree(data, obs)
-			if 'delete' in data:
-				if data['delete'] == True:
-					newTree.delete()
-			else:
-				newTree.save()
-			newTree.printJSON()
-		else:
-			print 'Status:406\n'
-			print result['key'] + '->' + msg
-			
-	elif method == 'DELETE':
-		form = cgi.FieldStorage()
-		data = json.loads(form.file.read(), object_hook=json_util.object_hook)
 		newTree = Tree(data, obs)
-		newTree.delete()
-		newTree.printJSON()
+		if 'delete' in data:
+			if data['delete'] == True:
+				newTree.delete()
+				newTree.printJSON()
+		else:
+			if newTree.save() != False:
+				newTree.printJSON()
 		
 		
 if __name__ == "__main__":
