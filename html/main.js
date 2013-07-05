@@ -647,9 +647,9 @@ $(document).ready(function(){
 				</td>\
 				<td class="editable">\
 					<span class="display_cell date_select"><%= toFormattedDate(entry.date) %></span>\
-					<span class="edit_cell date_select"><input data-original-title="Enter a date in mm/dd/yyyy format. It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
-				</td>\<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers.join(", ") %></span><span class="edit-obs-info edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
-				<td class="editable"><span class="show-obs-info display_cell diameter"><%= entry.value %></span><span class="edit-obs-info edit_cell diameter"><input title="Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
+					<span class="edit_cell date_select"><input data-original-title="Enter a date in mm/dd/yyyy format. It may not already have an associated diameter entry or be in the future." class="date_select" type="text" value="<%= toFormattedDate(entry.date) %>"/>\
+				</td>\<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers.join(", ") %></span><span class="edit-obs-info edit_cell observers"><input title="Observers field may not be empty." class="observers" type="text" value="<%= entry.observers %>"></span></td>\
+				<td class="editable"><span class="show-obs-info display_cell diameter"><%= entry.value %></span><span class="edit-obs-info edit_cell diameter"><input title="Please enter an integer or floating point number such as 5, 6.1, 10.33" class="diameter" type="text" value="<%= entry.value %>"></span></td>\
 				<td class="editable"><span class="show-obs-info display_cell status"><%= entry.status %></span><span class="edit-obs-info edit_cell status"><div class="edit-obs-info status" data-toggle="buttons-radio">\
   					<button type="button" class="btn btn-mini btn-info status alive" style="width: 120px" value="alive">Alive</button><br>\
   					<button type="button" class="btn btn-mini btn-warning status dead_standing" style="width: 120px" value="dead_standing">Dead (standing)</button><br>\
@@ -898,6 +898,22 @@ $(document).ready(function(){
 				type: 'observers'
 			});
 			
+			/*$new_entry_row.find(".edit_cell.date_select :input").on("blur", function() {
+				console.log("date");
+				$new_entry_row.find(".edit_cell.date_select").addClass("to_validate");
+				dis.validateField();
+			});
+			$new_entry_row.find(".edit_cell.observers :input").on("blur", function() {
+				console.log("observers");
+				$new_entry_row.find(".edit_cell.observers").addClass("to_validate");
+				dis.validateField();
+			});
+			$new_entry_row.find(".edit_cell.diameter :input").on("blur", function() {
+				console.log("diams");
+				$new_entry_row.find(".edit_cell.diameter").addClass("to_validate");
+				dis.validateField();
+			});*/
+			
 		},
 
 		editObservation: function(event) {
@@ -960,6 +976,23 @@ $(document).ready(function(){
 			});
 			$(".already").remove();
 			
+			var dis = this;
+			$row_to_edit.find(".edit_cell.date_select :input").on("blur", function() {
+				console.log("date");
+				$row_to_edit.find(".edit_cell.date_select :input").addClass("to_validate");
+				dis.validateField();
+			});
+			$row_to_edit.find(".edit_cell.observers :input").on("blur", function() {
+				console.log("observers");
+				$row_to_edit.find(".edit_cell.observers :input").addClass("to_validate");
+				dis.validateField();
+			});
+			$row_to_edit.find(".edit_cell.diameter :input").on("blur", function() {
+				console.log("diams");
+				$row_to_edit.find(".edit_cell.diameter :input").addClass("to_validate");
+				dis.validateField();
+			});
+			
 		},
 
 		cancelEditObservation: function() {
@@ -973,10 +1006,23 @@ $(document).ready(function(){
 
 		saveObservation: function(event) {
 			// User added or edited an observation.  Save it to the server.	
-			// Get the row that is being edited
 			
 			// Get the row that is being edited
 			var $row_to_save = $(event.target).parents("tr");
+			
+			/* validate data being entered before saving; cancel if invalid */
+			$row_to_save.find(".edit_cell.date_select :input").addClass("to_validate");
+			if (! this.validateField()) {
+				return;
+			}
+			$row_to_save.find(".edit_cell.observers :input").addClass("to_validate");
+			if (! this.validateField()) {
+				return;
+			}
+			$row_to_save.find(".edit_cell.diameter :input").addClass("to_validate");
+			if (! this.validateField()) {
+				return;
+			}
 			
 			// is it a new row, or an old one?
 			var is_this_row_new = $row_to_save.hasClass("new");
@@ -1106,47 +1152,54 @@ $(document).ready(function(){
 			});
 			
 		},
-		validateField: function(event){
+		validateField: function(){
 
-			var field_to_validate = event.currentTarget.className;
 			var current_row = $("#tree-observations > tbody > tr .edit_cell :visible").parents("tr");
+			var field_to_validate = current_row.find(".to_validate").parent().attr("class").replace("to_validate", "").replace("display_cell", "").replace("edit_cell", "").replace("show-obs-info", "").replace("edit-obs-info", "").trim();
 
 			var error_message = false;	// on a validation error this is populated with string to display
 			var field_to_highlight;		
 			
-			/* if date field lost focus */
-			if (field_to_validate.search("date_select") != -1){	     // search the box that was changed to see which class it is
+			//if date field lost focus 
+			if (field_to_validate == "date_select"){
 				error_message = this.validateDate(current_row);	
 				if (error_message) field_to_highlight="date_select";			
-			/* if observers field lost focus */				
-			} else if (field_to_validate.search("observers") != -1){
+			//if observers field lost focus				
+			} else if (field_to_validate == "observers"){
 				error_message = this.validateObservers(current_row);
 				if (error_message) field_to_highlight="observers";
-			/* if diameter field lost focus */				
-			} else if (field_to_validate.search("diameter") != -1){
+			//if diameter field lost focus				
+			} else if (field_to_validate == "diameter"){
 				error_message = this.validateDiameter(current_row);
-				if (error_message) field_to_highlight="diameter";
+				if (error_message) {field_to_highlight="diameter"; console.log("didnt pass");}
 			} else {
 				// field left was comments, which don't need to be validated (and should be allowed to be empty!)
-				return;
+				return true;
 			}
 						
 			if (error_message) {				
-				/* flag the field as invalid with a tooltip and highlighted color */
+				//flag the field as invalid with a tooltip and highlighted color
 				// change the title that will be displayed in the tooltip
 				$(".edit_cell."+field_to_highlight+" :input").attr("data-original-title", error_message);	
 				$(".edit_cell."+field_to_highlight+" :input").tooltip();
 				$(".edit_cell."+field_to_highlight+" :input" ).tooltip("show");
 				$(".edit_cell."+field_to_highlight+" :input" ).addClass("alert_invalid");	// highlight invalid field
+				
+				current_row.find(".to_validate").removeClass("to_validate");
+				return false;
 			} else {
-				/* if field passes all tests, make sure nothing is highlighted anymore */
+				//if field passes all tests, make sure nothing is highlighted anymore 
 				// change the title that will be displayed on hovering
 				$(".edit_cell :input").attr("data-original-title", "");	
 				$(".edit_cell :input").removeClass("alert_invalid");
 				$(".edit_cell :input").tooltip("destroy");
+				current_row.find(".to_validate").removeClass("to_validate");
+				return true;
 			}
+			console.log(current_row.find(".to_validate"));
+			current_row.find(".to_validate").removeClass("to_validate");
+			//$(current_row.find(".to_validate")).removeClass("to_validate");
 			
-
 		},
 
 		validateDate: function($current_row) {
@@ -1179,6 +1232,9 @@ $(document).ready(function(){
 			var this_row_index = parseInt(($current_row.attr("id")).split("-")[1]);
 			var existing_entries = this.model.get('diameter');
 			for (i in existing_entries) {
+				if (i == this_row_index) {
+					continue;	// skip checking if the date is the same as it was before
+				}
 				if (existing_entries[i].date.y == date_entered.getFullYear()
 						&& existing_entries[i].date.m == (date_entered.getMonth() + 1)
 			 			&& existing_entries[i].date.d == date_entered.getDate()) {
@@ -1208,7 +1264,8 @@ $(document).ready(function(){
 
 			// get diameter entry
 			var diam_entered = parseFloat(current_row.find(".diameter :input").val());
-
+			console.log("hellooo");
+			console.log(isNaN(diam_entered));
 			// make sure the diameter is in correct format (can be parsed as float)
 			if (isNaN(diam_entered)) {
 				return "Please enter an integer or floating point number such as 5, 6.1, 10.33";
