@@ -711,7 +711,7 @@ $(document).ready(function(){
   					<button type="button" class="btn btn-mini btn-warning status dead_standing" style="width: 120px" value="dead_standing">Dead (standing)</button><br>\
  					<button type="button" class="btn btn-mini btn-danger status dead_fallen" style="width: 120px" value="dead_fallen">Dead (fallen)</button><br>\
 					</div></span></td>\
-					<td class="editable"><span class="show-obs-info display_cell notes"><%= htmlEntities(entry.notes) %></span><span class="edit-obs-info edit_cell notes"><input type="text" value="<%= htmlEntities(entry.notes) %>"></span></span></td>\
+					<td class="editable"><span class="show-obs-info display_cell notes"><%= entry.notes %></span><span class="edit-obs-info edit_cell notes"><input type="text" value="<%= htmlEntities(entry.notes) %>"></span></span></td>\
 				</tr>\
 			<% }); %>\
 			</tbody>\
@@ -1032,11 +1032,13 @@ $(document).ready(function(){
 				
 			}
 			
+			var self = this;
+			
 			$("#tree-observations > tr").removeClass("edit");
 			this.model.url = app.config.cgiDir + 'litterfall.py';
 			this.model.save({}, {
-				success: function(model, response) {
-					model.render();
+				success: function() {
+					self.render();
 				},
 				error: function(model, xhr) {
 					var saveError = new errorView({
