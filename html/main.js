@@ -1125,7 +1125,7 @@ $(document).ready(function(){
 			/* if diameter field lost focus */				
 			} else if (field_to_validate.search("diameter") != -1){
 				error_message = this.validateDiameter(current_row);
-				if (error_message) field_to_highlight="observers";
+				if (error_message) field_to_highlight="diameter";
 			} else {
 				// field left was comments, which don't need to be validated (and should be allowed to be empty!)
 				return;
