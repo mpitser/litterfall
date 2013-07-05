@@ -1,5 +1,5 @@
 #! /usr/bin/python
-from datetime import datetime
+from datetime import datetime, date
 from pymongo import MongoClient
 from bson import json_util
 from bson.objectid import ObjectId
@@ -369,7 +369,9 @@ def getdata(obs, site, plot, treeid, subtreeid):
 		data.sort()
 		n = 0 # n is not important, just helps up in decigin which data to assign to json_data
 	elif site == 'allObservers':
-		data = obs.find({'collection_type':'tree'}, {'fields':'diameter.observers'}).distinct('diameter.observers')
+		# how many years back?
+		num_years = 4
+		data = obs.find({'collection_type':'tree', 'diameter.date.y' : {'$gte': date.today().year - num_years}}, {'fields':'diameter.observers'}).distinct('diameter.observers')
 		data.sort()
 		n = len(data)
 
