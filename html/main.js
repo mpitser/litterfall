@@ -1110,15 +1110,17 @@ $(document).ready(function(){
 
 			var field_to_validate = event.currentTarget.className;
 			var current_row = $("#tree-observations > tbody > tr .edit_cell :visible").parents("tr");
+			console.log("in validation");
+			console.log(field_to_validate.search("observers"));
 
 			/* if date field lost focus */
-			if (field_to_validate == "edit_cell date_select"){				
+			if (field_to_validate.search("date_select") != -1){	     // search the box that was changed to see which class it is
 				this.validateDate(current_row);
 			/* if observers field lost focus */				
-			} else if (field_to_validate == "edit_cell observers"){
+			} else if (field_to_validate.search("observers") != -1){
 				this.validateObservers(current_row);
 			/* if diameter field lost focus */				
-			} else if (field_to_validate == "edit_cell diameter"){
+			} else if (field_to_validate.search("diameter") != -1){
 				this.validateDiameter(current_row);
 			} else {
 				// field left was comments, which don't need to be validated (and should be allowed to be empty!)
@@ -1198,6 +1200,7 @@ $(document).ready(function(){
 
 			// get observers entry and format
 			var obs_entered = current_row.find(".observers :input").val().split(",");
+			console.log(obs_entered);
 			for (var i=0; i<obs_entered.length; i++){
 				obs_entered[i] = obs_entered[i].trim(" ");
 			}	
