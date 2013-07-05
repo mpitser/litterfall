@@ -487,7 +487,8 @@ $(document).ready(function(){
 			'click .btn-analyze': 'goToTree',								//if update button is clicked, runs updateTree function
 			'click .add-new-sub-tree-from-row': function() {
 				$('.add-new-sub-tree').eq(0).trigger("choosing_parent_tree");
-				this.addSubTree(this.model.get("tree_id"));
+				this.model.trigger("add_new_sub_tree_from_row");
+				//this.addSubTree(this.model.get("tree_id"));
 			}
 		},
 		goToTree: function(){
@@ -1461,10 +1462,13 @@ $(document).ready(function(){
   			var plot_number = 0;
   			var max_diam = 0;
   			
+  			var this_plot = this;
+  			
   			this.each(function(tree){
   				tree.plotViewInitialize();
   				var num_obvs = tree.get("diameter").length;
 
+  				this_plot.listenTo(tree, 'add_new_sub_tree_from_row', function() {this_plot.addSubTree(tree.get('tree_id'));});
   				
   				// determine the maximum number of observations for any tree in this plot
   				// to allocate enough columns in the CSV file
