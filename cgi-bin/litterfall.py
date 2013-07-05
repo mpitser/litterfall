@@ -217,7 +217,7 @@ class Tree:
 		if not 'distance' in self.tree:
 			return "No distance specified"
 		else:
-			if type(self.tree['distance']) is not IntType:
+			if ((type(self.tree['distance']) is not FloatType) and (type(self.tree['distance']) is not IntType)):
 				return "Invalid distance"
 			elif self.tree['distance'] < 0:
 				self.tree['distance'] = -1 * self.tree['distance']
