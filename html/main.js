@@ -898,21 +898,23 @@ $(document).ready(function(){
 				type: 'observers'
 			});
 			
-			/*$new_entry_row.find(".edit_cell.date_select :input").on("blur", function() {
+			var dis = this;
+			
+			$new_entry_row.find(".edit_cell.date_select :input").on("blur", function() {
 				console.log("date");
-				$new_entry_row.find(".edit_cell.date_select").addClass("to_validate");
+				$new_entry_row.find(".edit_cell.date_select :input").addClass("to_validate");
 				dis.validateField();
 			});
 			$new_entry_row.find(".edit_cell.observers :input").on("blur", function() {
 				console.log("observers");
-				$new_entry_row.find(".edit_cell.observers").addClass("to_validate");
+				$new_entry_row.find(".edit_cell.observers :input").addClass("to_validate");
 				dis.validateField();
 			});
 			$new_entry_row.find(".edit_cell.diameter :input").on("blur", function() {
 				console.log("diams");
-				$new_entry_row.find(".edit_cell.diameter").addClass("to_validate");
+				$new_entry_row.find(".edit_cell.diameter :input").addClass("to_validate");
 				dis.validateField();
-			});*/
+			});
 			
 		},
 
@@ -1228,12 +1230,17 @@ $(document).ready(function(){
 				return "Data was not collected before 2002... Why are you adding entries for earlier dates?";
 			}
 			
-			/* make sure date doesn't already have a measurement listed for this tree */			
-			var this_row_index = parseInt(($current_row.attr("id")).split("-")[1]);
+			/* make sure date doesn't already have a measurement listed for this tree */	
+			var this_row_index;
+			if ($current_row.hasClass("new")) {
+				this_row_index = -1;	// dummy variable so that all other dates are looped through
+			} else {
+				this_row_index = parseInt(($current_row.attr("id")).split("-")[1]);
+			}
 			var existing_entries = this.model.get('diameter');
 			for (i in existing_entries) {
 				if (i == this_row_index) {
-					continue;	// skip checking if the date is the same as it was before
+					continue;	// skip checking if the date is the same as it was before 
 				}
 				if (existing_entries[i].date.y == date_entered.getFullYear()
 						&& existing_entries[i].date.m == (date_entered.getMonth() + 1)
@@ -1246,10 +1253,10 @@ $(document).ready(function(){
 			return false;
 		},
 
-		validateObservers: function(current_row) {
+		validateObservers: function($current_row) {
 
 			// get observers entry and format
-			var obs_entered = current_row.find(".observers :input").val().split(",");	
+			var obs_entered = $current_row.find(".observers :input").val().split(",");	
 
 			// make sure some observers were entered
 			if (obs_entered[0] === "") {
@@ -1260,12 +1267,11 @@ $(document).ready(function(){
 
 		},
 
-		validateDiameter: function(current_row) {
+		validateDiameter: function($current_row) {
 
 			// get diameter entry
-			var diam_entered = parseFloat(current_row.find(".diameter :input").val());
-			console.log("hellooo");
-			console.log(isNaN(diam_entered));
+			var diam_entered = parseFloat($current_row.find(".diameter :input").val());
+
 			// make sure the diameter is in correct format (can be parsed as float)
 			if (isNaN(diam_entered)) {
 				return "Please enter an integer or floating point number such as 5, 6.1, 10.33";
