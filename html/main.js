@@ -297,12 +297,14 @@ $(document).ready(function(){
 			// Set the URL--don't you think we should not have to specify the URL every time we call the server?
 			this.model.url = app.config.cgiDir + 'litterfall.py';
 			var self = this;
+			
 			this.model.validate = function() {
 				if (!(self.validateAngle() || self.validateDistance() || self.validateSpecies())) {
 					return "Invalid data";
 				}
 				
-			}
+			};
+			
 			this.model.on("invalid", function() {
 				$('#add-modal .error').eq(0).focus();
 			});
@@ -313,17 +315,22 @@ $(document).ready(function(){
 				angle: parseInt($('#new-tree-angle').val()),
 				distance: parseInt($('#new-tree-distance').val())
 			}, {
-				success: function() {
+				success: function(model) {
 					self.$el.modal("hide");
 					if (back_to_plot == true) {
 						/* if (self.isSubTree === true) {
 							$(".add-new-sub-tree").trigger("click");
 						} */
-						console.log("we're saving a new tree now??");
 						self.trigger("tree_saved");
 					} else {
-						app_router.navigate(document.location.hash + "/treeid/" + self.model.get("tree_id"), {trigger: true});
+						app_router.navigate(document.location.hash + "/treeid/" + model.get("tree_id") + (self.isSubTree ? ("/subtreeid/" + model.get("sub_tree_id")) : ""), {trigger: true});
 					}
+				},
+				error: function(model, xhr) {
+					
+					var saveTreeError = new errorView({xhr: xhr});
+					saveTreeError.render().$el.prependTo("#add-new-tree-modal > .modal-body");
+					
 				}
 			});
 
@@ -530,19 +537,18 @@ $(document).ready(function(){
 
 			var this_tree_el = this.$el;
 			this.model.url = app.config.cgiDir + 'litterfall.py';
-			var result = this.model.destroy();
-			if (result !== false) {
-
-				this_model = this.model;
-
-				result.done(function() { // once done
-
+			var result = this.model.destroy({
+			
+				success: function(model) { // once done
+					
+					var this_model = model;
+					
 					this_tree_el.fadeOut("slow", function() {						//function called after fadeOut is done
 
 						// remove the row--we need this because if we just hide (using visibility:hidden) the row then the table-stripe class will not work
-						$("#"+this_model.get('_id').$oid).remove();
+						$("#"+model.get('_id').$oid).remove();
 
-						var target_tree_id = this_model.get('tree_id');
+						var target_tree_id = model.get('tree_id');
 
 						// update all the trees under the same tree_id
 						$(".tree-cluster-"+target_tree_id).each(function(i) {
@@ -574,8 +580,15 @@ $(document).ready(function(){
 						});
 
 					});
-				});
-			}
+				}, 
+				error: function(model, xhr) {
+					
+					var deleteTreeError = new errorView({xhr: xhr});
+					deleteTreeError.render().$el.insertAfter($("h1").eq(0));
+					
+				}
+				
+			});
 
 		}
 	});
@@ -1021,8 +1034,19 @@ $(document).ready(function(){
 			
 			$("#tree-observations > tr").removeClass("edit");
 			this.model.url = app.config.cgiDir + 'litterfall.py';
-			this.model.save();
-			this.render();		
+			this.model.save({}, {
+				success: function(model, response) {
+					model.render();
+				},
+				error: function(model, xhr) {
+					var saveError = new errorView({
+						xhr: xhr
+					});
+					
+					saveError.render().$el.insertBefore('#tree-observations');
+					
+				}
+			});	
 			
 
 		},
@@ -1283,6 +1307,29 @@ $(document).ready(function(){
     		return parsed_options;
     	}
 	});
+	
+	var errorView = Backbone.View.extend({
+		
+		tagName: 'div',
+		className: 'alert alert-error fade in',
+		defaults: {
+			title: "Error",
+			message: "Hey, something just did go wrong."
+		},
+		initialize: function() {},
+		render: function() {
+		
+			var has_xhr = this.options.xhr !== undefined;
+		
+			this.$el.html('<button type="button" class="close" data-dismiss="alert">&times;</button>\
+			<h4>' + (has_xhr ? ("Error " + this.options.xhr.status + ": " + this.options.xhr.statusText) : this.options.title) + '</h4>\
+			' + (has_xhr ? this.options.xhr.responseText : this.options.message) + '\
+			');
+		
+			return this;
+		}
+		
+	});
 
 
 	//Declare the tree object (Model)
@@ -1372,9 +1419,8 @@ $(document).ready(function(){
 		},
 		// ** Normally, it would not have to go through save, but somehow destroy doesn't work
 		// I think there is something wrong with the DELETE request method
-		destroy: function() {
-			this.set('delete', true);
-			return this.save();
+		destroy: function(options) {
+			return this.save({delete: true}, options);
 		},
 		validate: function(attrs, options){
 			//this is where we validate the model's data
