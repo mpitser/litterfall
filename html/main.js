@@ -179,7 +179,7 @@ $(document).ready(function(){
 
 			// Remove the model when done
 			this.$el.on("hidden", function() {
-				this.remove();
+				$(this).remove();
 				if (self.isSubTree) {
 					$('.add-new-sub-tree').eq(0).trigger("not_choosing_parent_tree");
 				}
