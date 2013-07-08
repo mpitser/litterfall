@@ -190,34 +190,30 @@ $(document).ready(function(){
 		},
 		addAutocomplete: function() {
 
-			// Array to contain species
-			var all_species = [];
-
-			// Get all the species first
-			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allSpecies', function(data) {
-				for (i in data) {
-					all_species[i] = data[i];
-				}
-			});
+		// get the species list from the text file and populate array
+	        	$.get('lib/speciesList.txt', function(data){
+	        		var all_species = data.split(",");
+				//console.log(all_species);
 
 			// Add autocomplete
-			$("#new-tree-species").autocomplete({
-				minLength: 0,
-				source: all_species,
-				appendTo: "#add-new-tree-modal" // so that the list moves along with the model
-			})
-			.focus(function() { // when focus, trigger autocomplete
-				$(this).autocomplete("search");
+				$("#new-tree-species").autocomplete({
+					minLength: 0,
+					source: all_species,
+					appendTo: "#add-new-tree-modal" // so that the list moves along with the model
+				})
+       
+				.focus(function() { // when focus, trigger autocomplete
+					$(this).autocomplete("search");
+				});
+ 
+				// Limit the height of the dropdown list
+				// (Forget IE6 Compatibility)
+				$(".ui-autocomplete").css({
+					'max-height': '200px',
+					'overflow-y': 'auto',
+					'overflow-x': 'hidden'
+				});
 			});
-
-			// Limit the height of the dropdown list
-			// (Forget IE6 Compatibility)
-			$(".ui-autocomplete").css({
-				'max-height': '200px',
-				'overflow-y': 'auto',
-				'overflow-x': 'hidden'
-			});
-
 		},
 		events: {
 			'click .btn-save-and-back': function() {
@@ -795,7 +791,6 @@ $(document).ready(function(){
 					}
 				});
 			});
-
 		},
 		events: {
 			'click .btn-new-observation': 'newObservation',	
