@@ -189,35 +189,30 @@ $(document).ready(function(){
 
 		},
 		addAutocomplete: function() {
+			// get the species list from the text file and populate array
+        	$.get('lib/speciesList.txt', function(data){
+            	var all_species = data.split(",");
+           	 	//console.log(all_species);
+           	 	
+           	 	// Add autocomplete
+				$("#new-tree-species").autocomplete({
+					minLength: 0,
+					source: all_species,
+					appendTo: "#add-new-tree-modal" // so that the list moves along with the model
+				})
+				
+				.focus(function() { // when focus, trigger autocomplete
+					$(this).autocomplete("search");
+				});
 
-			// Array to contain species
-			var all_species = [];
-
-			// Get all the species first
-			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allSpecies', function(data) {
-				for (i in data) {
-					all_species[i] = data[i];
-				}
-			});
-
-			// Add autocomplete
-			$("#new-tree-species").autocomplete({
-				minLength: 0,
-				source: all_species,
-				appendTo: "#add-new-tree-modal" // so that the list moves along with the model
-			})
-			.focus(function() { // when focus, trigger autocomplete
-				$(this).autocomplete("search");
-			});
-
-			// Limit the height of the dropdown list
-			// (Forget IE6 Compatibility)
-			$(".ui-autocomplete").css({
-				'max-height': '200px',
-				'overflow-y': 'auto',
-				'overflow-x': 'hidden'
-			});
-
+				// Limit the height of the dropdown list
+				// (Forget IE6 Compatibility)
+				$(".ui-autocomplete").css({
+					'max-height': '200px',
+					'overflow-y': 'auto',
+					'overflow-x': 'hidden'
+				});
+   			});
 		},
 		events: {
 			'click .btn-save-and-back': function() {
@@ -773,17 +768,20 @@ $(document).ready(function(){
 		},
 		populateSpecies: function(){
 			var tree_species = this.model.get('species');
-			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allSpecies', function(data) {
-				$.each(data, function(index, value) {
-					if (value == tree_species) {
-						$(".species select").append($("<option></option>").attr("value",value).attr("selected", "selected").text(value));
+			
+			// get species list from text file
+			$.get('lib/speciesList.txt', function(data){
+            	var all_species = data.split(",");
+            	// populate the dropdown menu for editing tree species (with the tree's listed species as default selected)
+            	for (i in all_species) {
+            		if (all_species[i] == tree_species) {	
+						$(".species select").append($("<option></option>").attr("value",all_species[i]).attr("selected", "selected").text(all_species[i]));
 					} else {
-						$(".species select").append($("<option></option>").attr("value",value).text(value))
+						$(".species select").append($("<option></option>").attr("value",all_species[i]).text(all_species[i]))
 					}
-				});
-			});
-
-		},
+            	}
+            });
+    	},
 		events: {
 			'click .btn-new-observation': 'newObservation',	
 			'click .edit-existing': 'editObservation',
