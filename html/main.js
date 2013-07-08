@@ -21,6 +21,57 @@ Date.prototype.fromLitterfallDateObject = function(date) {
 	this.setDate(date.d);
 };
 
+var orig = {
+    matcher: $.fn.typeahead.Constructor.prototype.matcher,
+    updater: $.fn.typeahead.Constructor.prototype.updater,
+    select: $.fn.typeahead.Constructor.prototype.select,
+};
+
+$.extend($.fn.typeahead.Constructor.prototype, {
+	matcher: function(item) {
+	
+		if (this.options.type != 'observers') {
+			return orig.matcher.call(this, item);
+		}
+		
+		var observers = this.query.split(",");
+		var last_observer = observers[observers.length - 1];
+		var last_observer = last_observer.replace(/^\s+/,"");
+		
+		if (last_observer == "") return false;
+		
+		for (i = 0; i < observers.length - 2; i++) {
+			if (observers[i].replace(/^\s+|\s+$/g, '') == item) return false;
+		}
+		
+		var last_observer = last_observer.toLowerCase();
+		
+		return last_observer.length && ~item.toLowerCase().indexOf(last_observer);
+	},
+	updater: function(item) {
+		
+		if (this.options.type != 'observers') {
+			return orig.updater.call(this, item);
+		}
+		
+		if (this.query.indexOf(",") == -1) return item+", ";
+		
+		return this.query.replace(/,[^,]*$/, ", "+item+", ");
+		
+	},
+	select: function() {
+		
+		if (this.options.type != 'observers') {
+			return orig.select.call(this);
+		}
+		
+		var to_return = orig.select.call(this);
+		this.$element.focus();
+		return to_return;
+		
+	}
+});
+
 $(document).ready(function(){
 	require.config({});
 	
@@ -128,7 +179,7 @@ $(document).ready(function(){
 
 			// Remove the model when done
 			this.$el.on("hidden", function() {
-				this.model.remove();
+				$(this).remove();
 				if (self.isSubTree) {
 					$('.add-new-sub-tree').eq(0).trigger("not_choosing_parent_tree");
 				}
@@ -246,12 +297,14 @@ $(document).ready(function(){
 			// Set the URL--don't you think we should not have to specify the URL every time we call the server?
 			this.model.url = app.config.cgiDir + 'litterfall.py';
 			var self = this;
+			
 			this.model.validate = function() {
 				if (!(self.validateAngle() || self.validateDistance() || self.validateSpecies())) {
 					return "Invalid data";
 				}
 				
-			}
+			};
+			
 			this.model.on("invalid", function() {
 				$('#add-modal .error').eq(0).focus();
 			});
@@ -260,18 +313,24 @@ $(document).ready(function(){
 			this.model.save({
 				species: $('#new-tree-species').val(),
 				angle: parseInt($('#new-tree-angle').val()),
-				distance: parseInt($('#new-tree-distance').val()),
-				success: function() {
+				distance: parseInt($('#new-tree-distance').val())
+			}, {
+				success: function(model) {
 					self.$el.modal("hide");
 					if (back_to_plot == true) {
 						/* if (self.isSubTree === true) {
 							$(".add-new-sub-tree").trigger("click");
 						} */
-						console.log("we're saving a new tree now??");
 						self.trigger("tree_saved");
 					} else {
-						app_router.navigate(document.location.hash + "/treeid/" + self.model.get("tree_id"), {trigger: true});
+						app_router.navigate(document.location.hash + "/treeid/" + model.get("tree_id") + (self.isSubTree ? ("/subtreeid/" + model.get("sub_tree_id")) : ""), {trigger: true});
 					}
+				},
+				error: function(model, xhr) {
+					
+					var saveTreeError = new errorView({xhr: xhr});
+					saveTreeError.render().$el.prependTo("#add-new-tree-modal > .modal-body");
+					
 				}
 			});
 
@@ -443,7 +502,8 @@ $(document).ready(function(){
 			'click .btn-analyze': 'goToTree',								//if update button is clicked, runs updateTree function
 			'click .add-new-sub-tree-from-row': function() {
 				$('.add-new-sub-tree').eq(0).trigger("choosing_parent_tree");
-				this.addSubTree(this.model.get("tree_id"));
+				this.model.trigger("add_new_sub_tree_from_row");
+				//this.addSubTree(this.model.get("tree_id"));
 			}
 		},
 		goToTree: function(){
@@ -493,20 +553,18 @@ $(document).ready(function(){
 
 			var this_tree_el = this.$el;
 			this.model.url = app.config.cgiDir + 'litterfall.py';
-			var result = this.model.destroy();
-			if (result !== false) {
+			var result = this.model.destroy({
 			
-				this_model = this.model;
-				
-				result.done(function() { // once done
+				success: function(model) { // once done
 					
+					var this_model = model;					
 					this_tree_el.fadeOut("slow", function() {						//function called after fadeOut is done
 						
 						// remove the row--we need this because if we just hide (using visibility:hidden) the row then the table-stripe class will not work
-						$("#"+this_model.get('_id').$oid).remove();
-						
-						var target_tree_id = this_model.get('tree_id');
-						
+						$("#"+model.get('_id').$oid).remove();
+
+						var target_tree_id = model.get('tree_id');
+
 						// update all the trees under the same tree_id
 						$(".tree-cluster-"+target_tree_id).each(function(i) {
 						
@@ -537,8 +595,15 @@ $(document).ready(function(){
 						});
 						
 					});
-				});
-			}
+
+				}, 
+				error: function(model, xhr) {
+					
+					var deleteTreeError = new errorView({xhr: xhr});
+					deleteTreeError.render().$el.insertAfter($("h1").eq(0));
+					
+				}
+			});
 		}
 	});
 
@@ -652,15 +717,15 @@ $(document).ready(function(){
 					</td>\
 					<td class="editable">\
 						<span class="display_cell date_select"><%= toFormattedDate(entry.date) %></span>\
-						<span class="edit_cell date_select"><input title="Enter a date in yyyy/mm/dd format. It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
-					</td>\<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers %></span><span class="edit-obs-info edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
+						<span class="edit_cell date_select"><input data-original-title="Enter a date in mm/dd/yyyy format. It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
+					</td>\<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers %></span><span class="edit-obs-info edit_cell observers"><input title="Who collected this data" type="text" value="<%= entry.observers %>"></span></td>\
 					<td class="editable"><span class="show-obs-info display_cell diameter"><%= entry.value %></span><span class="edit-obs-info edit_cell diameter"><input title="Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
 					<td class="editable"><span class="show-obs-info display_cell status"><%= entry.status %></span><span class="edit-obs-info edit_cell status"><div class="edit-obs-info status btn-group btn-group-vertical" data-toggle="buttons-radio">\
   					<button type="button" class="btn btn-mini btn-info status alive" style="width: 120px" value="alive">Alive</button>\
   					<button type="button" class="btn btn-mini btn-warning status dead_standing" style="width: 120px" value="dead_standing">Dead (standing)</button>\
  					<button type="button" class="btn btn-mini btn-danger status dead_fallen" style="width: 120px" value="dead_fallen">Dead (fallen)</button>\
 					</div></span></td>\
-					<td class="editable"><span class="show-obs-info display_cell notes"><%= entry.notes %></span><span class="edit-obs-info edit_cell notes"><input type="text" value="<%= entry.notes %>"></span></span></td>\
+					<td class="editable"><span class="show-obs-info display_cell notes"><%= entry.notes %></span><span class="edit-obs-info edit_cell notes"><input type="text" value="<%= htmlEntities(entry.notes) %>"></span></span></td>\
 				</tr>\
 			<% }); %>\
 			</tbody>\
@@ -828,7 +893,8 @@ $(document).ready(function(){
 				maxDate: 0,
 				changeYear: true,
 				changeMonth: true,
-				constrainInput: true,
+				yearRange: '2000:c', // allow years to be edited back to the start of collection, and up to current year
+				//constrainInput: true,
 				onSelect: function() {
 					$(".ui-datepicker a").removeAttr("href");
 				}
@@ -840,7 +906,29 @@ $(document).ready(function(){
 			
 			//var existingObs = this.model.findAllObservers();
 			var all_observers = this.getAllObservers();
-			$new_entry_row.find(".edit_cell.observers :input").typeahead({source: all_observers});
+			$new_entry_row.find(".edit_cell.observers :input").typeahead({
+				source: all_observers,
+				type: 'observers'
+			});
+			
+			var dis = this;
+			
+			$new_entry_row.find(".edit_cell.date_select :input").on("blur", function() {
+				console.log("date");
+				$new_entry_row.find(".edit_cell.date_select :input").addClass("to_validate");
+				dis.validateField();
+			});
+			$new_entry_row.find(".edit_cell.observers :input").on("blur", function() {
+				console.log("observers");
+				$new_entry_row.find(".edit_cell.observers :input").addClass("to_validate");
+				dis.validateField();
+			});
+			$new_entry_row.find(".edit_cell.diameter :input").on("blur", function() {
+				console.log("diams");
+				$new_entry_row.find(".edit_cell.diameter :input").addClass("to_validate");
+				dis.validateField();
+			});
+			
 		},
 
 		editObservation: function(event) {
@@ -888,7 +976,8 @@ $(document).ready(function(){
 				maxDate: 0, 
 				changeYear: true, 
 				changeMonth: true, 
-				constrainInput: true,
+				yearRange: '2000:c', // allow years to be edited back to the start of collection, and up to current year
+				//constrainInput: true,
 				onSelect: function() {
 					$(".ui-datepicker a").removeAttr("href");
 				}
@@ -896,8 +985,28 @@ $(document).ready(function(){
 			$row_to_edit.addClass("old");
 			
 			var all_observers = this.getAllObservers();
-			$row_to_edit.find(".edit_cell.observers :input").typeahead({source: all_observers});
+			$row_to_edit.find(".edit_cell.observers :input").typeahead({
+				source: all_observers,
+				type: 'observers'
+			});
 			$(".already").remove();
+			
+			var dis = this;
+			$row_to_edit.find(".edit_cell.date_select :input").on("blur", function() {
+				console.log("date");
+				$row_to_edit.find(".edit_cell.date_select :input").addClass("to_validate");
+				dis.validateField();
+			});
+			$row_to_edit.find(".edit_cell.observers :input").on("blur", function() {
+				console.log("observers");
+				$row_to_edit.find(".edit_cell.observers :input").addClass("to_validate");
+				dis.validateField();
+			});
+			$row_to_edit.find(".edit_cell.diameter :input").on("blur", function() {
+				console.log("diams");
+				$row_to_edit.find(".edit_cell.diameter :input").addClass("to_validate");
+				dis.validateField();
+			});
 			
 		},
 
@@ -912,10 +1021,23 @@ $(document).ready(function(){
 
 		saveObservation: function(event) {
 			// User added or edited an observation.  Save it to the server.	
-			// Get the row that is being edited
 			
 			// Get the row that is being edited
 			var $row_to_save = $(event.target).parents("tr");
+			
+			/* validate data being entered before saving; cancel if invalid */
+			$row_to_save.find(".edit_cell.date_select :input").addClass("to_validate");
+			if (! this.validateField()) {
+				return;
+			}
+			$row_to_save.find(".edit_cell.observers :input").addClass("to_validate");
+			if (! this.validateField()) {
+				return;
+			}
+			$row_to_save.find(".edit_cell.diameter :input").addClass("to_validate");
+			if (! this.validateField()) {
+				return;
+			}
 			
 			// is it a new row, or an old one?
 			var is_this_row_new = $row_to_save.hasClass("new");
@@ -923,9 +1045,12 @@ $(document).ready(function(){
 			var entries_array = this.model.get("diameter");
 			
 			// convert observers from string to array
-			var new_observers = $row_to_save.find(".observers :input").val().split(",");
-			for (var i = 0; i < new_observers.length; i++){
-				new_observers[i] = new_observers[i].trim(" ");
+			var new_observers_orig = $row_to_save.find(".observers :input").val().split(",");
+			var new_observers = [];
+			var new_observer = "";
+			for (var i = 0; i < new_observers_orig.length; i++){
+				new_observer = new_observers_orig[i].trim(" ");
+				if (new_observer != "") new_observers.push(new_observer);
 			}
 			
 			// var new_date = new Date(parseInt($row_to_save.find(".unix-time").val()));
@@ -934,14 +1059,14 @@ $(document).ready(function(){
 			var new_entry = {
 				date: ($row_to_save.find(".edit_cell.date_select :input").datepicker("getDate")).toLitterfallDateObject(),
 				year: ($row_to_save.find(".edit_cell.date_select :input").datepicker("getDate")).getFullYear(),
-				value: parseFloat($row_to_save.find(".diameter :input").val()),
+				value: parseFloat($row_to_save.find(".diameter :input").val()).toFixed(1), //round the diameter measurement to 1 decimal place
 				observers: new_observers,
 				notes: $row_to_save.find(".notes :input").val(),
 				status: $row_to_save.find(".status.active").val()
 			};				
 			this.model.set('status', $row_to_save.find(".status.active").val());
-			console.log($row_to_save.find(".status.active").val());
-			console.log(this.model);
+			//console.log($row_to_save.find(".status.active").val());
+			//console.log(this.model);
 			// if it is a new one
 			if (is_this_row_new === true) {
 				
@@ -971,9 +1096,23 @@ $(document).ready(function(){
 				
 			}
 			
+			var self = this;
+			
 			$("#tree-observations > tr").removeClass("edit");
-			this.model.save();
-			this.render();		
+			this.model.url = app.config.cgiDir + 'litterfall.py';
+			this.model.save({}, {
+				success: function() {
+					self.render();
+				},
+				error: function(model, xhr) {
+					var saveError = new errorView({
+						xhr: xhr
+					});
+					
+					saveError.render().$el.insertBefore('#tree-observations');
+					
+				}
+			});	
 			
 
 		},
@@ -1021,181 +1160,138 @@ $(document).ready(function(){
 				
 				// delete it! HAHAHAHAHA
 				self.model.set('diameter', _.without(entries_array, entries_array[target_index]));
+				this.model.url = app.config.cgiDir + 'litterfall.py';
 				self.model.save();
 				self.render();
 				
 			});
 			
 		},
-		validateField: function(event){
+		validateField: function(){
 
-			var field_to_validate = event.currentTarget.className;
 			var current_row = $("#tree-observations > tbody > tr .edit_cell :visible").parents("tr");
+			var field_to_validate = current_row.find(".to_validate").parent().attr("class").replace("to_validate", "").replace("display_cell", "").replace("edit_cell", "").replace("show-obs-info", "").replace("edit-obs-info", "").trim();
 
-			/* if date field lost focus */
-			if (field_to_validate == "edit_cell date_select"){				
-				this.validateDate(current_row);
-			/* if observers field lost focus */				
-			} else if (field_to_validate == "edit_cell observers"){
-				this.validateObservers(current_row);
-			/* if diameter field lost focus */				
-			} else if (field_to_validate == "edit_cell diameter"){
-				this.validateDiameter(current_row);
+			var error_message = false;	// on a validation error this is populated with string to display
+			var field_to_highlight;		
+			
+			//if date field lost focus 
+			if (field_to_validate == "date_select"){
+				error_message = this.validateDate(current_row);	
+				if (error_message) field_to_highlight="date_select";			
+			//if observers field lost focus				
+			} else if (field_to_validate == "observers"){
+				error_message = this.validateObservers(current_row);
+				if (error_message) field_to_highlight="observers";
+			//if diameter field lost focus				
+			} else if (field_to_validate == "diameter"){
+				error_message = this.validateDiameter(current_row);
+				if (error_message) {field_to_highlight="diameter"; console.log("didnt pass");}
 			} else {
 				// field left was comments, which don't need to be validated (and should be allowed to be empty!)
-				return;
+				return true;
 			}
-
+						
+			if (error_message) {				
+				//flag the field as invalid with a tooltip and highlighted color
+				// change the title that will be displayed in the tooltip
+				$(".edit_cell."+field_to_highlight+" :input").attr("data-original-title", error_message);	
+				$(".edit_cell."+field_to_highlight+" :input").tooltip();
+				$(".edit_cell."+field_to_highlight+" :input" ).tooltip("show");
+				$(".edit_cell."+field_to_highlight+" :input" ).addClass("alert_invalid");	// highlight invalid field
+				
+				current_row.find(".to_validate").removeClass("to_validate");
+				return false;
+			} else {
+				//if field passes all tests, make sure nothing is highlighted anymore 
+				// change the title that will be displayed on hovering
+				$(".edit_cell :input").attr("data-original-title", "");	
+				$(".edit_cell :input").removeClass("alert_invalid");
+				$(".edit_cell :input").tooltip("destroy");
+				current_row.find(".to_validate").removeClass("to_validate");
+				return true;
+			}
+			console.log(current_row.find(".to_validate"));
+			current_row.find(".to_validate").removeClass("to_validate");
+			//$(current_row.find(".to_validate")).removeClass("to_validate");
+			
 		},
 
 		validateDate: function($current_row) {
-
-			/* get date to validate */
-			// var date_entered = current_row.find(".formatted-date").val();
-			var date_entered = ($current_row.find(".edit_cell.date_select :input")).datepicker("getDate");
-			
-			console.log(date_entered);
-			
-			/* if date is not valid */
-			if (_.isDate(date_entered) === false) {
-				$(".edit_cell.date_select :input" ).addClass("alert_invalid");
-				alert("Date format invalid!");
-				console.log("date validation failed");
-				($current_row.find('.edit-existing')).trigger('click');
-				return false;
-			}
-
-			/* make sure date isn't in future */
+		
+			/*  get date to validate  */
+			// date shown in input box -- will be what was chosen in datepicker OR whatever the user manually enters
+			var date_entered = new Date(($current_row.find(".edit_cell.date_select :input")).val());
+			var date_parts = ($current_row.find(".edit_cell.date_select :input")).val().split("/"); // splits into mm dd and yyyy
 			var today = new Date();
-			console.log(date_entered > today);
-			/* make sure date isn't in future */
-			// the smallest unit for time comparison is days, 
-			// so comparing the Dates (or UNIX times) wouldn't work,
-			// because the today Date would always be greater than the date picked from datepicker
-			i/*f (date_entered.getFullYear() > today.getFullYear()) {
-				if (date_entered.getMonth() > today.getMonth()) {
-					if (date_entered.getDate() > today.getDate()) {*/
-					if (date_entered > today){
-						// trigger the edit Observation button to prevent saving
-						$(".edit_cell.date_select :input" ).addClass("alert_invalid");
-						//alert("Can't have date past today!");
-						console.log("date validation failed");
-						($current_row.find('.edit-existing')).trigger('click');
-						return false;
-						}
-					/*}
-				}
-			}*/
 
-			/* make sure date isn't already added */
-			/*	
-			// get all dates listed in model for diam entries
-			var existing_diams_object = this.model.attributes.diameter;
-			var existing_dates_array = existing_diams_object.date.reverse();
-			// remove the date previously listed in the date field from the list of dates to check against
-			var prev_dateindex = $("#tree-observations tbody tr").index(current_row);
-			existing_dates_array.splice(prev_date_index, 1);
-			// alert user if the date already has an associated entry
-			*/
+			/* make sure entry is a valid date format (mm/dd/yyyy) */
+			if (date_parts.length != 3 || 
+				date_parts[0].length != 2 || 			
+				date_parts[0] > 12 ||
+				date_parts[1].length != 2 || 
+				date_parts[1] > 31 ||
+				date_parts[2].length != 4){		
+				return "Enter a date in mm/dd/yyyy format or choose your date from the DatePicker.";
+			} 
+			/* make sure date isn't in future*/
+			else if (date_entered > today){  
+				return "A data collection date may not be in the future... Don't fake the data, man.";
+			} 
+			/* make sure date isn't befre data collection began */
+			else if (date_entered.getFullYear() < 2002) {
+				return "Data was not collected before 2002... Why are you adding entries for earlier dates?";
+			}
 			
-			var this_row_index = parseInt(($current_row.attr("id")).split("-")[1]);
+			/* make sure date doesn't already have a measurement listed for this tree */	
+			var this_row_index;
+			if ($current_row.hasClass("new")) {
+				this_row_index = -1;	// dummy variable so that all other dates are looped through
+			} else {
+				this_row_index = parseInt(($current_row.attr("id")).split("-")[1]);
+			}
 			var existing_entries = this.model.get('diameter');
-			
-			/*
-			var today_days = today.getFullYear()*366 + today.getMonth()*32 + today.getDate();
-			
-			var doBinarySearch = function(i, begin, end) {
-				var days = existing_entries[i].date.y*366 + existing_entries[i].date.m*32 + existing_entries[i].date.d;
-				
-				if (days == today_days) {
-					if (i == this_row_index) return false;
-					return true;
-				}
-				else if (days < today_days) {
-					if (i == begin && i == end) return false;
-					return doBinarySearch(Math.floor(i/2), i+1, end);
-				} else {
-					if (i == begin && i == end) return false;
-					return doBinarySearch(Math.floor(i/2), begin, i-1);
-				}
-			};
-			
-			if (doBinarySearch(Math.floor((existing_entries.length - 1)/2), 0, existing_entries.length - 1) === true) {
-				// show user a tooltip about the proper entry
-				$(".edit_cell.date_select :input").tooltip();   // NOTE: the text shown on the tooltip is listed as the title attribute of the template for TreeEditView.
-				$(".edit_cell.date_select :input" ).tooltip("show");
-				$(".edit_cell.date_select :input" ).addClass("alert_invalid");
-				return false;
-			}
-			*/
-			
 			for (i in existing_entries) {
-			
-				/*if (i == this_row_index) {
-					break;
-				}*/
-				
-				if (existing_entries[i].date.y == today.getFullYear() && existing_entries[i].date.m == today.getMonth() && existing_entries[i].date.d == today.getDate()) {
-					
-					// show user a tooltip about the proper entry
-					$(".edit_cell.date_select :input").tooltip();   // NOTE: the text shown on the tooltip is listed as the title attribute of the template for TreeEditView.
-					$(".edit_cell.date_select :input" ).tooltip("show");
-					$(".edit_cell.date_select :input" ).addClass("alert_invalid");
-					return false;
-					
+				if (i == this_row_index) {
+					continue;	// skip checking if the date is the same as it was before 
 				}
-				
+				if (existing_entries[i].date.y == date_entered.getFullYear()
+						&& existing_entries[i].date.m == (date_entered.getMonth() + 1)
+			 			&& existing_entries[i].date.d == date_entered.getDate()) {
+					return "Trees don't grow that quickly... why are you entering a date that already has an\
+									associated diameter measurement?  Please make sure you are entering the correct\
+									date, or edit the existing entry.";
+				}
 			}
-
-			/* if date field passes all tests, make sure it is not highlighted anymore */
-			$(".edit_cell.date_select :input" ).removeClass("alert_invalid");
-			$(".edit_cell.date_select :input" ).tooltip("destroy");
-			console.log("date validation passed");
-			return true;
+			return false;
 		},
 
-		validateObservers: function(current_row) {
+		validateObservers: function($current_row) {
 
 			// get observers entry and format
-			var obs_entered = current_row.find(".observers :input").val().split(",");
-			for (var i=0; i<obs_entered.length; i++){
-				obs_entered[i] = obs_entered[i].trim(" ");
-			}	
+			var obs_entered = $current_row.find(".observers :input").val().split(",");	
 
-			// make sure an observer was entered
+			// make sure some observers were entered
 			if (obs_entered[0] === "") {
-				console.log("empty list");
-				$(".edit_cell.observers :input").tooltip(); // NOTE: the text shown on the tooltip is listed as the title attribute of the template for TreeEditView.
-				$(".edit_cell.observers :input" ).tooltip("show");
-				$(".edit_cell.observers :input" ).addClass("alert_invalid");
-				return false;
-			} else { 
-				$(".edit_cell.observers :input" ).removeClass("alert_invalid");
-				$(".edit_cell.observers :input" ).tooltip("destroy");
-				console.log("observers validation passed");
-				return true;
+				return "Observers field may not be empty.";
 			}
+			
+			return false;
 
 		},
 
-		validateDiameter: function(current_row) {
+		validateDiameter: function($current_row) {
 
 			// get diameter entry
-			var diam_entered = parseFloat(current_row.find(".diameter :input").val());
+			var diam_entered = parseFloat($current_row.find(".diameter :input").val());
 
 			// make sure the diameter is in correct format (can be parsed as float)
 			if (isNaN(diam_entered)) {
-				console.log("returned NaN");
-				$(".edit_cell.diameter :input").tooltip(); // NOTE: the text shown on the tooltip is listed as the title attribute of the template for TreeEditView.
-				$(".edit_cell.diameter :input").tooltip("show");				
-				$(".edit_cell.diameter :input").addClass("alert_invalid");
-				return false;
-			} else { 
-				$(".edit_cell.diameter :input" ).removeClass("alert_invalid");
-				$(".edit_cell.diameter :input" ).tooltip("destroy");
-				console.log("diameter validation passed");
-				return true;
-			}
+				return "Please enter an integer or floating point number such as 5, 6.1, 10.33";
+			} 
+			
+			return false;
+			
 		},
 
 		getAllObservers: function() {
@@ -1234,6 +1330,29 @@ $(document).ready(function(){
     		}
     		return parsed_options;
     	}
+	});
+	
+	var errorView = Backbone.View.extend({
+		
+		tagName: 'div',
+		className: 'alert alert-error fade in',
+		defaults: {
+			title: "Error",
+			message: "Hey, something just did go wrong."
+		},
+		initialize: function() {},
+		render: function() {
+		
+			var has_xhr = this.options.xhr !== undefined;
+		
+			this.$el.html('<button type="button" class="close" data-dismiss="alert">&times;</button>\
+			<h4>' + (has_xhr ? ("Error " + this.options.xhr.status + ": " + this.options.xhr.statusText) : this.options.title) + '</h4>\
+			' + (has_xhr ? this.options.xhr.responseText : this.options.message) + '\
+			');
+		
+			return this;
+		}
+		
 	});
 
 
@@ -1324,9 +1443,8 @@ $(document).ready(function(){
 		},
 		// ** Normally, it would not have to go through save, but somehow destroy doesn't work
 		// I think there is something wrong with the DELETE request method
-		destroy: function() {
-			this.set('delete', true);
-			return this.save();
+		destroy: function(options) {
+			return this.save({delete: true}, options);
 		},
 		validate: function(attrs, options){
 			//this is where we validate the model's data
@@ -1365,10 +1483,13 @@ $(document).ready(function(){
   			var plot_number = 0;
   			var max_diam = 0;
   			
+  			var this_plot = this;
+  			
   			this.each(function(tree){
   				tree.plotViewInitialize();
   				var num_obvs = tree.get("diameter").length;
 
+  				this_plot.listenTo(tree, 'add_new_sub_tree_from_row', function() {this_plot.addSubTree(tree.get('tree_id'));});
   				
   				// determine the maximum number of observations for any tree in this plot
   				// to allocate enough columns in the CSV file
@@ -1753,12 +1874,8 @@ function toFormattedDate(date){
 	
 }
 
-function toUnixTime(date) {
-	
-	var theDate = new Date(date.y, date.m - 1, date.d);
-	return theDate.getTime();
-	
-	
+function htmlEntities(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/\'/g, '&#39;');
 }
 
 /*

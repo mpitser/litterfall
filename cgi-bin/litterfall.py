@@ -1,5 +1,5 @@
 #! /usr/bin/python
-from datetime import datetime
+from datetime import datetime, date
 from pymongo import MongoClient
 from bson import json_util
 from bson.objectid import ObjectId
@@ -92,7 +92,7 @@ class Tree:
 		result = self.format()
 		if type(result) is StringType:
 			self.printError(result)
-			return
+			return False
 		
 		# ---- dealing with a possible new tree ----
 		
@@ -178,16 +178,16 @@ class Tree:
 	def format(self):
 		
 		if not 'tree_id' in self.tree:
-			msg = "No tree ID specified"
+			return "No tree ID specified"
 		else:
-			if self.tree['tree_id'] <= 0 or self.tree['tree_id'] != -1:
-				msg = "Tree ID is invalid"
+			if self.tree['tree_id'] <= 0 and self.tree['tree_id'] != -1:
+				return "Tree ID is invalid"
 		
 		if not 'sub_tree_id' in self.tree:
 			return "No sub-tree ID specified"
 		else:
-			if self.tree['sub_tree_id'] < 0 or self.tree['sub_tree_id'] != -1:
-				msg = "Sub-tree ID is invalid"
+			if self.tree['sub_tree_id'] < 0 and self.tree['sub_tree_id'] != -1:
+				return "Sub-tree ID is invalid"
 				
 		
 		if not 'plot' in self.tree:
@@ -217,7 +217,7 @@ class Tree:
 		if not 'distance' in self.tree:
 			return "No distance specified"
 		else:
-			if type(self.tree['distance']) is not IntType:
+			if ((type(self.tree['distance']) is not FloatType) and (type(self.tree['distance']) is not IntType)):
 				return "Invalid distance"
 			elif self.tree['distance'] < 0:
 				self.tree['distance'] = -1 * self.tree['distance']
@@ -369,7 +369,9 @@ def getdata(obs, site, plot, treeid, subtreeid):
 		data.sort()
 		n = 0 # n is not important, just helps up in decigin which data to assign to json_data
 	elif site == 'allObservers':
-		data = obs.find({'collection_type':'tree'}, {'fields':'diameter.observers'}).distinct('diameter.observers')
+		# how many years back?
+		num_years = 4
+		data = obs.find({'collection_type':'tree', 'diameter.date.y' : {'$gte': date.today().year - num_years}}, {'fields':'diameter.observers'}).distinct('diameter.observers')
 		data.sort()
 		n = len(data)
 
@@ -561,27 +563,14 @@ def main():
 	elif method == 'POST' or method == 'PUT':
 		form = cgi.FieldStorage()
 		data = json.loads(form.file.read(), object_hook=json_util.object_hook)	
-		result = validate(obs, data)
-		flag = result['flag']
-		msg = result['msg']
-		if flag:
-			newTree = Tree(data, obs)
-			if 'delete' in data:
-				if data['delete'] == True:
-					newTree.delete()
-			else:
-				newTree.save()
-			newTree.printJSON()
-		else:
-			print 'Status:406\n'
-			print result['key'] + '->' + msg
-			
-	elif method == 'DELETE':
-		form = cgi.FieldStorage()
-		data = json.loads(form.file.read(), object_hook=json_util.object_hook)
 		newTree = Tree(data, obs)
-		newTree.delete()
-		newTree.printJSON()
+		if 'delete' in data:
+			if data['delete'] == True:
+				newTree.delete()
+				newTree.printJSON()
+		else:
+			if newTree.save() != False:
+				newTree.printJSON()
 		
 		
 if __name__ == "__main__":
