@@ -1,0 +1,459 @@
+Content-Type: application/json
+[
+	{
+		"acronym": "ACNE",
+		"common_name": "Box elder maple",
+		"family": "Aceracea",
+		"genera": "Acer",
+		"species": "negundo",
+		"scientific_name": "Acer negundo"
+	},
+	{
+		"acronym": "ACPA",
+		"common_name": "Japanese maple",
+		"family": "Aceraceae",
+		"genera": "Acer",
+		"species": "palmatum",
+		"scientific_name": "Acer palmatum"
+	},
+	{
+		"acronym": "ACPE",
+		"common_name": "Striped maple",
+		"family": "Aceraceae",
+		"genera": "Acer",
+		"species": "pensylvanicum",
+		"scientific_name": "Acer pensylvanicum"
+	},
+	{
+		"acronym": "ACPL",
+		"common_name": "Norway maple",
+		"family": "Aceracea",
+		"genera": "Acer",
+		"species": "platanoides",
+		"scientific_name": "Acer platanoides"
+	},
+	{
+		"acronym": "ACRU",
+		"common_name": "Red maple",
+		"family": "Aceracea",
+		"genera": "Acer",
+		"species": "rubrum",
+		"scientific_name": "Acer rubrum"
+	},
+	{
+		"acronym": "ACSA",
+		"common_name": "Silver maple",
+		"family": "Aceraceae",
+		"genera": "Acer",
+		"species": "saccharinum",
+		"scientific_name": "Acer saccharinum"
+	},
+	{
+		"acronym": "ACSC",
+		"common_name": "Sugar maple",
+		"family": "Aceracea",
+		"genera": "Acer",
+		"species": "saccharum",
+		"scientific_name": "Acer saccharum"
+	},
+	{
+		"acronym": "ACspp",
+		"common_name": "Maples",
+		"family": "Aceracae",
+		"genera": "Acer",
+		"species": "spp.",
+		"scientific_name": "Acer spp."
+	},
+	{
+		"acronym": "AEHI",
+		"common_name": "Buckey horse chesnut",
+		"family": "Hippocastanaceae",
+		"genera": "Aesculus",
+		"species": "hippocastanum",
+		"scientific_name": "Aesculus hippocastanum"
+	},
+	{
+		"acronym": "AMAR",
+		"common_name": "Downy serviceberry",
+		"family": "Rosaceae",
+		"genera": "Amelanchier",
+		"species": "arborea",
+		"scientific_name": "Amelanchier arborea"
+	},
+	{
+		"acronym": "CACA",
+		"common_name": "American hornbeam",
+		"family": "Betulaceae",
+		"genera": "Carpinus",
+		"species": "caroliniana",
+		"scientific_name": "Carpinus caroliniana"
+	},
+	{
+		"acronym": "CASP",
+		"common_name": "Hickories",
+		"family": "Juglandacea",
+		"genera": "Carya",
+		"species": "spp.",
+		"scientific_name": "Carya spp."
+	},
+	{
+		"acronym": "CAGL",
+		"common_name": "Hickory",
+		"family": "Juglandaceae",
+		"genera": "Carya",
+		"species": "glabra",
+		"scientific_name": "Carya  glabra"
+	},
+	{
+		"acronym": "CAspp",
+		"common_name": "Hickories",
+		"family": "Juglandaceae",
+		"genera": "Carya",
+		"species": "spp.",
+		"scientific_name": "Carya spp."
+	},
+	{
+		"acronym": "CLAL",
+		"common_name": "Coast white alder",
+		"family": "Clethraceae",
+		"genera": "Clethra",
+		"species": "alnifolia",
+		"scientific_name": "Clethra alnifolia"
+	},
+	{
+		"acronym": "COFL",
+		"common_name": "Flowering dogwood",
+		"family": "Cornaceae",
+		"genera": "Cornus",
+		"species": "florida",
+		"scientific_name": "Cornus florida"
+	},
+	{
+		"acronym": "EUAM",
+		"common_name": "Burning bush",
+		"family": "Celastraceae",
+		"genera": "Euonymus",
+		"species": "americanus",
+		"scientific_name": "Euonymus americanus"
+	},
+	{
+		"acronym": "FAGR",
+		"common_name": "American beech",
+		"family": "Fagaceae",
+		"genera": "Fagus",
+		"species": "grandifolia",
+		"scientific_name": "Fagus grandifolia"
+	},
+	{
+		"acronym": "FRAM",
+		"common_name": "White ash",
+		"family": "Oleaceae",
+		"genera": "Fraxinus",
+		"species": "americana",
+		"scientific_name": "Fraxinus americana"
+	},
+	{
+		"acronym": "FRspp",
+		"common_name": "Ashes",
+		"family": "Oleaceae",
+		"genera": "Fraxinus",
+		"species": "spp.",
+		"scientific_name": "Fraxinus spp."
+	},
+	{
+		"acronym": "FRNI",
+		"common_name": "Black ash",
+		"family": "Oleaceae",
+		"genera": "Fraxinus",
+		"species": "nigra",
+		"scientific_name": "Fraxinus nigra"
+	},
+	{
+		"acronym": "FRPA",
+		"common_name": "Green ash",
+		"family": "Oleacea",
+		"genera": "Fraxinus",
+		"species": "pennsylvanica",
+		"scientific_name": "Fraxinus pennsylvanica"
+	},
+	{
+		"acronym": "FRPR",
+		"common_name": "Pumpkin ash",
+		"family": "Oleaceae",
+		"genera": "Fraxinus",
+		"species": "profunda",
+		"scientific_name": "Fraxinus profunda"
+	},
+	{
+		"acronym": "HAVI",
+		"common_name": "Witch hazel",
+		"family": "Hamamelidaceae",
+		"genera": "Hamamelis",
+		"species": "virginiana",
+		"scientific_name": "Hamamelis virginiana"
+	},
+	{
+		"acronym": "KALA",
+		"common_name": "Mountain laurel",
+		"family": "Ericaceae",
+		"genera": "Kalmia",
+		"species": "latifolia",
+		"scientific_name": "Kalmia latifolia"
+	},
+	{
+		"acronym": "LIBE",
+		"common_name": "Spice bush",
+		"family": "Lauraceae",
+		"genera": "Lindera",
+		"species": "benzoin",
+		"scientific_name": "Lindera benzoin"
+	},
+	{
+		"acronym": "LITU",
+		"common_name": "Tulip tree",
+		"family": "Magnoliaceae",
+		"genera": "Liriodendron",
+		"species": "tulipifera",
+		"scientific_name": "Liriodendron tulipifera"
+	},
+	{
+		"acronym": "MORU",
+		"common_name": "Red mulberry",
+		"family": "Moraceae",
+		"genera": "Morus",
+		"species": "rubra",
+		"scientific_name": "Morus rubra"
+	},
+	{
+		"acronym": "NYAQ",
+		"common_name": "Sour gum",
+		"family": "Cornaceae",
+		"genera": "Nyssa",
+		"species": "aquatica",
+		"scientific_name": "Nyssa aquatica"
+	},
+	{
+		"acronym": "NYSY",
+		"common_name": "Sour gum",
+		"family": "Cornaceae",
+		"genera": "Nyssa",
+		"species": "sylvatica",
+		"scientific_name": "Nyssa sylvatica"
+	},
+	{
+		"acronym": "NYspp",
+		"common_name": "Gums",
+		"family": "Cornaceae",
+		"genera": "Nyssa",
+		"species": "spp.",
+		"scientific_name": "Nyssa spp."
+	},
+	{
+		"acronym": "OSVI",
+		"common_name": "Ironwood",
+		"family": "Betulaceae",
+		"genera": "Ostrya",
+		"species": "virginiana",
+		"scientific_name": "Ostrya virginiana"
+	},
+	{
+		"acronym": "PLOC",
+		"common_name": "Sycamore",
+		"family": "Platanaceae",
+		"genera": "Platanus",
+		"species": "occidentalis",
+		"scientific_name": "Platanus occidentalis"
+	},
+	{
+		"acronym": "PRAM",
+		"common_name": "American wild plum",
+		"family": "Rosaceae",
+		"genera": "Prunus",
+		"species": "americana",
+		"scientific_name": "Prunus americana"
+	},
+	{
+		"acronym": "PRSE",
+		"common_name": "Wild black cherry",
+		"family": "Rosaceae",
+		"genera": "Prunus",
+		"species": "serotina",
+		"scientific_name": "Prunus serotina"
+	},
+	{
+		"acronym": "PRspp",
+		"common_name": "Cherries",
+		"family": "Rosaceae",
+		"genera": "Prunus",
+		"species": "spp.",
+		"scientific_name": "Prunus spp."
+	},
+	{
+		"acronym": "PTTR",
+		"common_name": "Common hop-tree",
+		"family": "Rutaceae",
+		"genera": "Ptelea",
+		"species": "trifoliata",
+		"scientific_name": "Ptelea trifoliata"
+	},
+	{
+		"acronym": "QUAL",
+		"common_name": "White oak",
+		"family": "Fagaceae",
+		"genera": "Quercus",
+		"species": "alba",
+		"scientific_name": "Quercus alba"
+	},
+	{
+		"acronym": "QUBI",
+		"common_name": "Swamp oak",
+		"family": "Fagaceae",
+		"genera": "Quercus",
+		"species": "bicolor",
+		"scientific_name": "Quercus bicolor"
+	},
+	{
+		"acronym": "QUCO",
+		"common_name": "Scarlet oak",
+		"family": "Fagaceae",
+		"genera": "Quercus",
+		"species": "coccinea",
+		"scientific_name": "Quercus coccinea"
+	},
+	{
+		"acronym": "QUEL",
+		"common_name": "Northern pin oak",
+		"family": "Fagaceae",
+		"genera": "Quercus",
+		"species": "ellipsoidalis",
+		"scientific_name": "Quercus ellipsoidalis"
+	},
+	{
+		"acronym": "QUFA",
+		"common_name": "Southern red oak",
+		"family": "Fagaceae",
+		"genera": "Quercus",
+		"species": "falcata",
+		"scientific_name": "Quercus falcata"
+	},
+	{
+		"acronym": "QUMU",
+		"common_name": "Yellow oak",
+		"family": "Fagaceae",
+		"genera": "Quercus",
+		"species": "muehlenbergii",
+		"scientific_name": "Quercus muehlenbergii"
+	},
+	{
+		"acronym": "QEPA",
+		"common_name": "Pin oak",
+		"family": "Fagaceae",
+		"genera": "Quercus",
+		"species": "palustris",
+		"scientific_name": "Quercus palustris"
+	},
+	{
+		"acronym": "QUPR",
+		"common_name": "Chestnut oak",
+		"family": "Fagaceae",
+		"genera": "Quercus",
+		"species": "prinus",
+		"scientific_name": "Quercus prinus"
+	},
+	{
+		"acronym": "QERU",
+		"common_name": "Red oak",
+		"family": "Fagaceae",
+		"genera": "Quercus",
+		"species": "rubra",
+		"scientific_name": "Quercus rubra"
+	},
+	{
+		"acronym": "QUVE",
+		"common_name": "Black oak",
+		"family": "Fagaceae",
+		"genera": "Quercus",
+		"species": "velutina",
+		"scientific_name": "Quercus velutina"
+	},
+	{
+		"acronym": "RHSP",
+		"common_name": "Azalea",
+		"family": "Ericaceae",
+		"genera": "Rhododendron",
+		"species": "spp.",
+		"scientific_name": "Rhododendron spp."
+	},
+	{
+		"acronym": "SAAL",
+		"common_name": "Sassafras",
+		"family": "Lauracea",
+		"genera": "Sassafras",
+		"species": "albidum",
+		"scientific_name": "Sassafras albidum"
+	},
+	{
+		"acronym": "TORA",
+		"common_name": "Poison ivy",
+		"family": "Anacardiaceae",
+		"genera": "Toxicodendron",
+		"species": "radicans",
+		"scientific_name": "Toxicodendron radicans"
+	},
+	{
+		"acronym": "TSCA",
+		"common_name": "Eastern hemlock",
+		"family": "Pinaceae",
+		"genera": "Tsuga",
+		"species": "canadensis",
+		"scientific_name": "Tsuga canadensis"
+	},
+	{
+		"acronym": "ULAM",
+		"common_name": "American elm",
+		"family": "Ulmaceae",
+		"genera": "Ulmus",
+		"species": "americana",
+		"scientific_name": "Ulmus americana"
+	},
+	{
+		"acronym": "ULRU",
+		"common_name": "Slippery elm",
+		"family": "Ulmaceae",
+		"genera": "Ulmus",
+		"species": "rubra",
+		"scientific_name": "Ulmus rubra"
+	},
+	{
+		"acronym": "ULspp",
+		"common_name": "Elms",
+		"family": "Ulmaceae",
+		"genera": "Ulmus",
+		"species": "spp.",
+		"scientific_name": "Ulmus spp."
+	},
+	{
+		"acronym": "XXXX",
+		"common_name": "Unidentified",
+		"family": "Unknown",
+		"genera": "Unidentified",
+		"species": "spp.",
+		"scientific_name": "Unidentified spp."
+	},
+	{
+		"acronym": "VIRE",
+		"common_name": "Arrowood leaves",
+		"family": "Caprifolaceae",
+		"genera": "Viburnum",
+		"species": "spp.",
+		"scientific_name": "Viburnum spp."
+	},
+	{
+		"acronym": "VIRU",
+		"common_name": "Sand grape",
+		"family": "Vitaceae",
+		"genera": "Vitis",
+		"species": "rupestris",
+		"scientific_name": "Vitis rupestris"
+	}
+]
