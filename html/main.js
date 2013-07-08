@@ -25,28 +25,43 @@ var orig = {
     matcher: $.fn.typeahead.Constructor.prototype.matcher,
     updater: $.fn.typeahead.Constructor.prototype.updater,
     select: $.fn.typeahead.Constructor.prototype.select,
+    listen: $.fn.typeahead.Constructor.prototype.listen
 };
 
 $.extend($.fn.typeahead.Constructor.prototype, {
 	matcher: function(item) {
-	
-		if (this.options.type != 'observers') {
+		console.log(this.source);
+		if (this.options.type == 'observers') {
+			var observers = this.query.split(",");
+			var last_observer = observers[observers.length - 1];
+			var last_observer = last_observer.replace(/^\s+/,"");
+			
+			if (last_observer == "") return false;
+			
+			for (i = 0; i < observers.length - 2; i++) {
+				if (observers[i].replace(/^\s+|\s+$/g, '') == item) return false;
+			}
+			
+			var last_observer = last_observer.toLowerCase();
+			
+			return last_observer.length && ~item.toLowerCase().indexOf(last_observer);
+		} else if (this.options.type == 'species') {
+			
+			var is_matched = item.toLowerCase().indexOf(this.query.toLowerCase()) == 0;
+			if (is_matched) return true;
+			
+			// always keep unidentified as an option
+			if (item == 'Unidentified spp.') return true;
+			
+			// keep Genus spp. as an option--if the genus matches the query
+			var query_genus = this.query.split(" ")[0];
+			var item_genus = item.split(" ")[0];
+			if (query_genus.toLowerCase() == item_genus.toLowerCase() && item.toLowerCase() == query_genus.toLowerCase() + " spp.") return true;
+			
+			return false;
+		} else {
 			return orig.matcher.call(this, item);
 		}
-		
-		var observers = this.query.split(",");
-		var last_observer = observers[observers.length - 1];
-		var last_observer = last_observer.replace(/^\s+/,"");
-		
-		if (last_observer == "") return false;
-		
-		for (i = 0; i < observers.length - 2; i++) {
-			if (observers[i].replace(/^\s+|\s+$/g, '') == item) return false;
-		}
-		
-		var last_observer = last_observer.toLowerCase();
-		
-		return last_observer.length && ~item.toLowerCase().indexOf(last_observer);
 	},
 	updater: function(item) {
 		
@@ -69,6 +84,18 @@ $.extend($.fn.typeahead.Constructor.prototype, {
 		this.$element.focus();
 		return to_return;
 		
+	},
+	listen: function() {
+		if (this.options.type == 'species') {
+			this.$element.on('focus', $.proxy(this.lookup, this));
+			this.$menu.css({
+				'overflow-x': 'hidden',
+				'overflow-y': 'auto',
+				'max-height': '150px',
+				'min-width': this.$element.outerWidth()
+			});
+		}
+		orig.listen.call(this);
 	}
 });
 
@@ -114,12 +141,13 @@ $(document).ready(function(){
 			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>\
 			<h3>Add a new tree</h3>\
 		</div>\
-		<div class="modal-body"><p>\
+		<div class="modal-body" style="overflow-y:visible;">\
 			<form class="form-horizontal">\
 				<div class="control-group">\
 					<label class="control-label" for="new-tree-species">Species</label>\
 					<div class="controls">\
 						<input type="text" id="new-tree-species" placeholder="Species" style="font-style: italic;">\
+						<small class="help-inline"></small>\
 						<span class="help-block"></span>\
 					</div>\
 				</div>\
@@ -142,7 +170,7 @@ $(document).ready(function(){
 					</div>\
 				</div>\
 			</form>\
-		</p></div>\
+		</div>\
 		<div class="modal-footer">\
 			<a class="btn btn-danger" data-dismiss="modal">Cancel</a>\
 			<a class="btn btn-save-and-back">Save and Go Back</a>\
@@ -190,28 +218,17 @@ $(document).ready(function(){
 		},
 		addAutocomplete: function() {
 			// get the species list from the text file and populate array
-        	$.get('lib/speciesList.txt', function(data){
-            	var all_species = data.split(",");
-           	 	//console.log(all_species);
+        	$.getJSON('data/tree_species.json', function(data){
            	 	
            	 	// Add autocomplete
-				$("#new-tree-species").autocomplete({
+				$("#new-tree-species").typeahead({
 					minLength: 0,
-					source: all_species,
-					appendTo: "#add-new-tree-modal" // so that the list moves along with the model
-				})
+					items: Infinity,
+					source: data,
+					jsonSource: data,
+					type: "species"
+				});
 				
-				.focus(function() { // when focus, trigger autocomplete
-					$(this).autocomplete("search");
-				});
-
-				// Limit the height of the dropdown list
-				// (Forget IE6 Compatibility)
-				$(".ui-autocomplete").css({
-					'max-height': '200px',
-					'overflow-y': 'auto',
-					'overflow-x': 'hidden'
-				});
    			});
 		},
 		events: {
@@ -294,7 +311,7 @@ $(document).ready(function(){
 			var self = this;
 			
 			this.model.validate = function() {
-				if (!(self.validateAngle() || self.validateDistance() || self.validateSpecies())) {
+				if (!(self.validateAngle() && self.validateDistance() && self.validateSpecies())) {
 					return "Invalid data";
 				}
 				

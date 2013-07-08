@@ -1802,7 +1802,7 @@
 
       this.query = this.$element.val()
 
-      if (!this.query || this.query.length < this.options.minLength) {
+      if (this.query.length < this.options.minLength) {
         return this.shown ? this.hide() : this
       }
 
@@ -1820,9 +1820,9 @@
 
       items = this.sorter(items)
 
-      if (!items.length) {
-        return this.shown ? this.hide() : this
-      }
+      //if (!items.length) {
+      //  return this.shown ? this.hide() : this
+      //}
 
       return this.render(items.slice(0, this.options.items)).show()
     }
