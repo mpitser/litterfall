@@ -691,15 +691,44 @@ $(document).ready(function(){
 		templateUpdate: '\
 		<div id="tree-info">\
 			<button class="btn btn-success btn-mini edit-tree-info-btn">Edit Tree Info</button>\
-			<div class="edit-tree-info btn-group"><button class="btn-save-tree-info btn btn-mini btn-success" type="button">Submit</button>\
-			<button class="btn-cancel-tree-info btn btn-mini btn-danger" type="button">Cancel</button>\
+			<div class="edit-tree-info btn-group">\
+				<button class="btn-save-tree-info btn btn-mini btn-success" type="button">Submit</button>\
+				<button class="btn-cancel-tree-info btn btn-mini btn-danger" type="button">Cancel</button>\
 			</div>\
-			<ul>\
-				<li>Species: <span class="display-tree-info species"><%= tree.species %></span><span class="edit-tree-info species"><select></select></span></li>\
-				<li>Angle Degrees: <span class="display-tree-info angle"><%= tree.angle %></span><span class="edit-tree-info angle"><input value="<%= tree.angle %>"></input></span></li>\
-				<li>Distance Meters: <span class="display-tree-info distance"><%= tree.distance %></span><span class="edit-tree-info distance"><input value="<%= tree.distance %>"></input></span></li>\
-			</ul>\
-		</div>\
+			\
+			<span class="form-horizontal">\
+				<div class="control-group edit-tree-info species">\
+					<label class="control-label" for="edit-tree-species">Species: </label>\
+					<div class="controls">\
+						<select></select>\
+						<small class="help-inline"></small>\
+						<span class="help-block"></span>\
+					</div>\
+				</div>\
+				\
+				<div class="control-group edit-tree-info">\
+					<label class="control-label" for="edit-tree-angle">Angle: </label>\
+					<div class="controls">\
+						<span class="edit-tree-info angle">\
+						<input type="text" id="edit-tree-angle" value="<%= tree.angle %>">\
+						<small class="help-inline">Degrees</small>\
+						<span class="help-block"></span></span>\
+					</div>\
+				</div>\
+				\
+				<div class="control-group edit-tree-info">\
+					<label class="control-label" for="edit-tree-distance">Distance: </label>\
+					<div class="controls">\
+						<span class="edit-tree-info distance">\
+						<input type="text" id="edit-tree-distance" value="<%= tree.distance %>">\
+						<small class="help-inline">Meters</small>\
+						<span class="help-block"></span></span>\
+					</div>\
+				</div>\
+			</span>\
+			<div class="display-tree-info">Species: <span class="species"><%= tree.species %></span></div>\
+			<div class="display-tree-info">Angle: <span class="angle"><%= tree.angle %></span></div>\
+			<div class="display-tree-info">Distance: <span class="distance"><%= tree.distance %></span></div>\
 		<div class="button-row">\
 			<button class="btn-new-observation btn btn-mini btn-success pull-left" type="button">+ New Entry</button>\
 		</div>\
@@ -825,7 +854,9 @@ $(document).ready(function(){
 			'click .edit-tree-info-btn': 'editTreeInfo',
 			'click .btn-cancel-tree-info': 'cancelEditTreeInfo',
 			'click .btn-save-tree-info': 'saveTreeInfo',
-			'change .edit_cell': 'validateField'
+			'change .edit_cell': 'validateField',
+			'blur .angle' : 'validateAngle',
+			'blur .distance' : 'validateDistance'
 		},
 		editTreeInfo: function(){
 			$('.edit-tree-info-btn').toggle();
@@ -838,10 +869,17 @@ $(document).ready(function(){
 			$('.edit-tree-info').toggle();
 		},
 		saveTreeInfo: function(){
+
+			// if edited info doesn't pass validation, just return out of saving
+			if (! this.validateAngle() || ! this.validateDistance()) {
+				console.log("failed validation");
+				return false;
+			}
+			
 			this.model.set({
 				'species': $("#tree-info .species select").val(),
 				'angle': parseInt($("#tree-info .angle input").val(), 10),
-				'distance': parseFloat($("#tree-info .distance input").val(), 10)
+				'distance': parseFloat(parseFloat($("#tree-info .distance input").val(), 10).toFixed(2))
 			});
 			
 			var self = this;
@@ -849,6 +887,55 @@ $(document).ready(function(){
 			this.model.save({}, {
 				success: function() {if (self.is_report() === false) self.renderUpdate();}
 			});
+		},
+		validateAngle: function() {
+
+			var $angle = $('#edit-tree-angle');
+			
+			// It should only be numbers
+			var number_regex = /^[0-9]*$/;
+
+			var error = false;
+
+			if ($angle.val() == '') {
+				error = "This cannot be empty.";
+			} else if (!number_regex.test($angle.val())) {
+				error = "An angle should be a number.";
+			} else if (parseInt($angle.val()) > 360 || parseInt($angle.val()) < 0) {
+				error = "It should be between 0-360 degrees!";
+			}
+
+			return this.addErrorMessage($angle, error);
+
+		},
+		validateDistance: function() {
+		
+			// get distance entered
+			var $distance = $('#edit-tree-distance');
+
+			var error = false;
+
+			if ($distance.val() == '') {
+				error = "This cannot be empty.";
+			} else if (isNaN(parseFloat($distance.val()))) {
+				error = "A distance should be a number...";
+			} else if (parseInt($distance.val()) > 30 || parseInt($distance.val()) < 0) {
+				error = "Do you think it is a bit too far?";
+			}
+
+			return this.addErrorMessage($distance, error);
+
+		},
+		addErrorMessage: function($target, error) {
+			if (error !== false) {
+				$target.parent().parent().parent().removeClass("success").addClass("error");
+				$target.parent().find(".help-block").text(error);
+				return false;
+			} else {
+				$target.parent().parent().parent().removeClass("error").addClass("success");
+				$target.parent().find(".help-block").empty();
+				return true;
+			}
 		},
 		newObservation: function(){
 			$(".btn-new-observation").hide()
@@ -1179,7 +1266,7 @@ $(document).ready(function(){
 				
 				// delete it! HAHAHAHAHA
 				self.model.set('diameter', _.without(entries_array, entries_array[target_index]));
-				this.model.url = app.config.cgiDir + 'litterfall.py';
+				self.model.url = app.config.cgiDir + 'litterfall.py';
 				self.model.save();
 				self.render();
 				
