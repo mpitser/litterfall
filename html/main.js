@@ -30,7 +30,7 @@ var orig = {
 
 $.extend($.fn.typeahead.Constructor.prototype, {
 	matcher: function(item) {
-		console.log(this.source);
+		//console.log(this.source);
 		if (this.options.type == 'observers') {
 			var observers = this.query.split(",");
 			var last_observer = observers[observers.length - 1];
@@ -241,7 +241,7 @@ $(document).ready(function(){
 			},
 			'blur #new-tree-angle': 'validateAngle',
 			'blur #new-tree-distance': 'validateDistance',
-			'blur #new-tree-species': 'validateSpecies'
+			'change #new-tree-species': 'validateSpecies'
 		},
 		validateSpecies: function() {
 
@@ -301,7 +301,7 @@ $(document).ready(function(){
 		},
 		addErrorMessage: function($target, error) {
 			if (error !== false) {
-				$target.parent().parent().addClass("error");
+				$target.parent().parent().removeClass("success").addClass("error");
 				$target.parent().find(".help-block").text(error);
 				return false;
 			} else {
@@ -804,8 +804,10 @@ $(document).ready(function(){
 		},
 		populateSpecies: function(){
 			var tree_species = this.model.get('species');
-			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allSpecies', function(data) {
+			
+			$.getJSON('data/tree_species.json', function(data){
 				$.each(data, function(index, value) {
+				
 					if (value == tree_species) {
 						$(".species select").append($("<option></option>").attr("value",value).attr("selected", "selected").text(value));
 					} else {
