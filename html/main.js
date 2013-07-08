@@ -128,7 +128,7 @@ $(document).ready(function(){
 
 			// Remove the model when done
 			this.$el.on("hidden", function() {
-				this.remove();
+				this.model.remove();
 				if (self.isSubTree) {
 					$('.add-new-sub-tree').eq(0).trigger("not_choosing_parent_tree");
 				}
@@ -297,16 +297,16 @@ $(document).ready(function(){
 			<td>\
 				<%= tree.distance %>\
 			</td>\
+			<td>\
 			<% var status_display = ""; %>\
 			<% if (tree.status == "alive") { %>\
-			<%		status_display = <i class="icon-tree-deciduous"></i> + "Alive"; %>\
+			<%		status_display = "Alive"; %>\
 			<%	} else if (tree.status == "dead_standing"){ %>\
-			<%		status_display = <i class="icon-skull"></i> + "Dead (standing)"; %>\
+			<%		status_display = "Dead (standing)"; %>\
 			<%	} else if (tree.status == "dead_fallen"){ %>\
-			<%		status_display = <i class="icon-skull"></i> + "Dead (fallen)"; %>\
+			<%		status_display = "Dead (fallen)"; %>\
 			<% } %>\
-			<td>\
-				<%= tree.status %>\
+				<%= status_display %>\
 			</td>',
 		templateUpdate:	'\
 			<td>\
@@ -333,21 +333,16 @@ $(document).ready(function(){
 			<td>\
 				<%= tree.distance %>\
 			</td>\
+			<td>\
 			<% var status_display = ""; %>\
 			<% if (tree.status == "alive") { %>\
-			<%		status_class="icon-leaf"; %>\
 			<%		status_display = "Alive"; %>\
 			<%	} else if (tree.status == "dead_standing"){ %>\
-			<%		status_class="icon-skull"; %>\
 			<%		status_display = "Dead (standing)"; %>\
 			<%	} else if (tree.status == "dead_fallen"){ %>\
-			<%		status_class="icon-skull"; %>\
 			<%		status_display = "Dead (fallen)"; %>\
 			<% } %>\
-			<td>\
-				<i class="icon status-icon"></i>\
 				<%= status_display %>\
-				<% $(".status-icon").addClass(status_class); %> \
 			</td>\
 			<td>\
 				<%= tree.latest_DBH_message %>\
@@ -458,6 +453,44 @@ $(document).ready(function(){
 			app_router.navigate(document.location.hash + tree_url, {trigger: true});
 		},
 		deleteTree: function(){
+
+			// ask the user whether they're absolutely sure...
+			var $alert_modal = $('<div></div>').addClass("modal hide face").attr({
+				'tabindex': '-1',
+				'role': 'dialog',
+				'aria-labelledby': 'dialog',
+				'aria-hidden': 'true'
+			}).html('\
+				<div class="modal-header">\
+					<h3>This tree will be gone forever.</h3>\
+				</div>\
+				<div class="modal-body">\
+					<p>Take a deep breathe and think carefully. This tree will never return once it is gone. Are you sure you want to get rid of it?</p>\
+				</div>\
+				<div class="modal-footer">\
+					<button class="btn" data-dismiss="modal" aria-hidden="true">No&mdash;sorry, tree</button>\
+					<button class="btn btn-danger" id="no-remorse">Yes&mdash;sorry, tree</button>\
+				</div>\
+			');
+
+			$('body').append($alert_modal);
+			$alert_modal.modal();
+			$alert_modal.modal('show');
+			var is_user_sure = true;
+			$alert_modal.on('hidden', function() {
+				$alert_modal.remove();
+			});
+
+			var self = this;
+
+			$alert_modal.find('#no-remorse').on('click', function() {
+				$alert_modal.modal("hide");
+				self.deleteTreeFunction();
+			});
+
+		},
+		deleteTreeFunction: function() {
+
 			var this_tree_el = this.$el;
 			this.model.url = app.config.cgiDir + 'litterfall.py';
 			var result = this.model.destroy();
@@ -565,10 +598,10 @@ $(document).ready(function(){
 					<span class="edit_cell date_select"><input title="Enter a date in mm/dd/yyyy format. It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
 				</td>\<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers.join(", ") %></span><span class="edit-obs-info edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
 				<td class="editable"><span class="show-obs-info display_cell diameter"><%= entry.value %></span><span class="edit-obs-info edit_cell diameter"><input title="Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
-				<td class="editable"><span class="show-obs-info display_cell status"><%= entry.status %></span><span class="edit-obs-info edit_cell status"><div class="edit-obs-info status" data-toggle="buttons-radio">\
-  					<button type="button" class="btn btn-mini btn-info status alive" style="width: 120px" value="alive">Alive</button><br>\
-  					<button type="button" class="btn btn-mini btn-warning status dead_standing" style="width: 120px" value="dead_standing">Dead (standing)</button><br>\
- 					<button type="button" class="btn btn-mini btn-danger status dead_fallen" style="width: 120px" value="dead_fallen">Dead (fallen)</button><br>\
+				<td class="editable"><span class="show-obs-info display_cell status"><%= entry.status %></span><span class="edit-obs-info edit_cell status"><div class="edit-obs-info status btn-group btn-group-vertical" data-toggle="buttons-radio">\
+  					<button type="button" class="btn btn-mini btn-info status alive" style="width: 120px" value="alive">Alive</button>\
+  					<button type="button" class="btn btn-mini btn-warning status dead_standing" style="width: 120px" value="dead_standing">Dead (standing)</button>\
+ 					<button type="button" class="btn btn-mini btn-danger status dead_fallen" style="width: 120px" value="dead_fallen">Dead (fallen)</button>\
 					</div></span></td>\
 				<td class="editable"><span class="show-obs-info display_cell notes"><%= entry.notes %></span><span class="edit-obs-info edit_cell notes"><input type="text" value="<%= entry.notes %>"></span></span></td>\
 		',
@@ -622,10 +655,10 @@ $(document).ready(function(){
 						<span class="edit_cell date_select"><input title="Enter a date in yyyy/mm/dd format. It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
 					</td>\<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers %></span><span class="edit-obs-info edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
 					<td class="editable"><span class="show-obs-info display_cell diameter"><%= entry.value %></span><span class="edit-obs-info edit_cell diameter"><input title="Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
-					<td class="editable"><span class="show-obs-info display_cell status"><%= entry.status %></span><span class="edit-obs-info edit_cell status"><div class="edit-obs-info status" data-toggle="buttons-radio">\
-  					<button type="button" class="btn btn-mini btn-info status alive" style="width: 120px" value="alive">Alive</button><br>\
-  					<button type="button" class="btn btn-mini btn-warning status dead_standing" style="width: 120px" value="dead_standing">Dead (standing)</button><br>\
- 					<button type="button" class="btn btn-mini btn-danger status dead_fallen" style="width: 120px" value="dead_fallen">Dead (fallen)</button><br>\
+					<td class="editable"><span class="show-obs-info display_cell status"><%= entry.status %></span><span class="edit-obs-info edit_cell status"><div class="edit-obs-info status btn-group btn-group-vertical" data-toggle="buttons-radio">\
+  					<button type="button" class="btn btn-mini btn-info status alive" style="width: 120px" value="alive">Alive</button>\
+  					<button type="button" class="btn btn-mini btn-warning status dead_standing" style="width: 120px" value="dead_standing">Dead (standing)</button>\
+ 					<button type="button" class="btn btn-mini btn-danger status dead_fallen" style="width: 120px" value="dead_fallen">Dead (fallen)</button>\
 					</div></span></td>\
 					<td class="editable"><span class="show-obs-info display_cell notes"><%= entry.notes %></span><span class="edit-obs-info edit_cell notes"><input type="text" value="<%= entry.notes %>"></span></span></td>\
 				</tr>\
@@ -795,7 +828,10 @@ $(document).ready(function(){
 				maxDate: 0,
 				changeYear: true,
 				changeMonth: true,
-				constrainInput: true
+				constrainInput: true,
+				onSelect: function() {
+					$(".ui-datepicker a").removeAttr("href");
+				}
 			});
 			
 			// Disable all the other edit buttons
@@ -852,7 +888,10 @@ $(document).ready(function(){
 				maxDate: 0, 
 				changeYear: true, 
 				changeMonth: true, 
-				constrainInput: true
+				constrainInput: true,
+				onSelect: function() {
+					$(".ui-datepicker a").removeAttr("href");
+				}
 			});
 			$row_to_edit.addClass("old");
 			
