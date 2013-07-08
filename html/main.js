@@ -239,18 +239,25 @@ $(document).ready(function(){
 			'click .btn-save-and-update': function() {
 				this.addAndSaveTree(false);
 			},
-			'change #new-tree-angle': 'validateAngle',
-			'change #new-tree-distance': 'validateDistance',
-			'change #new-tree-species': 'validateSpecies'
+			'blur #new-tree-angle': 'validateAngle',
+			'blur #new-tree-distance': 'validateDistance',
+			'blur #new-tree-species': 'validateSpecies'
 		},
 		validateSpecies: function() {
 
 			var $species = $('#new-tree-species');
+			var $all_species = $species.data("typeahead").source;
+			//console.log($all_species);
+			//console.log($species.val());
 
 			var error = false;
 
 			if ($species.val() == '') {
 				error = "This cannot be empty";
+			} else if ($.inArray($species.val(), $all_species) == -1) {
+				$species.val("Unidentified, spp.");
+				console.log($species);
+				error = "The species entered did not match a species name on file.  It has been given a species name of Unidentified.  If this is an error, please edit your entry to choose one of the options or contact the professor.";
 			}
 
 			return this.addErrorMessage($species, error);
@@ -279,14 +286,12 @@ $(document).ready(function(){
 		validateDistance: function() {
 			var $distance = $('#new-tree-distance');
 
-			var number_regex = /^[0-9]*$/;
-
 			var error = false;
 
 			if ($distance.val() == '') {
 				error = "This cannot be empty.";
-			} else if (!number_regex.test($distance.val())) {
-				error = "A distance should be a number.";
+			} else if (isNaN(parseFloat($distance.val()))) {
+				error = "A distance should be a number...";
 			} else if (parseInt($distance.val()) > 30 || parseInt($distance.val()) < 0) {
 				error = "Do you think it is a bit too far?";
 			}
