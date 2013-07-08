@@ -189,30 +189,35 @@ $(document).ready(function(){
 
 		},
 		addAutocomplete: function() {
-			// get the species list from the text file and populate array
-        	$.get('lib/speciesList.txt', function(data){
-            	var all_species = data.split(",");
-           	 	//console.log(all_species);
-           	 	
-           	 	// Add autocomplete
-				$("#new-tree-species").autocomplete({
-					minLength: 0,
-					source: all_species,
-					appendTo: "#add-new-tree-modal" // so that the list moves along with the model
-				})
-				
-				.focus(function() { // when focus, trigger autocomplete
-					$(this).autocomplete("search");
-				});
 
-				// Limit the height of the dropdown list
-				// (Forget IE6 Compatibility)
-				$(".ui-autocomplete").css({
-					'max-height': '200px',
-					'overflow-y': 'auto',
-					'overflow-x': 'hidden'
-				});
-   			});
+			// Array to contain species
+			var all_species = [];
+
+			// Get all the species first
+			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allSpecies', function(data) {
+				for (i in data) {
+					all_species[i] = data[i];
+				}
+			});
+
+			// Add autocomplete
+			$("#new-tree-species").autocomplete({
+				minLength: 0,
+				source: all_species,
+				appendTo: "#add-new-tree-modal" // so that the list moves along with the model
+			})
+			.focus(function() { // when focus, trigger autocomplete
+				$(this).autocomplete("search");
+			});
+
+			// Limit the height of the dropdown list
+			// (Forget IE6 Compatibility)
+			$(".ui-autocomplete").css({
+				'max-height': '200px',
+				'overflow-y': 'auto',
+				'overflow-x': 'hidden'
+			});
+
 		},
 		events: {
 			'click .btn-save-and-back': function() {
@@ -781,20 +786,17 @@ $(document).ready(function(){
 		},
 		populateSpecies: function(){
 			var tree_species = this.model.get('species');
-			
-			// get species list from text file
-			$.get('lib/speciesList.txt', function(data){
-            	var all_species = data.split(",");
-            	// populate the dropdown menu for editing tree species (with the tree's listed species as default selected)
-            	for (i in all_species) {
-            		if (all_species[i] == tree_species) {	
-						$(".species select").append($("<option></option>").attr("value",all_species[i]).attr("selected", "selected").text(all_species[i]));
+			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allSpecies', function(data) {
+				$.each(data, function(index, value) {
+					if (value == tree_species) {
+						$(".species select").append($("<option></option>").attr("value",value).attr("selected", "selected").text(value));
 					} else {
-						$(".species select").append($("<option></option>").attr("value",all_species[i]).text(all_species[i]))
+						$(".species select").append($("<option></option>").attr("value",value).text(value))
 					}
-            	}
-            });
-    	},
+				});
+			});
+
+		},
 		events: {
 			'click .btn-new-observation': 'newObservation',	
 			'click .edit-existing': 'editObservation',
@@ -1513,13 +1515,15 @@ $(document).ready(function(){
 
   			var j = 0;
   			var agt=navigator.userAgent.toLowerCase();
-  			
-  			if (agt.indexOf("firefox" != -1) || agt.indexOf("explorer" != -1)){
+  			console.log(agt);
+  			if (agt.indexOf("firefox") != -1 || agt.indexOf("msie") != -1){
   				$(".export-info").attr("data-original-title", "Open the file in a text editor, then save it as a file with a .csv extension.");
   				$(".export-info").attr("href", "https://www.google.com/intl/en/chrome/browser/");
-  			}
-
-  			if (agt.indexOf("safari" != -1)){
+  			} else if (agt.indexOf("msie") != -1){
+				$(".export-info").attr("data-original-title", "This WILL NOT WORK if you are using Internet Explorer. Click to download a better browser before proceeding.");
+			} else if (agt.indexOf("chrome") != -1){
+				 $(".export-info").attr("data-original-title", "Opening the resulting file should launch MS Excel.");
+			}else if (agt.indexOf("safari") != -1){
   				console.log("safari found");
   				$(".export-info").attr("data-original-title","Select 'Save as...' from the File menu and enter a filename that uses a .csv extension.");
   			}
@@ -1554,7 +1558,7 @@ $(document).ready(function(){
 				}
 				// ensures information has loaded before opening the CSV file
 				if (j > 0) {
-					if (agt.indexOf("firefox") != -1) {
+					if (agt.indexOf("firefox") != -1 || agt.indexOf("msie") != -1) {
 						window.open('data:application/octet-stream;charset=utf-8,' + encodeURIComponent($('#CSV').text()));
 					} else {
 						window.open('data:text/csv;charset=utf-8,' + encodeURIComponent($('#CSV').text()));
