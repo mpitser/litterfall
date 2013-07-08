@@ -229,6 +229,7 @@ $(document).ready(function(){
 					type: "species"
 				});
 				
+				
    			});
 		},
 		events: {
