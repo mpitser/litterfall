@@ -370,8 +370,15 @@ $(document).ready(function(){
 				<%= tree.distance %>\
 			</td>\
 			<td>\
-				<% console.log( "treestats ", tree.status) %>\
-				<%= tree.status %>\
+			<% var status_display = ""; %>\
+			<% if (tree.status == "alive") { %>\
+			<%		status_display = "Alive"; %>\
+			<%	} else if (tree.status == "dead_standing"){ %>\
+			<%		status_display = "Dead (standing)"; %>\
+			<%	} else if (tree.status == "dead_fallen"){ %>\
+			<%		status_display = "Dead (fallen)"; %>\
+			<% } %>\
+				<%= status_display %>\
 			</td>',
 		templateUpdate:	'\
 			<td>\
@@ -399,7 +406,15 @@ $(document).ready(function(){
 				<%= tree.distance %>\
 			</td>\
 			<td>\
-				<%= tree.status %>\
+			<% var status_display = ""; %>\
+			<% if (tree.status == "alive") { %>\
+			<%		status_display = "Alive"; %>\
+			<%	} else if (tree.status == "dead_standing"){ %>\
+			<%		status_display = "Dead (standing)"; %>\
+			<%	} else if (tree.status == "dead_fallen"){ %>\
+			<%		status_display = "Dead (fallen)"; %>\
+			<% } %>\
+				<%= status_display %>\
 			</td>\
 			<td>\
 				<%= tree.latest_DBH_message %>\
@@ -480,7 +495,7 @@ $(document).ready(function(){
 				// already sorted (the latest comes first) by Tree.parse()
 				var most_recent_entry = _.first(this_tree.diameter);
 				
-				this_tree.latest_DBH_message = most_recent_entry.value + " on " + toFormattedDate(most_recent_entry.date);
+				this_tree.latest_DBH_message = most_recent_entry.value + " in " + most_recent_entry.year;
 				this_tree.latest_comment = _.isEmpty(most_recent_entry.notes) ? '-' : most_recent_entry.notes;
 				
 			}
@@ -555,10 +570,9 @@ $(document).ready(function(){
 			
 				success: function(model) { // once done
 					
-					var this_model = model;
-					
+					var this_model = model;					
 					this_tree_el.fadeOut("slow", function() {						//function called after fadeOut is done
-
+						
 						// remove the row--we need this because if we just hide (using visibility:hidden) the row then the table-stripe class will not work
 						$("#"+model.get('_id').$oid).remove();
 
@@ -566,21 +580,21 @@ $(document).ready(function(){
 
 						// update all the trees under the same tree_id
 						$(".tree-cluster-"+target_tree_id).each(function(i) {
-
+						
 							// only the full_tree_id would be updated
 							var updated_tree = new Tree();
-
+							
 							// grab the second child
 							var full_tree_id_td = $(this).children('td').eq(1);
 							var target_full_tree_id = parseInt(parseFloat(full_tree_id_td.text())*10);
 							console.log(target_full_tree_id);
-
+							
 							// get the data
 							// using oid, because that's the only way it's stable
 							updated_tree.url = app.config.cgiDir + 'litterfall.py?oid=' + $(this).attr('id');
 							updated_tree.fetch({
 								success: function() {
-
+									console.log(updated_tree);
 									// update it, only the full tree id, for now
 									console.log("tree_id: " + updated_tree.get('tree_id'));
 									updated_full_tree_id = updated_tree.get('tree_id') + (updated_tree.get('sub_tree_id') * .1);
@@ -590,10 +604,11 @@ $(document).ready(function(){
 									}
 							}
 							});
-
+							
 						});
-
+						
 					});
+
 				}, 
 				error: function(model, xhr) {
 					
@@ -601,9 +616,7 @@ $(document).ready(function(){
 					deleteTreeError.render().$el.insertAfter($("h1").eq(0));
 					
 				}
-				
 			});
-
 		}
 	});
 
@@ -660,13 +673,13 @@ $(document).ready(function(){
 				</td>\
 				<td class="editable">\
 					<span class="display_cell date_select"><%= toFormattedDate(entry.date) %></span>\
-					<span class="edit_cell date_select"><input data-original-title="Enter a date in mm/dd/yyyy format. It may not already have an associated diameter entry or be in the future." class="date_select" type="text" value="<%= toFormattedDate(entry.date) %>"/>\
-				</td>\<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers.join(", ") %></span><span class="edit-obs-info edit_cell observers"><input title="Observers field may not be empty." class="observers" type="text" value="<%= entry.observers %>"></span></td>\
-				<td class="editable"><span class="show-obs-info display_cell diameter"><%= entry.value %></span><span class="edit-obs-info edit_cell diameter"><input title="Please enter an integer or floating point number such as 5, 6.1, 10.33" class="diameter" type="text" value="<%= entry.value %>"></span></td>\
-				<td class="editable"><span class="show-obs-info display_cell status"><%= entry.status %></span><span class="edit-obs-info edit_cell status"><div class="edit-obs-info status" data-toggle="buttons-radio">\
-  					<button type="button" class="btn btn-mini btn-info status alive" style="width: 120px" value="alive">Alive</button><br>\
-  					<button type="button" class="btn btn-mini btn-warning status dead_standing" style="width: 120px" value="dead_standing">Dead (standing)</button><br>\
- 					<button type="button" class="btn btn-mini btn-danger status dead_fallen" style="width: 120px" value="dead_fallen">Dead (fallen)</button><br>\
+					<span class="edit_cell date_select"><input title="Enter a date in mm/dd/yyyy format. It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
+				</td>\<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers.join(", ") %></span><span class="edit-obs-info edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
+				<td class="editable"><span class="show-obs-info display_cell diameter"><%= entry.value %></span><span class="edit-obs-info edit_cell diameter"><input title="Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
+				<td class="editable"><span class="show-obs-info display_cell status"><%= entry.status %></span><span class="edit-obs-info edit_cell status"><div class="edit-obs-info status btn-group btn-group-vertical" data-toggle="buttons-radio">\
+  					<button type="button" class="btn btn-mini btn-info status alive" style="width: 120px" value="alive">Alive</button>\
+  					<button type="button" class="btn btn-mini btn-warning status dead_standing" style="width: 120px" value="dead_standing">Dead (standing)</button>\
+ 					<button type="button" class="btn btn-mini btn-danger status dead_fallen" style="width: 120px" value="dead_fallen">Dead (fallen)</button>\
 					</div></span></td>\
 				<td class="editable"><span class="show-obs-info display_cell notes"><%= entry.notes %></span><span class="edit-obs-info edit_cell notes"><input type="text" value="<%= entry.notes %>"></span></span></td>\
 		',
@@ -720,10 +733,10 @@ $(document).ready(function(){
 						<span class="edit_cell date_select"><input data-original-title="Enter a date in mm/dd/yyyy format. It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
 					</td>\<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers %></span><span class="edit-obs-info edit_cell observers"><input title="Who collected this data" type="text" value="<%= entry.observers %>"></span></td>\
 					<td class="editable"><span class="show-obs-info display_cell diameter"><%= entry.value %></span><span class="edit-obs-info edit_cell diameter"><input title="Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
-					<td class="editable"><span class="show-obs-info display_cell status"><%= entry.status %></span><span class="edit-obs-info edit_cell status"><div class="edit-obs-info status" data-toggle="buttons-radio">\
-  					<button type="button" class="btn btn-mini btn-info status alive" style="width: 120px" value="alive">Alive</button><br>\
-  					<button type="button" class="btn btn-mini btn-warning status dead_standing" style="width: 120px" value="dead_standing">Dead (standing)</button><br>\
- 					<button type="button" class="btn btn-mini btn-danger status dead_fallen" style="width: 120px" value="dead_fallen">Dead (fallen)</button><br>\
+					<td class="editable"><span class="show-obs-info display_cell status"><%= entry.status %></span><span class="edit-obs-info edit_cell status"><div class="edit-obs-info status btn-group btn-group-vertical" data-toggle="buttons-radio">\
+  					<button type="button" class="btn btn-mini btn-info status alive" style="width: 120px" value="alive">Alive</button>\
+  					<button type="button" class="btn btn-mini btn-warning status dead_standing" style="width: 120px" value="dead_standing">Dead (standing)</button>\
+ 					<button type="button" class="btn btn-mini btn-danger status dead_fallen" style="width: 120px" value="dead_fallen">Dead (fallen)</button>\
 					</div></span></td>\
 					<td class="editable"><span class="show-obs-info display_cell notes"><%= entry.notes %></span><span class="edit-obs-info edit_cell notes"><input type="text" value="<%= htmlEntities(entry.notes) %>"></span></span></td>\
 				</tr>\
@@ -786,20 +799,16 @@ $(document).ready(function(){
 		},
 		populateSpecies: function(){
 			var tree_species = this.model.get('species');
-			
-			// get species list from text file
-			$.get('lib/speciesList.txt', function(data){
-            	var all_species = data.split(",");
-            	// populate the dropdown menu for editing tree species (with the tree's listed species as default selected)
-            	for (i in all_species) {
-            		if (all_species[i] == tree_species) {	
-						$(".species select").append($("<option></option>").attr("value",all_species[i]).attr("selected", "selected").text(all_species[i]));
+			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allSpecies', function(data) {
+				$.each(data, function(index, value) {
+					if (value == tree_species) {
+						$(".species select").append($("<option></option>").attr("value",value).attr("selected", "selected").text(value));
 					} else {
-						$(".species select").append($("<option></option>").attr("value",all_species[i]).text(all_species[i]))
+						$(".species select").append($("<option></option>").attr("value",value).text(value))
 					}
-            	}
-            });
-    	},
+				});
+			});
+		},
 		events: {
 			'click .btn-new-observation': 'newObservation',	
 			'click .edit-existing': 'editObservation',
@@ -1517,6 +1526,20 @@ $(document).ready(function(){
   			}
 
   			var j = 0;
+  			var agt=navigator.userAgent.toLowerCase();
+  			console.log(agt);
+  			if (agt.indexOf("firefox") != -1 || agt.indexOf("msie") != -1){
+  				$(".export-info").attr("data-original-title", "Open the file in a text editor, then save it as a file with a .csv extension.");
+  				$(".export-info").attr("href", "https://www.google.com/intl/en/chrome/browser/");
+  			} else if (agt.indexOf("msie") != -1){
+				$(".export-info").attr("data-original-title", "This WILL NOT WORK if you are using Internet Explorer. Click to download a better browser before proceeding.");
+			} else if (agt.indexOf("chrome") != -1){
+				 $(".export-info").attr("data-original-title", "Opening the resulting file should launch MS Excel.");
+			}else if (agt.indexOf("safari") != -1){
+  				console.log("safari found");
+  				$(".export-info").attr("data-original-title","Select 'Save as...' from the File menu and enter a filename that uses a .csv extension.");
+  			}
+  			
   			$(".export").click(function(e) {
   				// query database for all trees in the plot
   				if (j == 0) {  				
@@ -1528,15 +1551,16 @@ $(document).ready(function(){
 							$.each(value["diameter"], function(i) {
 								var obs = value["diameter"][i];
 								if (obs["date"] != null){
-									var parsed_date = new Date(obs["date"]["$date"]);
-									var formatted_date = $.datepicker.formatDate('m/d/yy', parsed_date)
+									var formatted_date = obs["date"]["d"] + "/" + obs["date"]["m"] + "/" + obs["date"]["y"];
 									CSV += "," + formatted_date + "," + obs["value"] + ",";
 								}
+								console.log(obs["notes"].replace(/[^a-zA-Z 0-9]+/g, ''));
 								if (obs["notes"] != "" && obs["notes"] != undefined){
-									CSV += obs["notes"];
+									CSV += obs["notes"].replace(/[^a-zA-Z 0-9]+/g, '');
 								}
 							});
 						});
+					CSV += "\nDisclaimer: dates before 2013 are approximate. All data during that range was collected between September and October of the specified year.";
 					// adds formatted data to a hidden input on the page
 					$("#CSV").empty().append(CSV);
 					$(".export").val("Click to open file");
@@ -1546,8 +1570,7 @@ $(document).ready(function(){
 				}
 				// ensures information has loaded before opening the CSV file
 				if (j > 0) {
-					var agt=navigator.userAgent.toLowerCase();
-					if (agt.indexOf("firefox") != -1) {
+					if (agt.indexOf("firefox") != -1 || agt.indexOf("msie") != -1) {
 						window.open('data:application/octet-stream;charset=utf-8,' + encodeURIComponent($('#CSV').text()));
 					} else {
 						window.open('data:text/csv;charset=utf-8,' + encodeURIComponent($('#CSV').text()));
@@ -1573,28 +1596,18 @@ $(document).ready(function(){
 			for (var i=parseInt(start_year); i<=parseInt(end_year); i++){
 				$('.y-'+i).show();
 			}
-		$("#DBH").attr("colspan", num_years);
+
 			//format header row to make the DBH cell span all the years specified
   		//	document.getElementById("DBH").colSpan = num_years;
     	},
   		addTree: function(){
 
   			
-  			if (this.length == 0) {
-  				var plot_number = parseInt($('.plot-number').text());
-  				var site_name = $('.site-name').text();
-  			} else {
-  			
-  				var random_tree = this.find(function(){return true;});
-  				
-  				var plot_number = random_tree.get('plot');
-  				var site_name = random_tree.get('site');
-  				
-  			}
+  			var random_tree = this.find(function(){return true;});
   			
   			var new_tree = new Tree({
-  				plot: plot_number,
-  				site: site_name
+  				plot: random_tree.get('plot'),
+  				site: random_tree.get('site')
   			});
   			var new_model = new newTreeModal({
   				model: new_tree
@@ -1682,7 +1695,6 @@ $(document).ready(function(){
     	//reloads page based on selected location (site) and plot
 		$(".data").addClass("active");
     	$(".home").removeClass("active");
-    	
     	
 		var this_plot = new Plot;
 		//need to use site and plot variable to build url to python script
@@ -1827,11 +1839,7 @@ $(document).ready(function(){
 				tree_id: tree_id,
 				sub_tree_id: sub_tree_id
 			}));
-			
- 			// Bind the Back to Plot button to the appropriate function
-			$('.back').click(function() {
-				app_router.navigate('#data/' + mode + '/trees/site/' + site + '/plot/' + plot, {trigger: true});
-			});
+
 
 			var this_tree = new Tree();
 			this_tree.url = app.config.cgiDir + 'litterfall.py?site=' + site + '&plot=' + plot + '&treeid=' + tree_id + '&subtreeid=' + sub_tree_id;
