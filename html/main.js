@@ -1514,6 +1514,18 @@ $(document).ready(function(){
   			}
 
   			var j = 0;
+  			var agt=navigator.userAgent.toLowerCase();
+  			
+  			if (agt.indexOf("firefox" != -1) || agt.indexOf("explorer" != -1)){
+  				$(".export-info").attr("data-original-title", "Open the file in a text editor, then save it as a file with a .csv extension.");
+  				$(".export-info").attr("href", "https://www.google.com/intl/en/chrome/browser/");
+  			}
+
+  			if (agt.indexOf("safari" != -1)){
+  				console.log("safari found");
+  				$(".export-info").attr("data-original-title","Select 'Save as...' from the File menu and enter a filename that uses a .csv extension.");
+  			}
+  			
   			$(".export").click(function(e) {
   				// query database for all trees in the plot
   				if (j == 0) {  				
@@ -1526,11 +1538,11 @@ $(document).ready(function(){
 								var obs = value["diameter"][i];
 								if (obs["date"] != null){
 									var formatted_date = obs["date"]["d"] + "/" + obs["date"]["m"] + "/" + obs["date"]["y"];
-									console.log(formatted_date);
 									CSV += "," + formatted_date + "," + obs["value"] + ",";
 								}
+								console.log(obs["notes"].replace(/[^a-zA-Z 0-9]+/g, ''));
 								if (obs["notes"] != "" && obs["notes"] != undefined){
-									CSV += obs["notes"];
+									CSV += obs["notes"].replace(/[^a-zA-Z 0-9]+/g, '');
 								}
 							});
 						});
@@ -1544,7 +1556,6 @@ $(document).ready(function(){
 				}
 				// ensures information has loaded before opening the CSV file
 				if (j > 0) {
-					var agt=navigator.userAgent.toLowerCase();
 					if (agt.indexOf("firefox") != -1) {
 						window.open('data:application/octet-stream;charset=utf-8,' + encodeURIComponent($('#CSV').text()));
 					} else {
