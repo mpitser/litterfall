@@ -1243,6 +1243,7 @@ $(document).ready(function(){
 			var field_to_validate = current_row.find(".to_validate").parent().attr("class").replace("to_validate", "").replace("display_cell", "").replace("edit_cell", "").replace("show-obs-info", "").replace("edit-obs-info", "").trim();
 			console.log(field_to_validate.search("status") !== -1);
 			var error_message = false;	// on a validation error this is populated with string to display
+			var status_error_message = false;
 			var field_to_highlight;		
 			
 			//if date field lost focus 
@@ -1258,42 +1259,29 @@ $(document).ready(function(){
 				error_message = this.validateDiameter(current_row);
 				if (error_message) {field_to_highlight="diameter"; console.log("didnt pass");}
 			} else if (field_to_validate.search("status") !== -1) {
-				alert_message = this.validateStatus(current_row);
-				if (info_message) {console.log(info_message)};
+				status_error_message = this.validateStatus(current_row);
 			} else {
 				// field left was comments, which don't need to be validated (and should be allowed to be empty!)
 				return true;
 			}
 						
-			if (error_message) {				
+			
+			if (error_message) {	// if there is an error in validation of an editable field		
 				//flag the field as invalid with a tooltip and highlighted color
 				// change the title that will be displayed in the tooltip
-				$(".edit_cell."+field_to_highlight+" :input").attr("data-original-title", error_message);	
-				$(".edit_cell."+field_to_highlight+" :input").tooltip();
-				$(".edit_cell."+field_to_highlight+" :input" ).tooltip("show");
-				$(".edit_cell."+field_to_highlight+" :input" ).addClass("alert_invalid");	// highlight invalid field
-				
+				$(".edit_cell."+field_to_highlight+" :input").attr("data-original-title", error_message).addClass("alert_invalid").tooltip().tooltip('show');
+				// also remove validate flag since it has now been validated
 				current_row.find(".to_validate").removeClass("to_validate");
 				return false;
-			} else {
-				if (alert_message) {
-					var response = alert(alert_message);
-					//TODO: get response and either return or keep saving (use jquery, bootstrap or backbone!)
-					
-					if (response == "no") return false;  // if they don't want to submit yet, cancel out of validation
-				}
-				//if field passes all tests, make sure nothing is highlighted anymore 
-				// change the title that will be displayed on hovering
-				$(".edit_cell :input").attr("data-original-title", "");	
-				$(".edit_cell :input").removeClass("alert_invalid");
-				$(".edit_cell :input").tooltip("destroy");
+			} else if (status_error_message) {	// if there is an error in validation of the status buttons
+				console.log(status_error_message);
+				current_row.find(".btn-group.status").tooltip('destroy').tooltip({title: status_error_message}).tooltip('show');
 				current_row.find(".to_validate").removeClass("to_validate");
-				return true;
+			} else {	//if field passes all tests, make sure nothing is highlighted anymore 
+				// reset everything to look normal, unflagged, etc.
+				current_row.find(".to_validate").removeClass("to_validate").attr("data-original-title", "").removeClass("alert_invalid").tooltip("destroy");
 			}
-			console.log(current_row.find(".to_validate"));
-			current_row.find(".to_validate").removeClass("to_validate");
-			//$(current_row.find(".to_validate")).removeClass("to_validate");
-			
+			return true;
 		},
 
 		validateDate: function($current_row) {
@@ -1376,11 +1364,21 @@ $(document).ready(function(){
 		validateStatus: function($current_row) {
 			console.log("in validate status");
 			//TODO: get the most recent status.
-			// invalid moves: dead_fallen -> dead_standing 
-			// dead_fallen or dead_standing -> alive 
-			// (return alert_message to be displayed)
-			var info_message = "hello validation";
-			return info_message;
+
+			var last_known_status = (this.model.get("diameter")[0] !== undefined) ? this.model.get("diameter")[0].status : "alive";
+			console.log(last_known_status);
+			
+			var entered_status = $current_row.find(".status.to_validate").val();
+			console.log(entered_status);
+			
+			if (entered_status == "alive" && (last_known_status == "dead_standing" || last_known_status == "dead_fallen")) {
+				return "A dead tree doesn't usually come back to life... are you sure it is alive now???";
+			} else if (entered_status == "dead_standing" && last_known_status == "dead_fallen") {
+				return "A fallen tree doesn't usually stand itself back up... are you sure you are recording it correctly?";
+			} else {
+				return false;
+			}
+			
 		},
 
 		getAllObservers: function() {
