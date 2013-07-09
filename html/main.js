@@ -1006,6 +1006,21 @@ $(document).ready(function(){
 				$new_entry_row.find(".edit_cell.diameter :input").addClass("to_validate");
 				dis.validateField();
 			});
+			$new_entry_row.find(".status.alive").on("click", function() {
+				$new_entry_row.find(".status.alive").addClass("to_validate");
+				console.log("about to validate status");
+				dis.validateField();
+			});
+			$new_entry_row.find(".status.dead_standing").on("click", function() {
+				$new_entry_row.find(".status.dead_standing").addClass("to_validate");
+				console.log("about to validate status");
+				dis.validateField();
+			});
+			$new_entry_row.find(".status.dead_fallen").on("click", function() {
+				$new_entry_row.find(".status.dead_fallen").parent().addClass("to_validate");
+				console.log("about to validate status");
+				dis.validateField();
+			});
 			
 		},
 
@@ -1224,8 +1239,9 @@ $(document).ready(function(){
 		validateField: function(){
 
 			var current_row = $("#tree-observations > tbody > tr .edit_cell :visible").parents("tr");
+			//console.log(current_rowfind(".to_validate"));
 			var field_to_validate = current_row.find(".to_validate").parent().attr("class").replace("to_validate", "").replace("display_cell", "").replace("edit_cell", "").replace("show-obs-info", "").replace("edit-obs-info", "").trim();
-
+			console.log(field_to_validate.search("status") !== -1);
 			var error_message = false;	// on a validation error this is populated with string to display
 			var field_to_highlight;		
 			
@@ -1241,6 +1257,9 @@ $(document).ready(function(){
 			} else if (field_to_validate == "diameter"){
 				error_message = this.validateDiameter(current_row);
 				if (error_message) {field_to_highlight="diameter"; console.log("didnt pass");}
+			} else if (field_to_validate.search("status") !== -1) {
+				alert_message = this.validateStatus(current_row);
+				if (info_message) {console.log(info_message)};
 			} else {
 				// field left was comments, which don't need to be validated (and should be allowed to be empty!)
 				return true;
@@ -1257,6 +1276,12 @@ $(document).ready(function(){
 				current_row.find(".to_validate").removeClass("to_validate");
 				return false;
 			} else {
+				if (alert_message) {
+					var response = alert(alert_message);
+					//TODO: get response and either return or keep saving (use jquery, bootstrap or backbone!)
+					
+					if (response == "no") return false;  // if they don't want to submit yet, cancel out of validation
+				}
 				//if field passes all tests, make sure nothing is highlighted anymore 
 				// change the title that will be displayed on hovering
 				$(".edit_cell :input").attr("data-original-title", "");	
@@ -1346,6 +1371,16 @@ $(document).ready(function(){
 			
 			return false;
 			
+		},
+		
+		validateStatus: function($current_row) {
+			console.log("in validate status");
+			//TODO: get the most recent status.
+			// invalid moves: dead_fallen -> dead_standing 
+			// dead_fallen or dead_standing -> alive 
+			// (return alert_message to be displayed)
+			var info_message = "hello validation";
+			return info_message;
 		},
 
 		getAllObservers: function() {
