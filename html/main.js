@@ -1060,6 +1060,8 @@ $(document).ready(function(){
 			});
 			$(".already").remove();
 			
+			console.log($row_to_edit);
+			
 			var dis = this;
 			$row_to_edit.find(".edit_cell.date_select :input").on("blur", function() {
 				console.log("date");
@@ -1074,6 +1076,18 @@ $(document).ready(function(){
 			$row_to_edit.find(".edit_cell.diameter :input").on("blur", function() {
 				console.log("diams");
 				$row_to_edit.find(".edit_cell.diameter :input").addClass("to_validate");
+				dis.validateField();
+			});
+			$row_to_edit.find(".status.alive").on("click", function() {
+				$row_to_edit.find(".status.alive").addClass("to_validate");
+				dis.validateField();
+			});
+			$row_to_edit.find(".status.dead_standing").on("click", function() {
+				$row_to_edit.find(".status.dead_standing").addClass("to_validate");
+				dis.validateField();
+			});
+			$row_to_edit.find(".status.dead_fallen").on("click", function() {
+				$row_to_edit.find(".status.dead_fallen").parent().addClass("to_validate");
 				dis.validateField();
 			});
 			
