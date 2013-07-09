@@ -938,7 +938,8 @@ $(document).ready(function(){
 			}
 		},
 		newObservation: function(){
-			$(".btn-new-observation").hide()
+		
+			$(".btn-new-observation").hide();
 
 			//add a new blank row to the observation table
 			var today = new Date();
@@ -955,44 +956,17 @@ $(document).ready(function(){
 			
 			// new jQuery row to be prepended
 			// class="new" to mark the row as new
-			
 			var $new_entry_row = $('<tr></tr>').addClass("new").html(_.template(this.rowEntryTemplateUpdate, {entry: new_entry, tree: this.model}));
-			
-			/*
-			// Sorry, Jocelyn!
-			var existing_years = [];
-			$.each($(".show-obs-info.year"), function(i, obs) {
-				existing_years.push($(obs).text());
-			});
-			// Show edit content, hide display content, show "Submit/cancel button", add date_picker		
-			$new_entry_row.find(".edit-obs-info").show();
-			$new_entry_row.find(".show-obs-info").hide();
-			$new_entry_row.find(".select-info").show();
-			//populate dropdown menu with years not yet recorded
-			$("#tree-observations > tbody").prepend($new_entry_row);
-			for (var i = new_entry.year; i >= 2002; i--) {
-				already = false;
-				for (var j = 0; j < existing_years.length; j++) {
-					if (i == parseInt(existing_years[j])) {
-						already = true;
-					}
-				} 				
-				$(".year select").append($("<option></option>").attr("value", i).text(i).attr("id", i));
-				if (already == true) {
-					$("#" + i).addClass("already");
-				}
-			}
-			$(".already").remove();
-			if ($(".year select").length === 0) {
-				alert("already all years");
-			}
-			
-			// prepend it to the table
-			*/
+			// prepend new row to the table
 			$('#tree-observations tbody').prepend($new_entry_row);
 			
+			// set status as last recorded status by default
+			// or active if no entries are recorded yet
+			var last_known_status = ((this.model.get("diameter")[0] !== undefined) ? this.model.get("diameter")[0].status : "alive")
+			$new_entry_row.find("."+last_known_status).addClass("active");
+			
+			//show correct fields for editing
 			$new_entry_row.find(".edit-obs-info").show();
-
 			$new_entry_row.find(".edit_cell").show();
 			$new_entry_row.find(".display_cell").hide();
 			$new_entry_row.find(".edit_cell.date_select :input").datepicker({
@@ -1017,20 +991,18 @@ $(document).ready(function(){
 				type: 'observers'
 			});
 			
-			var dis = this;
 			
+			// bind the validation functions to the fields to validate
+			var dis = this;
 			$new_entry_row.find(".edit_cell.date_select :input").on("blur", function() {
-				console.log("date");
 				$new_entry_row.find(".edit_cell.date_select :input").addClass("to_validate");
 				dis.validateField();
 			});
 			$new_entry_row.find(".edit_cell.observers :input").on("blur", function() {
-				console.log("observers");
 				$new_entry_row.find(".edit_cell.observers :input").addClass("to_validate");
 				dis.validateField();
 			});
 			$new_entry_row.find(".edit_cell.diameter :input").on("blur", function() {
-				console.log("diams");
 				$new_entry_row.find(".edit_cell.diameter :input").addClass("to_validate");
 				dis.validateField();
 			});
@@ -1038,42 +1010,18 @@ $(document).ready(function(){
 		},
 
 		editObservation: function(event) {
+			// User wants to edit an existing observation. 
+
 			$(".btn-new-observation").hide()
-			// User wants to edit an existing observation.  
+			 
 			$row_to_edit = $(event.target).parents("tr");		// Get the row of edit button 
 			$row_to_edit.addClass("edit");
 			// Hide any existing edit modes
 			$("#tree-observations .btn.display_cell").hide();
 			$row_to_edit.find(".edit-obs-info").show();
-			console.log($row_to_edit.find("." + this.model.get("status")));
+			
+			// set status as whatever it was listed as in tree
 			$row_to_edit.find("." + this.model.get("status")).addClass("active");
-			/*
-			var curr_year = new Date().getFullYear();
-			var existing_years = [];
-			$.each($(".show-obs-info.year"), function(i, obs) {
-				existing_years.push($(obs).text());
-			});
-			// Show edit content, hide display content, show "Submit/cancel button"
-			$row_to_edit.find(".edit-obs-info").show();
-			$row_to_edit.find(".show-obs-info").hide();
-			$row_to_edit.find(".select-info").show();
-			//populate dropdown menu with years not yet recorded
-			for (var i = curr_year; i >= 2002; i--) {
-				already = false;
-				for (var j = 0; j < existing_years.length; j++) {
-					if (i == parseInt(existing_years[j])) {
-						already = true;
-					}
-				} 				
-				$(".edit > td > span > select").append($("<option></option>").attr("value", i).text(i).attr("id", i));
-				if (already == true) {
-					$("#" + i).addClass("already");
-				}
-			}
-			var y = $(".edit > td > .show-obs-info.display_cell.year").text();
-			$("#" + y).after($("<option></option>").attr("value", y).text(y).attr("selected", "selected"));
-			// get all observers existing in database, feed them into an autocomplete for the observers field
-			*/
 			
 			$row_to_edit.find(".edit_cell").show();
 			$row_to_edit.find(".display_cell").hide();
