@@ -520,7 +520,7 @@ def main():
 
 	# Load config (for database info, etc)
 	Config = ConfigParser.ConfigParser()
-	Config.read("tree_data_translate.conf")
+	Config.read("crum_woods_translate.conf")
 	MongoDB_host = Config.get('MongoDB', "host")
 	MongoDB_db = Config.get('MongoDB', "db")
 	
