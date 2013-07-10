@@ -30,23 +30,33 @@ var orig = {
 
 $.extend($.fn.typeahead.Constructor.prototype, {
 	matcher: function(item) {
-		//console.log(this.source);
+		
+		// Matcher function for observers typeahead
 		if (this.options.type == 'observers') {
+			
+			// split the query from the field
 			var observers = this.query.split(",");
+			// get the last observer
 			var last_observer = observers[observers.length - 1];
+			// trim the query
 			var last_observer = last_observer.replace(/^\s+/,"");
 			
-			if (last_observer == "") return false;
+			// if empty, don't show the autocomplete
+			if (last_observer.length == 0) return false;
 			
-			for (i = 0; i < observers.length - 2; i++) {
-				if (observers[i].replace(/^\s+|\s+$/g, '') == item) return false;
+			// not matching the observer already entered
+			for (i = 0; i < observers.length - 1; i++) {
+				if (observers[i].replace(/^\s+|\s+$/g, '').toLowerCase() == item.toLowerCase()) return false;
 			}
 			
+			// case insensitive
 			var last_observer = last_observer.toLowerCase();
 			
-			return last_observer.length && ~item.toLowerCase().indexOf(last_observer);
+			// find whether the item has the last observer
+			return ~item.toLowerCase().indexOf(last_observer);
 		} else if (this.options.type == 'species') {
 			
+			// matched only when the first characters match
 			var is_matched = item.toLowerCase().indexOf(this.query.toLowerCase()) == 0;
 			if (is_matched) return true;
 			
@@ -58,8 +68,10 @@ $.extend($.fn.typeahead.Constructor.prototype, {
 			var item_genus = item.split(" ")[0];
 			if (query_genus.toLowerCase() == item_genus.toLowerCase() && item.toLowerCase() == query_genus.toLowerCase() + " spp.") return true;
 			
+			// if all else fails, then no, it doesn't match
 			return false;
 		} else {
+			// if it's a normal typeahead, then call the original function
 			return orig.matcher.call(this, item);
 		}
 	},
@@ -87,7 +99,14 @@ $.extend($.fn.typeahead.Constructor.prototype, {
 	},
 	listen: function() {
 		if (this.options.type == 'species') {
+		
+			// bind focus to lookup, so that the menu shows up even though user still has not typed in anything
 			this.$element.on('focus', $.proxy(this.lookup, this));
+			
+			// style the menu
+			// i'm doing it here just because listen is called every time typeahead is constructed
+			// though structure-wise and semantically it does not make sense
+			// (binding focus above makes sense though!
 			this.$menu.css({
 				'overflow-x': 'hidden',
 				'overflow-y': 'auto',
@@ -95,6 +114,7 @@ $.extend($.fn.typeahead.Constructor.prototype, {
 				'min-width': this.$element.outerWidth()
 			});
 		}
+		
 		orig.listen.call(this);
 	}
 });
