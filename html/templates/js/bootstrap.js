@@ -1802,7 +1802,7 @@
 
       this.query = this.$element.val()
 
-      if (!this.query || this.query.length < this.options.minLength) {
+      if (this.query.length < this.options.minLength) {
         return this.shown ? this.hide() : this
       }
 

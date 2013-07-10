@@ -39,7 +39,7 @@
 			<div class="button-row">
      			<span style="display:none" id="CSV"></span>
       			<input type="button" class="btn btn-mini btn-primary export pull-right" value="Export Data"/>
-				<a href="#" class="dbh pull-right" rel="tooltip" data-placement="top" data-original-title="Once downloaded, save as a .csv file and open with MS Excel"><small>info</small></a>
+				<a href="#" class="dbh export-info pull-right" rel="tooltip" data-placement="top" data-original-title="Once downloaded, save as a .csv file and open with MS Excel"><small>info</small></a>
  	</div>
  	     
     <h3>View data from:
@@ -48,34 +48,6 @@
   		<select id="end-year" class="dropdown"></select>
       	<button id="btn-go" class="btn btn-mini" type="button">Go!</button>
     </h3>
-    
-    <script> 
-    
-    	// add selection options for data viewing based on years data is available
-  			var startYear = 2002; // year that data began collection
-  			var endYear = new Date().getFullYear();	// data collection continues through current year (in theory)
-  			for (var cur=startYear; cur<=endYear; cur++){
-  				// add selection options
-  				if (cur == startYear){
-  					$("#start-year").append($("<option></option>").attr({selected: "selected", value: cur}).text(cur));
-  					$("#end-year").append($("<option></option>").attr("value",cur).text(cur));
-  				} else if (cur == endYear){
-  					$("#start-year").append($("<option></option>").attr("value",cur).text(cur));
-  					$("#end-year").append($("<option></option>").attr({selected: "selected", value: cur}).text(cur));
-  				} else {
-  					$("#start-year").append($("<option></option>").attr("value",cur).text(cur));
-  					$("#end-year").append($("<option></option>").attr("value",cur).text(cur));
-  				}
-  				
-  				// add sub-header columns for the years we have data for
-  				$("#sub-header").append($("<th></th>").attr("class","date-entry "+cur).text(cur));
-  			}
-			
-			// make the DBH heading span all the year subheadings
-  			var numYears = endYear - startYear + 1;
-  			document.getElementById("DBH").colSpan = numYears;
-  			
-  	</script>  
   	
  	<table class="table-striped tablesorter" id="plot-table">
 	<thead>
@@ -93,6 +65,9 @@
 			<th rowspan="2">
 				Distance Meters
 			</th>
+			<th rowspan="2">
+				Status
+			</th>
 			<th id="DBH" class="{sorter:false}">
 				DBH (cm) <a href="#" class="dbh" rel="tooltip" data-placement="top" data-original-title="Diameter at Breast Height"><small>info</small></a>
 			</th>
@@ -103,9 +78,10 @@
 	
 	</tbody>
 	</table>
+	
 	<div class="button-row">
 	<input type="button" class="btn btn-mini btn-primary export pull-right" value="Export Data">
-		<a href="#" class="dbh pull-right" rel="tooltip" data-placement="top" data-original-title="Once downloaded, save as a .csv file and open with MS Excel"><small>info</small></a>
+		<a href="#" class="dbh export-info pull-right" rel="tooltip" data-placement="top" data-original-title="Once downloaded, save as a .csv file and open with MS Excel"><small>info</small></a>
     </div>
     </div> <!-- /container -->
    
