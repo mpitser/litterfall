@@ -1781,14 +1781,17 @@ $(document).ready(function(){
 				el: $('#site-select'),																//populates new selectionOptionsView with locations (sites)
 				collection: location_options
 			});
-			location_options.fetch();
-			$('#update-records').click(function(){														//waits for user to select plot
-				var getPlotUrl = "data/update/" + $('#type-select').val() + '/site/' + encodeURI($('#site-select').val()) + '/plot/' + $('#plot-select').val()
-				document.location.hash = getPlotUrl;
-			});
-			$('#analyze-data').click(function(){														//waits for user to select plot
-				var getPlotUrl = "data/reports/" + $('#type-select').val() + '/site/' + encodeURI($('#site-select').val()) + '/plot/' + $('#plot-select').val()
-				document.location.hash = getPlotUrl;
+			location_options.fetch({
+				success: function() {
+					$('#update-records').removeAttr("disabled").click(function(){														//waits for user to select plot
+						var getPlotUrl = "data/update/" + $('#type-select').val() + '/site/' + encodeURI($('#site-select').val()) + '/plot/' + $('#plot-select').val()
+						document.location.hash = getPlotUrl;
+					});
+					$('#analyze-data').removeAttr("disabled").click(function(){														//waits for user to select plot
+						var getPlotUrl = "data/reports/" + $('#type-select').val() + '/site/' + encodeURI($('#site-select').val()) + '/plot/' + $('#plot-select').val()
+						document.location.hash = getPlotUrl;
+					});
+				}
 			});
 		});
     });
