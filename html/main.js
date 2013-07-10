@@ -637,7 +637,7 @@ $(document).ready(function(){
 				}, 
 				error: function(model, xhr) {
 					
-					var deleteTreeError = new errorView({xhr: xhr});
+					var deleteTreeError = new errorView({xhr: xhr, id: "delete-tree-error"});
 					deleteTreeError.render().$el.insertAfter($("h1").eq(0));
 					
 				}
@@ -1209,7 +1209,8 @@ $(document).ready(function(){
 				},
 				error: function(model, xhr) {
 					var saveError = new errorView({
-						xhr: xhr
+						xhr: xhr,
+						id: "save-observation-error"
 					});
 					
 					saveError.render().$el.insertBefore('#tree-observations');
@@ -1264,8 +1265,16 @@ $(document).ready(function(){
 				// delete it! HAHAHAHAHA
 				self.model.set('diameter', _.without(entries_array, entries_array[target_index]));
 				self.model.url = app.config.cgiDir + 'litterfall.py';
-				self.model.save();
-				self.render();
+				self.model.save({}, {
+					success: self.render,
+					error: function(model, xhr) {
+						var deleteObservationError = new errorView({
+							xhr: xhr,
+							id: "delete-observation-error"
+						});
+					}
+				});
+				
 				
 			});
 			
@@ -1463,7 +1472,10 @@ $(document).ready(function(){
 		},
 		initialize: function() {},
 		render: function() {
-		
+			if (this.attributes.id !== undefined) {
+				$("#"+this.options.id).remove();
+				this.id = this.options.id;
+			}
 			var has_xhr = this.options.xhr !== undefined;
 		
 			this.$el.html('<button type="button" class="close" data-dismiss="alert">&times;</button>\
@@ -1552,12 +1564,10 @@ $(document).ready(function(){
 			
 			var result = Backbone.Model.prototype.save.call(this, attrs, options);
 			
-			tree_model = this;
-			result.done(function(data) {
-				
-				tree_model.set(data);
-				
-			});
+			var self = this;
+			if (result !== false) {
+				result.done(function(data) {self.set(data);});
+			}
 			
 			return result;
 		},
