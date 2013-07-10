@@ -1546,17 +1546,6 @@ $(document).ready(function(){
 				response.status = "alive";
 			}
 			
-			
-		//	var newEntryArray = [];
-			
-		//	console.log(response.diameter);
-		//	_.each(response.diameter, function(entry, key) {
-		//		console.log(new Date(response.diameter[key].date.$date));
-			//	response.diameter[key].date = new Date(response.diameter[key].date.$date);
-		///		console.log(response.diameter[key]);
-		//		console.log(response.diameter[key].date.getFullYear());
-		//	});
-			
 			return response;
 		},
 		// overriding the save method, so that when the model saves it updates its inside to match what the server sends back
@@ -1682,6 +1671,7 @@ $(document).ready(function(){
 					});
 				}
 				// ensures information has loaded before opening the CSV file
+				/*
 				if (j > 0) {
 					if (agt.indexOf("firefox") != -1 || agt.indexOf("msie") != -1) {
 						window.open('data:application/octet-stream;charset=utf-8,' + encodeURIComponent($('#CSV').text()));
@@ -1689,7 +1679,50 @@ $(document).ready(function(){
 						window.open('data:text/csv;charset=utf-8,' + encodeURIComponent($('#CSV').text()));
 					}
 					e.preventDefault();   				
-				}	
+				}*/
+				if (j > 0) {
+					var iframe = $('<iframe>',{
+						width:1,
+						height:1,
+						frameborder:0,
+						css:{
+							display:'none'
+						}
+					}).appendTo('body');
+			
+					var formHTML = '<form action="" method="post">'+
+						'<input type="hidden" name="filename" />'+
+						'<input type="hidden" name="content" />'+
+						'</form>';
+			
+					// Giving IE a chance to build the DOM in
+					// the iframe with a short timeout:
+			
+					setTimeout(function(){
+			
+						// The body element of the iframe document:
+			
+						var body = (iframe.prop('contentDocument') !== undefined) ?
+										iframe.prop('contentDocument').body :
+										iframe.prop('document').body;	// IE
+			
+						body = $(body);
+			
+						// Adding the form to the body:
+						body.html(formHTML);
+			
+						var form = body.find('form');
+			
+						form.attr('action', app.config.cgiDir + 'create_file.py');
+						form.find('input[name=filename]').val($(".site-name").text()+"-"+$(".plot-number").text());
+						form.find('input[name=content]').val(CSV);
+			
+						// Submitting the form to download.php. This will
+						// cause the file download dialog box to appear.
+			
+						form.submit();
+					},50);
+				}
   			});
     	},
 		populateTreeDiameters: function(){
