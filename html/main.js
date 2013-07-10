@@ -7,7 +7,7 @@ var app = {
 	}
 };
 
-Date.prototype.toLitterfallDateObject = function() {
+Date.prototype.toTreeDataDateObject = function() {
 	return {
 		'y': this.getFullYear(),
 		'm': this.getMonth() + 1,
@@ -15,7 +15,7 @@ Date.prototype.toLitterfallDateObject = function() {
 	};
 };
 
-Date.prototype.fromLitterfallDateObject = function(date) {
+Date.prototype.fromTreeDataDateObject = function(date) {
 	this.setFullYear(date.y);
 	this.setMonth(date.m - 1);
 	this.setDate(date.d);
@@ -333,7 +333,7 @@ $(document).ready(function(){
 		addAndSaveTree: function(back_to_plot) {
 
 			// Set the URL--don't you think we should not have to specify the URL every time we call the server?
-			this.model.url = app.config.cgiDir + 'litterfall.py';
+			this.model.url = app.config.cgiDir + 'tree_data.py';
 			var self = this;
 			
 			this.model.validate = function() {
@@ -590,7 +590,7 @@ $(document).ready(function(){
 		deleteTreeFunction: function() {
 
 			var this_tree_el = this.$el;
-			this.model.url = app.config.cgiDir + 'litterfall.py';
+			this.model.url = app.config.cgiDir + 'tree_data.py';
 			var result = this.model.destroy({
 			
 				success: function(model) { // once done
@@ -616,7 +616,7 @@ $(document).ready(function(){
 							
 							// get the data
 							// using oid, because that's the only way it's stable
-							updated_tree.url = app.config.cgiDir + 'litterfall.py?oid=' + $(this).attr('id');
+							updated_tree.url = app.config.cgiDir + 'tree_data.py?oid=' + $(this).attr('id');
 							updated_tree.fetch({
 								success: function() {
 									console.log(updated_tree);
@@ -966,7 +966,7 @@ $(document).ready(function(){
 
 			// if today's date already has an entry, set a template dateKey using tomorrow's date (which the user will be forced to change to pass validation)
 			var new_entry = {
-				date: today.toLitterfallDateObject(),
+				date: today.toTreeDataDateObject(),
 				year: today.getFullYear(),
 				value: 'n/a',
 				notes: "",
@@ -1160,7 +1160,7 @@ $(document).ready(function(){
 			
 			// new entry object
 			var new_entry = {
-				date: ($row_to_save.find(".edit_cell.date_select :input").datepicker("getDate")).toLitterfallDateObject(),
+				date: ($row_to_save.find(".edit_cell.date_select :input").datepicker("getDate")).toTreeDataDateObject(),
 				year: ($row_to_save.find(".edit_cell.date_select :input").datepicker("getDate")).getFullYear(),
 				value: parseFloat($row_to_save.find(".diameter :input").val()).toFixed(1), //round the diameter measurement to 1 decimal place
 				observers: new_observers,
@@ -1202,7 +1202,7 @@ $(document).ready(function(){
 			var self = this;
 			
 			$("#tree-observations > tr").removeClass("edit");
-			this.model.url = app.config.cgiDir + 'litterfall.py';
+			this.model.url = app.config.cgiDir + 'tree_data.py';
 			this.model.save({}, {
 				success: function() {
 					self.render();
@@ -1264,7 +1264,7 @@ $(document).ready(function(){
 				
 				// delete it! HAHAHAHAHA
 				self.model.set('diameter', _.without(entries_array, entries_array[target_index]));
-				self.model.url = app.config.cgiDir + 'litterfall.py';
+				self.model.url = app.config.cgiDir + 'tree_data.py';
 				self.model.save({}, {
 					success: self.render,
 					error: function(model, xhr) {
@@ -1428,7 +1428,7 @@ $(document).ready(function(){
 			//finds all observers that have been previously entered into the database
 			var observers_array = [];
 			
-			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allObservers', function(data) {
+			$.getJSON(app.config.cgiDir + 'tree_data.py?site=allObservers', function(data) {
 				
 				for (i in data) {
 					observers_array.push(data[i]);
@@ -1657,7 +1657,7 @@ $(document).ready(function(){
   				// query database for all trees in the plot
   				if (j == 0) {  				
   					$(".export").val("Preparing data for export...");
-  					$.getJSON(app.config.cgiDir + 'litterfall.py?site=' + $(".site-name").text() + "&plot=" + $(".plot-number").text(), function(data) {
+  					$.getJSON(app.config.cgiDir + 'tree_data.py?site=' + $(".site-name").text() + "&plot=" + $(".plot-number").text(), function(data) {
   						$.each(data, function(index, value) {
 							// format Comma Separated Value string with data from each tree
 							CSV = CSV + "\r\n" + (parseInt(value["tree_id"]) + parseInt(value["sub_tree_id"])*.1) + "," + value["species"] + "," + value["angle"] + "," + value["distance"];
@@ -1786,7 +1786,7 @@ $(document).ready(function(){
 		require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){			
 			$('#main').html(templateHTML);
 			var location_options = new selectionOptions;
-			location_options.url = app.config.cgiDir + "litterfall.py?site=all";						//creates list with all possible locations
+			location_options.url = app.config.cgiDir + "tree_data.py?site=all";						//creates list with all possible locations
 			var location_select = new selectionOptionsView({
 				el: $('#site-select'),																//populates new selectionOptionsView with locations (sites)
 				collection: location_options
@@ -1814,7 +1814,7 @@ $(document).ready(function(){
     	
 		var this_plot = new Plot();
 		//need to use site and plot variable to build url to python script
-		this_plot.url = app.config.cgiDir + 'litterfall.py?site=' + site + '&plot=' + plot;
+		this_plot.url = app.config.cgiDir + 'tree_data.py?site=' + site + '&plot=' + plot;
     	
 		// load different template depending on whether we are updating or analyzing data	
 		if (mode == 'reports') { //if url does not contain 'update' (i.e. it must contain 'reports')
@@ -1958,7 +1958,7 @@ $(document).ready(function(){
 
 
 			var this_tree = new Tree();
-			this_tree.url = app.config.cgiDir + 'litterfall.py?site=' + site + '&plot=' + plot + '&treeid=' + tree_id + '&subtreeid=' + sub_tree_id;
+			this_tree.url = app.config.cgiDir + 'tree_data.py?site=' + site + '&plot=' + plot + '&treeid=' + tree_id + '&subtreeid=' + sub_tree_id;
 			this_tree.fetch({
 				success: function() {
 					this_tree.editViewInitialize();
