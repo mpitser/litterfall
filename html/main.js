@@ -1,5 +1,7 @@
 // Filename: main.js
 
+// making changes!
+
 //app object contains global app information
 var app = {
 	config: {
