@@ -1498,7 +1498,6 @@ $(document).ready(function(){
 			collection_type: 'tree'
 		},
 		initialize: function(){
-			// this.editViewInitialize();
 			this.on('invalid', this.showError);
 		},
 		showError: function(){
@@ -1587,12 +1586,7 @@ $(document).ready(function(){
 		url: "/",
 		choosing_parent_tree: false,
   		initialize: function(){
-  			
   			this.on('reset', this.renderTrees); 
-  			//this.on('add', myFunction);
-  			//this.on('reset', this.findAllObservers); 
-  			//this.on('add', this.findAllObservers); 
-  			//this.on('change', this.renderTrees);
 
   		},
   		render: function() {
@@ -1712,11 +1706,11 @@ $(document).ready(function(){
   		addTree: function(){
 
   			
-  			var random_tree = this.find(function(){return true;});
+  			// var random_tree = this.find(function(){return true;});
   			
   			var new_tree = new Tree({
-  				plot: random_tree.get('plot'),
-  				site: random_tree.get('site')
+  				plot: parseInt($('.plot-number').text()),
+  				site: $('.site-name').text()
   			});
   			var new_model = new newTreeModal({
   				model: new_tree
@@ -1805,7 +1799,7 @@ $(document).ready(function(){
 		$(".data").addClass("active");
     	$(".home").removeClass("active");
     	
-		var this_plot = new Plot;
+		var this_plot = new Plot();
 		//need to use site and plot variable to build url to python script
 		this_plot.url = app.config.cgiDir + 'litterfall.py?site=' + site + '&plot=' + plot;
     	
@@ -1879,7 +1873,7 @@ $(document).ready(function(){
 				// adding new tree
 				$('.add-new-tree').click(function(){
 					if (this_plot.choosing_parent_tree === true) {
-						$addNewSubTree.eq(0).trigger("not_choosing_parent_tree");
+						$add_new_sub_tree.eq(0).trigger("not_choosing_parent_tree");
 					}
 					this_plot.addTree();
 				});
