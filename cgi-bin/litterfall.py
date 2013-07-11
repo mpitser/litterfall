@@ -16,27 +16,34 @@ import cgitb; cgitb.enable()
 def getdata(db, query):
 	# get data with all specifications that aren't 'all'
 	object_to_match = {}
-	if query.getvalue('site') != 'all' and query.getvalue('site') != None:
-		object_to_match['site'] = query.getvalue('site')
+
+	if query.getvalue('oid') != 'all' and query.getvalue('oid') != None:
+		object_to_match['_id'] = ObjectId(query.getvalue('oid'))
+	if query.getvalue('collection_type') != 'all' and query.getvalue('collection_type') != None:
+		object_to_match['collection_type'] = query.getvalue('collection_type')
+	# date
+	if query.getlist('observer') != 'all' and query.getlist('observer') != []:
+		print query.getlist('observer')
+		object_to_match['observers'] = {"$all": query.getlist('observer')}
 	if query.getvalue('plot') != 'all' and query.getvalue('plot') != None:
 		try:
 			object_to_match['plot'] = int(query.getvalue('plot'))
 		except ValueError:
 			print "Invalid plot number"
-	if query.getvalue('collection_type') != 'all' and query.getvalue('collection_type') != None:
-		object_to_match['collection_type'] = query.getvalue('collection_type')
-	if query.getvalue('oid') != 'all' and query.getvalue('oid') != None:
-		object_to_match['_id'] = ObjectId(query.getvalue('oid'))	
+	if query.getvalue('site') != 'all' and query.getvalue('site') != None:
+		object_to_match['site'] = query.getvalue('site')
+	if query.getvalue('sky') != 'all' and query.getvalue('sky') != None:
+		object_to_match['weather.sky'] = query.getvalue('sky')
+	if query.getvalue('precipitation') != 'all' and query.getvalue('precipitation') != None:
+		object_to_match['weather.precipitation'] = query.getvalue('precipitation')
+	#data
+	
 		
-	#print object_to_match
+	print object_to_match
 		
 	data = db.find(object_to_match)
 	
 	return data
-	
-	
-	#ser_data = json.dumps(data[0], default=json_util.default, separators=(',', ':'))
-	#print ser_data
 	
 def main():
 	# global Observation #not sure if needed
@@ -67,8 +74,10 @@ def main():
 		
 		print 'Content-Type: application/json\n'
 		if data.count() > 0:
-			print json.dumps(data[0], default=json_util.default, separators=(',', ':'))
-		
+			for i in range(0,data.count()):
+				print json.dumps(data[i], default=json_util.default, separators=(',', ':'))
+				print ""
+
 	elif method == 'POST' or method == 'PUT':
 		# we want to send data to server (without url) 
 		
