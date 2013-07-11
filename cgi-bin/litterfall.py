@@ -21,7 +21,36 @@ def getdata(db, query):
 		object_to_match['_id'] = ObjectId(query.getvalue('oid'))
 	if query.getvalue('collection_type') != 'all' and query.getvalue('collection_type') != None:
 		object_to_match['collection_type'] = query.getvalue('collection_type')
-	# date
+	
+	# get specific date
+	date = {}
+	if query.getvalue('year') != None and query.getvalue('year') != 'all':
+		date['y'] = int(query.getvalue('year'))
+	if query.getvalue('month') != None and query.getvalue('month') != 'all':
+		date['m'] = int(query.getvalue('month'))
+	if query.getvalue('day') != None and query.getvalue('day') != 'all':
+		date['d'] = int(query.getvalue('day'))		
+	if date != {}:		
+		object_to_match['date'] = date
+	
+	# get date in date range
+	date_begin = {}
+	date_end = {}
+	if query.getvalue('year_begin') != None and query.getvalue('year_begin') != 'all':
+		date_begin['y'] = int(query.getvalue('year_begin'))
+	if query.getvalue('month_begin') != None and query.getvalue('month_begin') != 'all':
+		date_begin['m'] = int(query.getvalue('month_begin'))
+	if query.getvalue('day_begin') != None and query.getvalue('day_begin') != 'all':
+		date_begin['d'] = int(query.getvalue('day_begin'))		
+	if query.getvalue('year_end') != None and query.getvalue('year_end') != 'all':
+		date_end['y'] = int(query.getvalue('year_end'))
+	if query.getvalue('month_end') != None and query.getvalue('month_end') != 'all':
+		date_end['m'] = int(query.getvalue('month_end'))
+	if query.getvalue('day_end') != None and query.getvalue('day_end') != 'all':
+		date_end['d'] = int(query.getvalue('day_end'))		
+	if date_begin != {} and date_end != {}:		
+		object_to_match['date'] = {"$gte": date_begin, "$lte": date_end}
+	
 	if query.getlist('observer') != 'all' and query.getlist('observer') != []:
 		print query.getlist('observer')
 		object_to_match['observers'] = {"$all": query.getlist('observer')}
