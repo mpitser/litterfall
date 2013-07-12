@@ -3,14 +3,15 @@
 // Require.js allows us to configure shortcut alias
 require.config({
   paths: {
-    jquery: 'lib/jquery-min',
+    jquery: 'lib/jquery.min',
     underscore: 'lib/underscore-min',
     backbone: 'lib/backbone-min',
+    bootstrap: 'templates/js/bootstrap',
     templates: 'templates'
   },
   shim: {
         backbone: {
-            deps: ['jquery','underscore'],
+            deps: ['jquery','underscore','bootstrap'],
             exports: 'Backbone'
         },
          'underscore': {
