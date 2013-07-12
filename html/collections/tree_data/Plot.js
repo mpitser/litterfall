@@ -1,6 +1,47 @@
+/*
+Collection: Plot
+Represents: A specific plot (which can be uniquely identified by site name and plot number
+----------------
+
+Plot is a Backbone Collection that contain Tree models. It fetches tree data from the database.
+Once it successfully fetches the data, the reset event will be triggered. Reset is bound to
+method renderTrees in Plot
+
+Methods:
+	initialize()	Built-in method from Backbone's Collection.
+	
+	renderTrees()	(It seriously should not be here, but oh well.) This method does essentially
+					two main things:
+					
+					First: for each Tree model in this Plot collection, it calls each
+					Tree's plotViewInitialize() method, in which a new plotRowView (a Backbone View)
+					is instantiated. The newly instantiated plotRowView represents the
+					corresponding Tree model; in its initialize() method, the render() method is
+					also called, so that only instantiating the new plotRowView will automatically
+					render and place the rendered element to the right location.
+					
+					Second: it implements the functionality that allows the user to export the
+					current plot as a CSV file.
+					
+	populateTreeDiameter()
+					In the analysis page of the tree data, the user can specify the range of years
+					of data shown. populateTreeDiameter() populates each tree's observation entries
+					within the range of years specified by the user.
+	
+	addTree()		Add a new Tree to the Plot collection *and* to the database. The custom 
+					event tree_saved is triggered when the user, after filling out the form in the
+					modal created for adding new trees, chooses to save and return to the plot.
+					In addTree(), we bind the function that will repopulates the Plot to the event
+					tree_saved.
+	
+	addSubTree()	addSubTree() is sort of like addTree(), but it adds a sub-tree rather than a tree,
+					as the method's name suggests. The event tree_saved is bound to the appropriate
+					function like in addTree().
+					
+*/
 define([
 	'jquery',
-	'underscore', 
+	'underscore',
 	'backbone', 
 	'models/tree_data/Tree',
 	'views/tree_data/newTreeModalView'
@@ -18,10 +59,6 @@ define([
   			//this.on('change', this.renderTrees);
 
   		},
-  		render: function() {
-  			this.renderTrees();
-  			return this;
-  		},
   		renderTrees: function(){
   			var site_name = "";
   			var plot_number = 0;
@@ -34,6 +71,7 @@ define([
   				var num_obvs = tree.get("diameter").length;
 
   				this_plot.listenTo(tree, 'add_new_sub_tree_from_row', function() {this_plot.addSubTree(tree.get('tree_id'));});
+  				this_plot.listenTo(tree, 'destroy', function() {this_plot.fetch({silent: true});});
   				
   				// determine the maximum number of observations for any tree in this plot
   				// to allocate enough columns in the CSV file
@@ -72,6 +110,7 @@ define([
   			
   			$(".export").click(function(e) {
   				// query database for all trees in the plot
+  				
   				if (j == 0) {
   				
 					$(".export").val("Preparing data for export...");
