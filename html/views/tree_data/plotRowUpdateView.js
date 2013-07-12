@@ -80,6 +80,8 @@ define([
 			this.$el.addClass("tree-cluster-" + this_tree.tree_id);
 			this.$el.children().eq(2).css("font-style","italic");
 			this.options.targetEl.append(this.el);	
+			$('.dbh').tooltip({trigger:'hover'});
+			$('.dropdown-toggle').dropdown();
 
 		},
 		events: {
@@ -108,14 +110,14 @@ define([
 				'aria-hidden': 'true'
 			}).html('\
 				<div class="modal-header">\
-					<h3>This tree will be gone forever.</h3>\
+					<h3>Do you want to continue?</h3>\
 				</div>\
 				<div class="modal-body">\
-					<p>Take a deep breathe and think carefully. This tree will never return once it is gone. Are you sure you want to get rid of it?</p>\
+					<p>Are you sure you want to delete this tree and all of its data? This action cannot be undone.</p>\
 				</div>\
 				<div class="modal-footer">\
-					<button class="btn" data-dismiss="modal" aria-hidden="true">No&mdash;sorry, tree</button>\
-					<button class="btn btn-danger" id="no-remorse">Yes&mdash;sorry, tree</button>\
+					<button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Cancel</button>\
+					<button class="btn btn-danger" id="no-remorse">Yes, delete this tree.</button>\
 				</div>\
 			');
 
