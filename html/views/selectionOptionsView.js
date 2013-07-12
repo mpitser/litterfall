@@ -9,8 +9,9 @@ define([
     	initialize: function(){
     		_.bindAll(this, 'render'); // fixes loss of context for 'this' within methods
     		console.log(this);
-			this.collection.on('add', this.render(this)); 
-			this.collection.on('reset',  this.render(this));
+    		
+			this.collection.on('add', this.render); 
+			this.collection.on('reset',  this.render);
     	},
     	render: function(){ 
     		this.collection.each(function(option){

@@ -148,7 +148,12 @@ define([
   			// we have to somehow think about sorting
   			new_model.on("tree_saved", function() {
   				$('#plot-table tbody').empty();
-  				this_plot.fetch({reset: true});
+  				this_plot.fetch({
+  					reset: true,
+  					success: function() {
+  						$('#plot-table').trigger('update');
+  					}
+  				});
   			});
 
   		},
@@ -176,7 +181,12 @@ define([
   			// we have to somehow think about sorting
   			new_model.on("tree_saved", function() {
   				$('#plot-table tbody').empty();
-  				this_plot.fetch({reset: true});
+  				this_plot.fetch({
+  					reset: true,
+  					success: function() {
+  						$('#plot-table').trigger('update');
+  					}
+  				});
   			});
   		}
   	});

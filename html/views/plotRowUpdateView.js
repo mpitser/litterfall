@@ -164,7 +164,7 @@ define([
 							
 							// get the data
 							// using oid, because that's the only way it's stable
-							updated_tree.url = app.config.cgiDir + 'litterfall.py?oid=' + $(this).attr('id');
+							updated_tree.url = app.config.cgiDir + 'tree_data.py?oid=' + $(this).attr('id');
 							updated_tree.fetch({
 								success: function() {
 									console.log(updated_tree);
@@ -175,12 +175,15 @@ define([
 									if (target_full_tree_id * .1 != updated_full_tree_id) {
 										full_tree_id_td.text(updated_full_tree_id);
 									}
-							}
+								}
 							});
 							
 						});
 						
 					});
+					
+					// reset tablesorter
+					$('#plot-table').trigger('update');
 
 				}, 
 				error: function(model, xhr) {
