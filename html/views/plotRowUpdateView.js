@@ -138,7 +138,7 @@ define([
 		deleteTreeFunction: function() {
 
 			var this_tree_el = this.$el;
-			this.model.url = app.config.cgiDir + 'litterfall.py';
+			this.model.url = app.config.cgiDir + 'tree_data.py';
 			var result = this.model.destroy({
 			
 				success: function(model) { // once done

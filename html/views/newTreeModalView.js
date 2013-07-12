@@ -1,9 +1,8 @@
 define([ 
 	'jquery',
 	'underscore', 
-	'backbone',	
-	'models/Tree'
-], function($, _, Backbone, Tree){
+	'backbone'
+], function($, _, Backbone){
 	var newTreeModalView = Backbone.View.extend({
 		tagName: 'div',
 		className: 'modal hide fade',

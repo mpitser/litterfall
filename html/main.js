@@ -36,21 +36,6 @@ require([
   App.initialize();
 });
 
-Date.prototype.toTreeDataDateObject = function() {
-	return {
-		'y': this.getFullYear(),
-		'm': this.getMonth() + 1,
-		'd': this.getDate()
-	};
-};
-
-Date.prototype.fromTreeDataDateObject = function(date) {
-	this.setFullYear(date.y);
-	this.setMonth(date.m - 1);
-	this.setDate(date.d);
-};
-
-
 Date.prototype.toLitterfallDateObject = function() {
 	return {
 		'y': this.getFullYear(),
@@ -64,22 +49,8 @@ Date.prototype.fromLitterfallDateObject = function(date) {
 	this.setMonth(date.m - 1);
 	this.setDate(date.d);
 };
-var orig = {
-    matcher: $.fn.typeahead.Constructor.prototype.matcher,
-    updater: $.fn.typeahead.Constructor.prototype.updater,
-    select: $.fn.typeahead.Constructor.prototype.select,
-    listen: $.fn.typeahead.Constructor.prototype.listen
-};
+
 //app object contains global app information
-
-
-
-$(function(){
-  $(".nav a").click(function(){
-    $(this).parent().addClass('active'). // <li>
-      siblings().removeClass('active');
-  });
-});
 
 function toFormattedDate(date){
 	

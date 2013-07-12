@@ -19,78 +19,6 @@ define([
 				"*actions": "defaultRoute" // Backbone will try match the route above first
 			}
 	});
-	$.extend($.fn.typeahead.Constructor.prototype, {
-	matcher: function(item) {
-		//console.log(this.source);
-		if (this.options.type == 'observers') {
-			var observers = this.query.split(",");
-			var last_observer = observers[observers.length - 1];
-			var last_observer = last_observer.replace(/^\s+/,"");
-			
-			if (last_observer == "") return false;
-			
-			for (i = 0; i < observers.length - 2; i++) {
-				if (observers[i].replace(/^\s+|\s+$/g, '') == item) return false;
-			}
-			
-			var last_observer = last_observer.toLowerCase();
-			
-			return last_observer.length && ~item.toLowerCase().indexOf(last_observer);
-		} else if (this.options.type == 'species') {
-			
-			var is_matched = item.toLowerCase().indexOf(this.query.toLowerCase()) == 0;
-			if (is_matched) return true;
-			
-			// always keep unidentified as an option
-			if (item == 'Unidentified spp.') return true;
-			
-			// keep Genus spp. as an option--if the genus matches the query
-			var query_genus = this.query.split(" ")[0];
-			var item_genus = item.split(" ")[0];
-			if (query_genus.toLowerCase() == item_genus.toLowerCase() && item.toLowerCase() == query_genus.toLowerCase() + " spp.") return true;
-			
-			return false;
-		} else {
-			return orig.matcher.call(this, item);
-		}
-	},
-	updater: function(item) {
-		
-		if (this.options.type != 'observers') {
-			return orig.updater.call(this, item);
-		}
-		
-		if (this.query.indexOf(",") == -1) return item+", ";
-		
-		return this.query.replace(/,[^,]*$/, ", "+item+", ");
-		
-	},
-	select: function() {
-		
-		if (this.options.type != 'observers') {
-			return orig.select.call(this);
-		}
-		
-		var to_return = orig.select.call(this);
-		this.$element.focus();
-		return to_return;
-		
-	},
-	listen: function() {
-		if (this.options.type == 'species') {
-			this.$element.on('focus', $.proxy(this.lookup, this));
-			this.$menu.css({
-				'overflow-x': 'hidden',
-				'overflow-y': 'auto',
-				'max-height': '150px',
-				'min-width': this.$element.outerWidth()
-			});
-		}
-		orig.listen.call(this);
-	}
-});
-
-	
 	var initialize = function(){
 		// Instantiate the router
 		var app_router = new AppRouter;
@@ -110,10 +38,11 @@ define([
 			$(".data").addClass("active");
 			$(".home").removeClass("active");
 			var  template_file = 'update.html';
+			console.log("access");
 			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){			
 				$('#main').html(templateHTML);
 				location_options = new selectionOptions;
-				location_options.url = app.config.cgiDir + "litterfall.py?site=all";						//creates list with all possible locations
+				location_options.url = app.config.cgiDir + "tree_data.py?site=all";						//creates list with all possible locations
 				location_select = new selectionOptionsView({
 					el: $('#site-select'),																//populates new selectionOptionsView with locations (sites)
 					collection: location_options
@@ -138,7 +67,7 @@ define([
 			$(".home").removeClass("active");
 			var this_plot = new Plot;
 			//need to use site and plot variable to build url to python script
-			this_plot.url = app.config.cgiDir + 'litterfall.py?site=' + site + '&plot=' + plot;
+			this_plot.url = app.config.cgiDir + 'tree_data.py?site=' + site + '&plot=' + plot;
 			this_plot.mode = 'reports';
 			// load different template depending on whether we are updating or analyzing data	
 			
@@ -198,7 +127,7 @@ define([
 			var this_plot = new Plot;
 			this_plot.mode = 'update';
 			//need to use site and plot variable to build url to python script
-			this_plot.url = app.config.cgiDir + 'litterfall.py?site=' + site + '&plot=' + plot;
+			this_plot.url = app.config.cgiDir + 'tree_data.py?site=' + site + '&plot=' + plot;
 			
 			console.log("updating");
 			
@@ -290,7 +219,7 @@ define([
 	
 	
 				var this_tree = new Tree();
-				this_tree.url = app.config.cgiDir + 'litterfall.py?site=' + site + '&plot=' + plot + '&treeid=' + tree_id + '&subtreeid=' + sub_tree_id;
+				this_tree.url = app.config.cgiDir + 'tree_data.py?site=' + site + '&plot=' + plot + '&treeid=' + tree_id + '&subtreeid=' + sub_tree_id;
 				this_tree.fetch({
 					success: function() {
 						this_tree.editViewInitialize(mode);
@@ -305,6 +234,88 @@ define([
 			});
 		});
 		
+	$.extend($.fn.typeahead.Constructor.prototype, {
+		matcher: function(item) {
+			//console.log(this.source);
+			if (this.options.type == 'observers') {
+				var observers = this.query.split(",");
+				var last_observer = observers[observers.length - 1];
+				var last_observer = last_observer.replace(/^\s+/,"");
+				
+				if (last_observer == "") return false;
+				
+				for (i = 0; i < observers.length - 2; i++) {
+					if (observers[i].replace(/^\s+|\s+$/g, '') == item) return false;
+				}
+				
+				var last_observer = last_observer.toLowerCase();
+				
+				return last_observer.length && ~item.toLowerCase().indexOf(last_observer);
+			} else if (this.options.type == 'species') {
+				
+				var is_matched = item.toLowerCase().indexOf(this.query.toLowerCase()) == 0;
+				if (is_matched) return true;
+				
+				// always keep unidentified as an option
+				if (item == 'Unidentified spp.') return true;
+				
+				// keep Genus spp. as an option--if the genus matches the query
+				var query_genus = this.query.split(" ")[0];
+				var item_genus = item.split(" ")[0];
+				if (query_genus.toLowerCase() == item_genus.toLowerCase() && item.toLowerCase() == query_genus.toLowerCase() + " spp.") return true;
+				
+				return false;
+			} else {
+				return orig.matcher.call(this, item);
+			}
+		},
+		updater: function(item) {
+			
+			if (this.options.type != 'observers') {
+				return orig.updater.call(this, item);
+			}
+			
+			if (this.query.indexOf(",") == -1) return item+", ";
+			
+			return this.query.replace(/,[^,]*$/, ", "+item+", ");
+			
+		},
+		select: function() {
+			
+			if (this.options.type != 'observers') {
+				return orig.select.call(this);
+			}
+			
+			var to_return = orig.select.call(this);
+			this.$element.focus();
+			return to_return;
+			
+		},
+		listen: function() {
+			if (this.options.type == 'species') {
+				this.$element.on('focus', $.proxy(this.lookup, this));
+				this.$menu.css({
+					'overflow-x': 'hidden',
+					'overflow-y': 'auto',
+					'max-height': '150px',
+					'min-width': this.$element.outerWidth()
+				});
+			}
+			orig.listen.call(this);
+		}
+	});
+		var orig = {
+		matcher: $.fn.typeahead.Constructor.prototype.matcher,
+		updater: $.fn.typeahead.Constructor.prototype.updater,
+		select: $.fn.typeahead.Constructor.prototype.select,
+		listen: $.fn.typeahead.Constructor.prototype.listen
+	};
+	$(function(){
+	  $(".nav a").click(function(){
+		$(this).parent().addClass('active'). // <li>
+		  siblings().removeClass('active');
+	  });
+	});
 		
 		// Start Backbone history a necessary step for bookmarkable URL's; enables user to click BACK without navigating to entirely different domain
 	//
