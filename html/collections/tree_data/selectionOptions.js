@@ -2,7 +2,7 @@ define([
 	'jquery',
 	'underscore', 
 	'backbone', 
-	'models/singleOption'
+	'models/tree_data/singleOption'
 ], function($,_, Backbone, singleOption){
 	var selectionOptions = Backbone.Collection.extend({							//creates Collection of singleOption Models (to-be locations, plots, collection type)
 		model: singleOption,
