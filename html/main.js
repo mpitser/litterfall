@@ -53,18 +53,24 @@ Date.prototype.fromLitterfallDateObject = function(date) {
 
 //app object contains global app information
 
+/* 
+toFormattedDate(date)
+Variables:	date	A JSON object (or a dictionary-like Javascript object) that contains attributes y, m, d
+					{y: ####, m: ##, d: ##}
+----------------------
+
+It converts the date object to a nicely formatted string
+*/
 function toFormattedDate(date){
 	
-	var return_string = "";
-	
+	// i'm just trying to be fancy
+	// this loop loops to add an appropriate amount of zeros before the number
 	function looper(num, i, num_digit, string) {
 		
 		var this_digit = (num%(Math.pow(10,i)) - num%(Math.pow(10,i-1)))/Math.pow(10,i-1);
 		
 		string = this_digit + string;
-		
 		if (i == num_digit) return string;
-		
 		i++;
 		return looper(num, i, num_digit, string);
 	}
@@ -73,6 +79,7 @@ function toFormattedDate(date){
 	
 }
 
+/* This should actually be replaced by _.escape() */
 function htmlEntities(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/\'/g, '&#39;');
 }
