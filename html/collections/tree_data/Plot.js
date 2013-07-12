@@ -182,11 +182,11 @@ define([
   		addTree: function(){
 
   			
-  			var random_tree = this.find(function(){return true;});
+  			// var random_tree = this.find(function(){return true;});
   			
   			var new_tree = new Tree({
-  				plot: random_tree.get('plot'),
-  				site: random_tree.get('site')
+  				plot: parseInt($('.plot-number').text()),
+  				site: $('.site-name').text()
   			});
   			var new_model = new newTreeModalView({
   				model: new_tree
