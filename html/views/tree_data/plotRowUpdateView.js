@@ -2,7 +2,7 @@ define([
   'jquery',
   'underscore',
   'backbone',
-  'models/Tree'
+  'tree_data/models/Tree'
 ], function($, _, Backbone, Tree){
 	var plotRowUpdateView = Backbone.View.extend({
 		tagName: 'tr',				
