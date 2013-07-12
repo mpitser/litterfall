@@ -2,11 +2,11 @@ define([
 	'jquery', 
 	'underscore', 
 	'backbone',
-	'models/singleOption',
-	'collections/selectionOptions',
-	'views/selectionOptionsView',
-	'collections/Plot',
-	'models/Tree'
+	'models/tree_data/singleOption',
+	'collections/tree_data/selectionOptions',
+	'views/tree_data/selectionOptionsView',
+	'collections/tree_data/Plot',
+	'models/tree_data/Tree'
 ], function($, _, Backbone, singleOption, selectionOptions, selectionOptionsView, Plot, Tree) {
 
 	var AppRouter = Backbone.Router.extend({

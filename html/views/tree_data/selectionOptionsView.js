@@ -2,7 +2,7 @@ define([
   'jquery',
   'underscore',
   'backbone',
-  'collections/selectionOptions'
+  'collections/tree_data/selectionOptions'
 ], function($, _, Backbone, selectionOptions) {
 	var selectionOptionsView = Backbone.View.extend({
     	template: '<option value="<%= value %>"><%= name %></option>',
