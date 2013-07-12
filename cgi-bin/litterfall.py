@@ -15,10 +15,12 @@ import cgitb; cgitb.enable()
 #############################################################################################
 def getdata(db, query):
 	# get data with all specifications that aren't 'all'
-	object_to_match = {}
+	
+	object_to_match = {}	# object to send to mongoDB to find matching documents
 
 	if query.getvalue('oid') != 'all' and query.getvalue('oid') != None:
 		object_to_match['_id'] = ObjectId(query.getvalue('oid'))
+	
 	if query.getvalue('collection_type') != 'all' and query.getvalue('collection_type') != None:
 		object_to_match['collection_type'] = query.getvalue('collection_type')
 	
@@ -54,22 +56,56 @@ def getdata(db, query):
 	if query.getlist('observer') != 'all' and query.getlist('observer') != []:
 		print query.getlist('observer')
 		object_to_match['observers'] = {"$all": query.getlist('observer')}
+	
 	if query.getvalue('plot') != 'all' and query.getvalue('plot') != None:
 		try:
 			object_to_match['plot'] = int(query.getvalue('plot'))
 		except ValueError:
 			print "Invalid plot number"
+	
 	if query.getvalue('site') != 'all' and query.getvalue('site') != None:
 		object_to_match['site'] = query.getvalue('site')
+	
 	if query.getvalue('sky') != 'all' and query.getvalue('sky') != None:
 		object_to_match['weather.sky'] = query.getvalue('sky')
+	
 	if query.getvalue('precipitation') != 'all' and query.getvalue('precipitation') != None:
 		object_to_match['weather.precipitation'] = query.getvalue('precipitation')
-	#data
 	
+	# query on data
+	material = None
+	type = []
+	trap = []
+	# get the values requested	
+	if query.getvalue('material') != 'all' and query.getvalue('material') != None:
+		material = query.getvalue('material')
+	if query.getlist('type') != 'all' and query.getlist('type') != []:
+		type = "['" + "', '".join(query.getlist('type')) + "']"
+	if query.getlist('trap') != 'all' and query.getlist('trap') != []:
+		trap = "[" + ", ".join(query.getlist('trap')) + "]"
+	
+	# set up a matching structure for mongo based on values given
+	if material != None and type == [] and trap == []:	
+		# only material was specified (leaf or nonleaf)
+		object_to_match['trap_data'] = {'$elemMatch': { 'material': material } }
+	else:
+		# something else (materials, traps, types of data, or all) was specified
+		if type != [] and trap != []:
+			where_query = type+".indexOf(this.type) != -1 && "+trap+".indexOf(this.trap) != -1"
+		elif type != []:
+			where_query = type+".indexOf(this.type) != -1"
+		elif trap != []:
+			where_query = trap+".indexOf(this.trap) != -1"
 		
-	print object_to_match
-		
+		# set up matching object
+		if material == None:
+			object_to_match['trap_data'] = {'$elemMatch': { '$where': where_query } }
+		else:
+			object_to_match['trap_data'] = {'$elemMatch': { 'material': material, '$where': where_query } }
+	
+	
+	# find matching documents to return as array
+	#print object_to_match
 	data = db.find(object_to_match)
 	
 	return data
