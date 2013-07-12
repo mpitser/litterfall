@@ -2,8 +2,8 @@ define([
 	'jquery',
 	'underscore', 
 	'backbone', 
-	'models/Tree',
-	'views/newTreeModalView'
+	'models/tree_data/Tree',
+	'views/tree_data/newTreeModalView'
 ], function($, _, Backbone, Tree, newTreeModalView){
 	var Plot = Backbone.Collection.extend({
 		model: Tree,
