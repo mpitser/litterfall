@@ -62,15 +62,22 @@ define([
   		renderTrees: function(){
   			var site_name = "";
   			var plot_number = 0;
+  			
+  			// for determining the maximum number of observation entries (aka diameters)
   			var max_diam = 0;
   			
   			var this_plot = this;
   			
+  			// for each tree in the collection, creates a plotRowView
   			this.each(function(tree){
+  				
   				tree.plotViewInitialize(this.mode);
+  				
   				var num_obvs = tree.get("diameter").length;
-
+				
+				// listen to the custom event triggered when the user adds a new sub-tree from the tree row
   				this_plot.listenTo(tree, 'add_new_sub_tree_from_row', function() {this_plot.addSubTree(tree.get('tree_id'));});
+  				// if any of the models is deleted, then make sure the data in this plot is up to date
   				this_plot.listenTo(tree, 'destroy', function() {this_plot.fetch({silent: true});});
   				
   				// determine the maximum number of observations for any tree in this plot
@@ -80,13 +87,15 @@ define([
   				}
   			}, this);
 
-
+			
   			$(".dbh").attr("href", document.location.hash);
   			$(".btn").css("display", "inline-block");
     		
     		// add tablesorter jquery plugin (no sorting for first column)
   			$("#plot-table").tablesorter({headers: { 0: { sorter: false}}}); 
+  			
   			// populate the diameter entries based on user's given years
+  			// only for the analysis page
   			this.populateTreeDiameters();
 
   			// set up column headers for CSV
@@ -96,18 +105,8 @@ define([
   			}
 
   			var j = 0;
-  			var agt=navigator.userAgent.toLowerCase();
-  			if (agt.indexOf("firefox") != -1 || agt.indexOf("msie") != -1){
-  				$(".export-info").attr("data-original-title", "Open the file in a text editor, then save it as a file with a .csv extension.");
-  				$(".export-info").attr("href", "https://www.google.com/intl/en/chrome/browser/");
-  			} else if (agt.indexOf("msie") != -1){
-				$(".export-info").attr("data-original-title", "This WILL NOT WORK if you are using Internet Explorer. Click to download a better browser before proceeding.");
-			} else if (agt.indexOf("chrome") != -1){
-				 $(".export-info").attr("data-original-title", "Opening the resulting file should launch MS Excel.");
-			}else if (agt.indexOf("safari") != -1){
-  				$(".export-info").attr("data-original-title","Select 'Save as...' from the File menu and enter a filename that uses a .csv extension.");
-  			}
   			
+  			// bind the export button
   			$(".export").click(function(e) {
   				// query database for all trees in the plot
   				
@@ -149,7 +148,12 @@ define([
 				}*/
 				
 				
-				 // Creating a 1 by 1 px invisible iframe:
+				// --------------
+				// the code below is copied from some random website
+				// it will post the content to a Python script file, which will create the file with the proper header
+				// and file name
+				
+				// Creating a 1 by 1 px invisible iframe:
 
 				var iframe = $('<iframe>',{
 					width:1,
@@ -239,6 +243,7 @@ define([
   				this_plot.fetch({
   					reset: true,
   					success: function() {
+  					// so that the tablesorter plugin does not bring back the zombie trees
   						$('#plot-table').trigger('update');
   					}
   				});
@@ -250,7 +255,7 @@ define([
   			
   			var new_tree = new Tree({
   				tree_id: tree_id,
-  				sub_tree_id: -1,
+  				sub_tree_id: -1, // telling the server that this is a new sub-tree
   				species: parent_tree.get('species'),
   				plot: parent_tree.get('plot'),
   				site: parent_tree.get('site'),
@@ -272,6 +277,7 @@ define([
   				this_plot.fetch({
   					reset: true,
   					success: function() {
+  						// so that the tablesorter plugin does not bring back the zombie trees
   						$('#plot-table').trigger('update');
   					}
   				});
