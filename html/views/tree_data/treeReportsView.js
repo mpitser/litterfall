@@ -2,7 +2,7 @@ define([
 	'jquery',
 	'underscore', 
 	'backbone',
-	'tree_data/models/Tree'
+	'models/tree_data/Tree'
 ], function($, _, Backbone, Tree){
 	var treeReportsView = Backbone.View.extend({
 		tagName: 'div',
