@@ -26,9 +26,123 @@ var app = {
 	}
 };
 
+<<<<<<< HEAD
 require([
   // Load our app module and pass it to our definition function
   'app',
+=======
+Date.prototype.toTreeDataDateObject = function() {
+	return {
+		'y': this.getFullYear(),
+		'm': this.getMonth() + 1,
+		'd': this.getDate()
+	};
+};
+
+Date.prototype.fromTreeDataDateObject = function(date) {
+	this.setFullYear(date.y);
+	this.setMonth(date.m - 1);
+	this.setDate(date.d);
+};
+
+var orig = {
+    matcher: $.fn.typeahead.Constructor.prototype.matcher,
+    updater: $.fn.typeahead.Constructor.prototype.updater,
+    select: $.fn.typeahead.Constructor.prototype.select,
+    listen: $.fn.typeahead.Constructor.prototype.listen
+};
+
+$.extend($.fn.typeahead.Constructor.prototype, {
+	matcher: function(item) {
+		
+		// Matcher function for observers typeahead
+		if (this.options.type == 'observers') {
+			
+			// split the query from the field
+			var observers = this.query.split(",");
+			// get the last observer
+			var last_observer = observers[observers.length - 1];
+			// trim the query
+			var last_observer = last_observer.replace(/^\s+/,"");
+			
+			// if empty, don't show the autocomplete
+			if (last_observer.length == 0) return false;
+			
+			// not matching the observer already entered
+			for (i = 0; i < observers.length - 1; i++) {
+				if (observers[i].replace(/^\s+|\s+$/g, '').toLowerCase() == item.toLowerCase()) return false;
+			}
+			
+			// case insensitive
+			var last_observer = last_observer.toLowerCase();
+			
+			// find whether the item has the last observer
+			return ~item.toLowerCase().indexOf(last_observer);
+		} else if (this.options.type == 'species') {
+			
+			// matched only when the first characters match
+			var is_matched = item.toLowerCase().indexOf(this.query.toLowerCase()) == 0;
+			if (is_matched) return true;
+			
+			// always keep unidentified as an option
+			if (item == 'Unidentified spp.') return true;
+			
+			// keep Genus spp. as an option--if the genus matches the query
+			var query_genus = this.query.split(" ")[0];
+			var item_genus = item.split(" ")[0];
+			if (query_genus.toLowerCase() == item_genus.toLowerCase() && item.toLowerCase() == query_genus.toLowerCase() + " spp.") return true;
+			
+			// if all else fails, then no, it doesn't match
+			return false;
+		} else {
+			// if it's a normal typeahead, then call the original function
+			return orig.matcher.call(this, item);
+		}
+	},
+	updater: function(item) {
+		
+		if (this.options.type != 'observers') {
+			return orig.updater.call(this, item);
+		}
+		
+		if (this.query.indexOf(",") == -1) return item+", ";
+		
+		return this.query.replace(/,[^,]*$/, ", "+item+", ");
+		
+	},
+	select: function() {
+		
+		if (this.options.type != 'observers') {
+			return orig.select.call(this);
+		}
+		
+		var to_return = orig.select.call(this);
+		this.$element.focus();
+		return to_return;
+		
+	},
+	listen: function() {
+		if (this.options.type == 'species') {
+		
+			// bind focus to lookup, so that the menu shows up even though user still has not typed in anything
+			this.$element.on('focus', $.proxy(this.lookup, this));
+			
+			// style the menu
+			// i'm doing it here just because listen is called every time typeahead is constructed
+			// though structure-wise and semantically it does not make sense
+			// (binding focus above makes sense though!
+			this.$menu.css({
+				'overflow-x': 'hidden',
+				'overflow-y': 'auto',
+				'max-height': '150px',
+				'min-width': this.$element.outerWidth()
+			});
+		}
+		
+		orig.listen.call(this);
+	}
+});
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
 
 <<<<<<< HEAD
 $(document).ready(function(){
@@ -65,6 +179,233 @@ $(document).ready(function(){
     	}
 	});
 
+<<<<<<< HEAD
+=======
+	//build a Bootstrap modal
+	var newTreeModal = Backbone.View.extend({
+		tagName: 'div',
+		className: 'modal hide fade',
+		id: 'add-new-tree-modal',
+		template: '\
+		<div class="modal-header">\
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>\
+			<h3>Add a new tree</h3>\
+		</div>\
+		<div class="modal-body" style="overflow-y:visible;">\
+			<form class="form-horizontal">\
+				<div class="control-group">\
+					<label class="control-label" for="new-tree-species">Species</label>\
+					<div class="controls">\
+						<input type="text" id="new-tree-species" placeholder="Species" style="font-style: italic;">\
+						<small class="help-inline"></small>\
+						<span class="help-block"></span>\
+					</div>\
+				</div>\
+				\
+				<div class="control-group">\
+					<label class="control-label" for="new-tree-angle">Angle</label>\
+					<div class="controls">\
+						<input type="text" id="new-tree-angle" placeholder="Angle">\
+						<small class="help-inline">Degrees</small>\
+						<span class="help-block"></span>\
+					</div>\
+				</div>\
+				\
+				<div class="control-group">\
+					<label class="control-label" for="new-tree-distance">Distance</label>\
+					<div class="controls">\
+						<input type="text" id="new-tree-distance" placeholder="Distance">\
+						<small class="help-inline">Meters</small>\
+						<span class="help-block"></span>\
+					</div>\
+				</div>\
+			</form>\
+		</div>\
+		<div class="modal-footer">\
+			<a class="btn btn-danger" data-dismiss="modal">Cancel</a>\
+			<a class="btn btn-save-and-back">Save and Go Back</a>\
+			<a class="btn btn-primary btn-save-and-update">Save and Add Observations</a>\
+		</div>\
+		',
+		initialize: function() {
+			this.isSubTree = this.model.get('tree_id') > 0;
+			this.render();
+		},
+		render: function() {
+			// Usual stuff
+
+			this.$el.html(_.template(this.template, {}));
+
+			// This is a bit ugly--to be fixed later
+			if (this.isSubTree) {
+				this.$el.find(".modal-header h3").html("Add a new sub-tree <small>Tree ID:  "+this.model.get("tree_id")+"</small>");
+				this.$el.find("#new-tree-species").tooltip({title: "The species of all sub-trees should be the same, no?"})
+					.attr("disabled", "disabled").val(this.model.get("species"));
+				this.$el.find('#new-tree-angle').val(this.model.get("angle"));
+				this.$el.find('#new-tree-distance').val(this.model.get("distance"));
+
+			}
+
+			// Append it to the body
+			$("body").append(this.el);
+			this.$el.modal();
+
+			// Add autocomplete to the species field
+			this.addAutocomplete();
+
+			var self = this;
+
+			// Remove the model when done
+			this.$el.on("hidden", function() {
+				$(this).remove();
+				if (self.isSubTree) {
+					$('.add-new-sub-tree').eq(0).trigger("not_choosing_parent_tree");
+				}
+			});
+
+			return this;
+
+		},
+		addAutocomplete: function() {
+			// get the species list from the text file and populate array
+        	$.getJSON('data/tree_species.json', function(data){
+           	 	
+           	 	// Add autocomplete
+				$("#new-tree-species").typeahead({
+					minLength: 0,
+					items: Infinity,
+					source: data,
+					jsonSource: data,
+					type: "species"
+				});
+				
+				
+   			});
+		},
+		events: {
+			'click .btn-save-and-back': function() {
+				this.addAndSaveTree(true);
+			},
+			'click .btn-save-and-update': function() {
+				this.addAndSaveTree(false);
+			},
+			'blur #new-tree-angle': 'validateAngle',
+			'blur #new-tree-distance': 'validateDistance',
+			'change #new-tree-species': 'validateSpecies'
+		},
+		validateSpecies: function() {
+
+			var $species = $('#new-tree-species');
+			var $all_species = $species.data("typeahead").source;
+			//console.log($all_species);
+			//console.log($species.val());
+
+			var error = false;
+
+			if ($species.val() == '') {
+				error = "This cannot be empty";
+			} else if ($.inArray($species.val(), $all_species) == -1) {
+				$species.val("Unidentified, spp.");
+				console.log($species);
+				error = "The species entered did not match a species name on file.  It has been given a species name of Unidentified.  If this is an error, please edit your entry to choose one of the options or contact the professor.";
+			}
+
+			return this.addErrorMessage($species, error);
+
+		},
+		validateAngle: function() {
+
+			var $angle = $('#new-tree-angle');
+
+			// It should only be numbers
+			var number_regex = /^[0-9]*$/;
+
+			var error = false;
+
+			if ($angle.val() == '') {
+				error = "This cannot be empty.";
+			} else if (!number_regex.test($angle.val())) {
+				error = "An angle should be a number.";
+			} else if (parseInt($angle.val()) > 360 || parseInt($angle.val()) < 0) {
+				error = "It should be between 0-360 degrees!";
+			}
+
+			return this.addErrorMessage($angle, error);
+
+		},
+		validateDistance: function() {
+			var $distance = $('#new-tree-distance');
+
+			var error = false;
+
+			if ($distance.val() == '') {
+				error = "This cannot be empty.";
+			} else if (isNaN(parseFloat($distance.val()))) {
+				error = "A distance should be a number...";
+			} else if (parseInt($distance.val()) > 30 || parseInt($distance.val()) < 0) {
+				error = "Do you think it is a bit too far?";
+			}
+
+			return this.addErrorMessage($distance, error);
+
+		},
+		addErrorMessage: function($target, error) {
+			if (error !== false) {
+				$target.parent().parent().removeClass("success").addClass("error");
+				$target.parent().find(".help-block").text(error);
+				return false;
+			} else {
+				$target.parent().parent().removeClass("error").addClass("success");
+				$target.parent().find(".help-block").empty();
+				return true;
+			}
+		},
+		addAndSaveTree: function(back_to_plot) {
+
+			// Set the URL--don't you think we should not have to specify the URL every time we call the server?
+			this.model.url = app.config.cgiDir + 'tree_data.py';
+			var self = this;
+			
+			this.model.validate = function() {
+				if (!(self.validateAngle() && self.validateDistance() && self.validateSpecies())) {
+					return "Invalid data";
+				}
+				
+			};
+			
+			this.model.on("invalid", function() {
+				$('#add-modal .error').eq(0).focus();
+			});
+
+			// save!
+			this.model.save({
+				species: $('#new-tree-species').val(),
+				angle: parseInt($('#new-tree-angle').val()),
+				distance: parseInt($('#new-tree-distance').val())
+			}, {
+				success: function(model) {
+					self.$el.modal("hide");
+					if (back_to_plot == true) {
+						/* if (self.isSubTree === true) {
+							$(".add-new-sub-tree").trigger("click");
+						} */
+						self.trigger("tree_saved");
+					} else {
+						app_router.navigate(document.location.hash + "/treeid/" + model.get("tree_id") + (self.isSubTree ? ("/subtreeid/" + model.get("sub_tree_id")) : ""), {trigger: true});
+					}
+				},
+				error: function(model, xhr) {
+					
+					var saveTreeError = new errorView({xhr: xhr});
+					saveTreeError.render().$el.prependTo("#add-new-tree-modal > .modal-body");
+					
+				}
+			});
+
+		}
+	});
+
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
 	//build a row in the plot table representing a tree
 	var plotRowView = Backbone.View.extend({
 		tagName: 'tr',
@@ -83,6 +424,20 @@ $(document).ready(function(){
 			</td>\
 			<td>\
 				<%= tree.distance %>\
+<<<<<<< HEAD
+=======
+			</td>\
+			<td>\
+			<% var status_display = ""; %>\
+			<% if (tree.status == "alive") { %>\
+			<%		status_display = "Alive"; %>\
+			<%	} else if (tree.status == "dead_standing"){ %>\
+			<%		status_display = "Dead (standing)"; %>\
+			<%	} else if (tree.status == "dead_fallen"){ %>\
+			<%		status_display = "Dead (fallen)"; %>\
+			<% } %>\
+				<%= status_display %>\
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
 			</td>',
 		templateUpdate:	'\
 			<td>\
@@ -122,6 +477,7 @@ $(document).ready(function(){
 			}
 		},
 		renderReport: function(){
+<<<<<<< HEAD
 			var thisTree = this.model.toJSON();
 			
 			//$el --> gets the jQuery object for this view's element 
@@ -240,6 +596,52 @@ $(document).ready(function(){
 			//}
 			
 			
+=======
+			var this_tree = this.model.toJSON();
+			
+			//$el --> gets the jQuery object for this view's element 
+			//*.attr('id', this_tree._id.$oid) --> sets 'id' to MongoDB value for tree's ID
+			//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
+			this.$el.attr('id', this_tree._id.$oid).html(_.template(this.templateReports, {tree: this_tree}));
+			this.$el.addClass("tree-cluster-" + this_tree.tree_id);
+			this.$el.children().eq(2).css("font-style","italic");
+			this.options.targetEl.append(this.el);
+			
+			// find start and end Year by select buttons
+
+			// if tree has entry, add it, otherwise just add -
+		      
+			var start_year = $('#start-year').val();
+			var end_year = $('#end-year').val();
+		 
+			var this_row = $(this.el);
+		        
+			var entry_added = false;
+			
+			/*
+			var unique_year_entries = _.uniq(this_tree.diameter, true, function(entry) {
+				return 0 - entry.date.y;
+			});
+			*/
+
+			$("#sub-header").children().each(function(index, value){
+
+				for (i in this_tree.diameter){
+					// this is the year of the column $(value).text());
+					if (this_tree.diameter[i].date.y === parseInt($(value).text())) {
+						$("<td></td>").addClass("date-entry y-"+$(value).text()).attr("value", this_tree.diameter[i].value).text(this_tree.diameter[i].value).appendTo(this_row);
+						entry_added = true;
+						break;
+					}
+				}
+				// if no entry for that date was found, add a '-' in that cell
+				if (entry_added == false) {
+					$("<td></td>").addClass("date-entry y-"+$(value).text()).attr("value", "no entry").text("-").appendTo(this_row);
+				}
+				// reset variable for next year
+				entry_added=false;
+			});
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
 				
 		},
 		renderUpdate: function(){
@@ -278,10 +680,54 @@ $(document).ready(function(){
 			app_router.navigate(document.location.hash + treeUrl, {trigger: true});
 		},
 		deleteTree: function(){
+<<<<<<< HEAD
 			var thisTreeEl = this.$el;
 			this.model.url = app.config.cgiDir + 'litterfall.py';
 			var result = this.model.destroy();
 			if (result !== false) {
+=======
+
+			// ask the user whether they're absolutely sure...
+			var $alert_modal = $('<div></div>').addClass("modal hide face").attr({
+				'tabindex': '-1',
+				'role': 'dialog',
+				'aria-labelledby': 'dialog',
+				'aria-hidden': 'true'
+			}).html('\
+				<div class="modal-header">\
+					<h3>This tree will be gone forever.</h3>\
+				</div>\
+				<div class="modal-body">\
+					<p>Take a deep breathe and think carefully. This tree will never return once it is gone. Are you sure you want to get rid of it?</p>\
+				</div>\
+				<div class="modal-footer">\
+					<button class="btn" data-dismiss="modal" aria-hidden="true">No&mdash;sorry, tree</button>\
+					<button class="btn btn-danger" id="no-remorse">Yes&mdash;sorry, tree</button>\
+				</div>\
+			');
+
+			$('body').append($alert_modal);
+			$alert_modal.modal();
+			$alert_modal.modal('show');
+			var is_user_sure = true;
+			$alert_modal.on('hidden', function() {
+				$alert_modal.remove();
+			});
+
+			var self = this;
+
+			$alert_modal.find('#no-remorse').on('click', function() {
+				$alert_modal.modal("hide");
+				self.deleteTreeFunction();
+			});
+
+		},
+		deleteTreeFunction: function() {
+
+			var this_tree_el = this.$el;
+			this.model.url = app.config.cgiDir + 'tree_data.py';
+			var result = this.model.destroy({
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
 			
 				thisModel = this.model;
 				
@@ -307,8 +753,13 @@ $(document).ready(function(){
 							
 							// get the data
 							// using oid, because that's the only way it's stable
+<<<<<<< HEAD
 							updatedTree.url = app.config.cgiDir + 'litterfall.py?oid=' + $(this).attr('id');
 							updatedTree.fetch({
+=======
+							updated_tree.url = app.config.cgiDir + 'tree_data.py?oid=' + $(this).attr('id');
+							updated_tree.fetch({
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
 								success: function() {
 									console.log(updatedTree);
 									// update it, only the full tree id, for now
@@ -379,6 +830,7 @@ $(document).ready(function(){
 					$("#plot-table .species select").append($("<option></option>").attr("value",value).text(value));
 				});
 
+<<<<<<< HEAD
 			});
 		},
 		events: {
@@ -476,6 +928,15 @@ $(document).ready(function(){
 			
 			this.$el.fadeOut("slow", function() {
 				$(this).remove();
+=======
+				}, 
+				error: function(model, xhr) {
+					
+					var deleteTreeError = new errorView({xhr: xhr, id: "delete-tree-error"});
+					deleteTreeError.render().$el.insertAfter($("h1").eq(0));
+					
+				}
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
 			});
 		}
 	});
@@ -654,10 +1115,17 @@ $(document).ready(function(){
 		console.log("here");
 			if (document.location.hash.search("update") === -1) {
 				this.renderReport();
+<<<<<<< HEAD
 				//this.model.on('change', this.renderReport, this); //re-render when the model is saved (new observation, or an edit)
 			} else {
 				this.renderUpdate();
 				//this.model.on('change', this.renderUpdate, this); //re-render when the model is saved (new observation, or an edit)
+=======
+				// this.model.on('change', this.renderReport, this); //re-render when the model is saved (new observation, or an edit)
+			} else {
+				this.renderUpdate();
+				//this.model.on('change', this.renderUpdate, this.model); //re-render when the model is saved (new observation, or an edit)
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
 			}
 		},
 		renderReport: function(){
@@ -667,6 +1135,7 @@ $(document).ready(function(){
 			thisTree.datesDesc = _.keys(thisTree.diameter).sort().reverse();
 			this.$el.html(_.template(this.templateReport, {tree: thisTree}));
 			$(".title").text("Analyzing Tree Data ");
+<<<<<<< HEAD
 			$("#tree_observations").tablesorter(); 
 			$('.back').click(function(){
 				console.log("clicked once");
@@ -674,6 +1143,9 @@ $(document).ready(function(){
 				app_router.navigate(document.location.hash.slice(0, document.location.hash.search("/treeid")), {trigger: true});
 			});
 			this.postRender();
+=======
+			$("#tree-observations").tablesorter();
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
 		},
 		renderUpdate: function(){
 			//console.log('render edit');
@@ -682,6 +1154,7 @@ $(document).ready(function(){
 			thisTree.datesDesc = _.keys(thisTree.diameter).sort().reverse();
 			this.$el.html(_.template(this.templateUpdate, {tree: thisTree}));
 			$(".title").text("Updating Tree Data ");
+<<<<<<< HEAD
 			$("#tree_observations").tablesorter({headers: { 0: { sorter: false}}}); 
 			$('.back').click(function(){
 							console.log("clicked once");
@@ -689,6 +1162,11 @@ $(document).ready(function(){
 			console.log(document.location.hash.slice(0, document.location.hash.search("/treeid")));
 				app_router.navigate(document.location.hash.slice(0, document.location.hash.search("/treeid")), {trigger: true});
 			});
+=======
+			$("#tree-observations").tablesorter({headers: { 0: { sorter: false}}}); 
+			$(".show-obs-info").show();
+			$(".edit-obs-info").hide();
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
 			this.postRender();
 		},
 		postRender: function(){
@@ -744,6 +1222,7 @@ $(document).ready(function(){
 			var today = new Date();
 			var todayDateKey = [today.getFullYear(),((today.getMonth() < 9) ? 0 : ""),(today.getMonth() + 1),((today.getDate() < 10) ? 0 : ""),today.getDate()].join(""); //yes it generates the date in YYYYMMDD format
 			// if today's date already has an entry, set a template dateKey using tomorrow's date (which the user will be forced to change to pass validation)
+<<<<<<< HEAD
 			diameters[(diameters[todayDateKey] == undefined) ? todayDateKey : (parseInt(todayDateKey) + 1)] = {
 					value: 'n/a',
 					notes: "",
@@ -761,6 +1240,85 @@ $(document).ready(function(){
 			$("#tree_observations > tbody > tr:first .edit_cell.date_select :input" ).datepicker({ altFormat: "yymmdd" , altField: "#tree_observations > tbody > tr .formatted_date" , maxDate: 0 , changeYear: true , changeMonth: true , constrainInput: true});	
 			var existingObs = this.model.findAllObservers();
 			$("#tree_observations > tbody > tr:first .edit_cell.observers :input").autocomplete({source: existingObs});
+=======
+			var new_entry = {
+				date: today.toTreeDataDateObject(),
+				year: today.getFullYear(),
+				value: 'n/a',
+				notes: "",
+				observers: [],
+				status: ""
+			};
+			
+			// new jQuery row to be prepended
+			// class="new" to mark the row as new
+			var $new_entry_row = $('<tr></tr>').addClass("new").html(_.template(this.rowEntryTemplateUpdate, {entry: new_entry, tree: this.model}));
+			// prepend new row to the table
+			$('#tree-observations tbody').prepend($new_entry_row);
+			
+			// set status as last recorded status by default
+			// or active if no entries are recorded yet
+			var last_known_status = ((this.model.get("diameter")[0] !== undefined) ? this.model.get("diameter")[0].status : "alive")
+			$new_entry_row.find("."+last_known_status).addClass("active");
+			
+			//show correct fields for editing
+			$new_entry_row.find(".edit-obs-info").show();
+			$new_entry_row.find(".edit_cell").show();
+			$new_entry_row.find(".display_cell").hide();
+			$new_entry_row.find(".edit_cell.date_select :input").datepicker({
+				maxDate: 0,
+				changeYear: true,
+				changeMonth: true,
+				yearRange: '2000:c', // allow years to be edited back to the start of collection, and up to current year
+				//constrainInput: true,
+				onSelect: function() {
+					$(".ui-datepicker a").removeAttr("href");
+				}
+			});
+			
+			// Disable all the other edit buttons
+			// Why do we need to do that though?
+			$("#tree-observations .btn.display_cell").hide();
+			
+			//var existingObs = this.model.findAllObservers();
+			var all_observers = this.getAllObservers();
+			$new_entry_row.find(".edit_cell.observers :input").typeahead({
+				source: all_observers,
+				type: 'observers'
+			});
+			
+			
+			// bind the validation functions to the fields to validate
+			var dis = this;
+			$new_entry_row.find(".edit_cell.date_select :input").on("blur", function() {
+				$new_entry_row.find(".edit_cell.date_select :input").addClass("to_validate");
+				dis.validateField();
+			});
+			$new_entry_row.find(".edit_cell.observers :input").on("blur", function() {
+				$new_entry_row.find(".edit_cell.observers :input").addClass("to_validate");
+				dis.validateField();
+			});
+			$new_entry_row.find(".edit_cell.diameter :input").on("blur", function() {
+				$new_entry_row.find(".edit_cell.diameter :input").addClass("to_validate");
+				dis.validateField();
+			});
+			$new_entry_row.find(".status.alive").on("click", function() {
+				$new_entry_row.find(".status.alive").addClass("to_validate");
+				console.log("about to validate status");
+				dis.validateField();
+			});
+			$new_entry_row.find(".status.dead_standing").on("click", function() {
+				$new_entry_row.find(".status.dead_standing").addClass("to_validate");
+				console.log("about to validate status");
+				dis.validateField();
+			});
+			$new_entry_row.find(".status.dead_fallen").on("click", function() {
+				$new_entry_row.find(".status.dead_fallen").parent().addClass("to_validate");
+				console.log("about to validate status");
+				dis.validateField();
+			});
+			
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
 		},
 
 		editObservation: function(event) {
@@ -769,6 +1327,7 @@ $(document).ready(function(){
 			row_to_edit = $(event.target).parents("tr");		// Get the row of edit button
 
 			// Hide any existing edit modes
+<<<<<<< HEAD
 			$("#tree_observations .btn.display_cell").hide();
 
 			// Show edit content, hide display content, show "Submit/cancel button", add date_picker		
@@ -780,16 +1339,85 @@ $(document).ready(function(){
 			var allDistinctObservers = this.populateObserversArray(allDistinctObservers);
 			row_to_edit.find(".edit_cell.observers :input").autocomplete({source: allDistinctObservers});			
 
+=======
+			$("#tree-observations .btn.display_cell").hide();
+			$row_to_edit.find(".edit-obs-info").show();
+			
+			// set status as whatever it was listed as in tree
+			$row_to_edit.find("." + this.model.get("status")).addClass("active");
+			
+			$row_to_edit.find(".edit_cell").show();
+			$row_to_edit.find(".display_cell").hide();
+			$row_to_edit.find(".edit_cell.date_select :input").datepicker({
+				dateFormat: "mm/dd/yy", 
+				maxDate: 0, 
+				changeYear: true, 
+				changeMonth: true, 
+				yearRange: '2000:c', // allow years to be edited back to the start of collection, and up to current year
+				//constrainInput: true,
+				onSelect: function() {
+					$(".ui-datepicker a").removeAttr("href");
+				}
+			});
+			$row_to_edit.addClass("old");
+			
+			var all_observers = this.getAllObservers();
+			$row_to_edit.find(".edit_cell.observers :input").typeahead({
+				source: all_observers,
+				type: 'observers'
+			});
+			$(".already").remove();
+			
+			console.log($row_to_edit);
+			
+			var dis = this;
+			$row_to_edit.find(".edit_cell.date_select :input").on("blur", function() {
+				console.log("date");
+				$row_to_edit.find(".edit_cell.date_select :input").addClass("to_validate");
+				dis.validateField();
+			});
+			$row_to_edit.find(".edit_cell.observers :input").on("blur", function() {
+				console.log("observers");
+				$row_to_edit.find(".edit_cell.observers :input").addClass("to_validate");
+				dis.validateField();
+			});
+			$row_to_edit.find(".edit_cell.diameter :input").on("blur", function() {
+				console.log("diams");
+				$row_to_edit.find(".edit_cell.diameter :input").addClass("to_validate");
+				dis.validateField();
+			});
+			$row_to_edit.find(".status.alive").on("click", function() {
+				$row_to_edit.find(".status.alive").addClass("to_validate");
+				dis.validateField();
+			});
+			$row_to_edit.find(".status.dead_standing").on("click", function() {
+				$row_to_edit.find(".status.dead_standing").addClass("to_validate");
+				dis.validateField();
+			});
+			$row_to_edit.find(".status.dead_fallen").on("click", function() {
+				$row_to_edit.find(".status.dead_fallen").parent().addClass("to_validate");
+				dis.validateField();
+			});
+			
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
 		},
 
 		cancelEditObservation: function() {
 			// user wants to cancel any edits made, or is canceling after adding a new entry
 			this.model.fetch(); // retrieves recent data
+<<<<<<< HEAD
 			this.renderUpdate();      // NOTE: this is sort of a hack to exit the editing view
+=======
+			$("#tree-observations > tr").removeClass("new");
+			$("#tree-observations > tr").removeClass("edit");
+			$(".btn-new-observation").show();
+			this.render();      // NOTE: this is sort of a hack to exit the editing view
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
 		},
 
 		saveObservation: function(event) {
 			// User added or edited an observation.  Save it to the server.	
+<<<<<<< HEAD
 			// Get the row that is being edited
 			row_to_save = $("#tree_observations > tbody > tr .edit_cell :visible").parents("tr");
 
@@ -865,6 +1493,209 @@ $(document).ready(function(){
 				return;
 			}
 
+=======
+			
+			// Get the row that is being edited
+			var $row_to_save = $(event.target).parents("tr");
+			
+			/* validate data being entered before saving; cancel if invalid */
+			$row_to_save.find(".edit_cell.date_select :input").addClass("to_validate");
+			if (! this.validateField()) {
+				return;
+			}
+			$row_to_save.find(".edit_cell.observers :input").addClass("to_validate");
+			if (! this.validateField()) {
+				return;
+			}
+			$row_to_save.find(".edit_cell.diameter :input").addClass("to_validate");
+			if (! this.validateField()) {
+				return;
+			}
+			
+			// is it a new row, or an old one?
+			var is_this_row_new = $row_to_save.hasClass("new");
+			
+			var entries_array = this.model.get("diameter");
+			
+			// convert observers from string to array
+			var new_observers_orig = $row_to_save.find(".observers :input").val().split(",");
+			var new_observers = [];
+			var new_observer = "";
+			for (var i = 0; i < new_observers_orig.length; i++){
+				new_observer = new_observers_orig[i].trim(" ");
+				if (new_observer != "") new_observers.push(new_observer);
+			}
+			
+			// var new_date = new Date(parseInt($row_to_save.find(".unix-time").val()));
+			
+			// new entry object
+			var new_entry = {
+				date: ($row_to_save.find(".edit_cell.date_select :input").datepicker("getDate")).toTreeDataDateObject(),
+				year: ($row_to_save.find(".edit_cell.date_select :input").datepicker("getDate")).getFullYear(),
+				value: parseFloat($row_to_save.find(".diameter :input").val()).toFixed(1), //round the diameter measurement to 1 decimal place
+				observers: new_observers,
+				notes: $row_to_save.find(".notes :input").val(),
+				status: $row_to_save.find(".status.active").val()
+			};				
+			this.model.set('status', $row_to_save.find(".status.active").val());
+			//console.log($row_to_save.find(".status.active").val());
+			//console.log(this.model);
+			// if it is a new one
+			if (is_this_row_new === true) {
+				
+				// add a new entry to the list, to where it should be
+				var target_index = _.sortedIndex(entries_array, new_entry, function(entry) {
+					return entry.year;
+				});
+				
+				// then insert it
+				this.model.set('diameter', _.union(_.first(entries_array, target_index), [new_entry], _.rest(entries_array, target_index)));
+				
+				
+			} else { // if we are editing a row
+				
+				// get the index from the id (id="entry-#")
+				var target_index = parseInt(($row_to_save.attr("id")).split("-")[1]);
+				// set the entry at the target index to the new one
+				entries_array[target_index] = new_entry;
+				// sort it, because why not?
+				// well, really though, why not?
+				entries_array = _.sortBy(this.model.get('diameter'), function (entry) {
+					return 0 - (entry.date.y*366 + entry.date.m*32 + entry.date.d);
+				});
+				
+				// set the new diameter
+				this.model.set('diameter', entries_array);
+				
+			}
+			
+			var self = this;
+			
+			$("#tree-observations > tr").removeClass("edit");
+			this.model.url = app.config.cgiDir + 'tree_data.py';
+			this.model.save({}, {
+				success: function() {
+					self.render();
+				},
+				error: function(model, xhr) {
+					var saveError = new errorView({
+						xhr: xhr,
+						id: "save-observation-error"
+					});
+					
+					saveError.render().$el.insertBefore('#tree-observations');
+					
+				}
+			});	
+			
+
+		},
+		deleteObservation: function(event) {
+			
+			// ask the user whether they're absolutely sure...
+			var $alert_modal = $('<div></div>').addClass("modal hide face").attr({
+				'tabindex': '-1',
+				'role': 'dialog',
+				'aria-labelledby': 'dialog',
+				'aria-hidden': 'true'
+			}).html('\
+				<div class="modal-header">\
+					<h3>Are you sure...</h3>\
+				</div>\
+				<div class="modal-body">\
+					<p>...you want to delete this observation entry? </p>\
+				</div>\
+				<div class="modal-footer">\
+					<button class="btn btn-info" data-dismiss="modal" aria-hidden="true">Nah, just kidding</button>\
+					<button class="btn btn-danger" id="no-remorse">Yes, I won\'t feel remorse</button>\
+				</div>\
+			');
+			
+			$('body').append($alert_modal);
+			$alert_modal.modal();
+			$alert_modal.modal('show');
+			var is_user_sure = true;
+			$alert_modal.on('hidden', function() {
+				$alert_modal.remove();
+			});
+			
+			var self = this;
+			
+			$alert_modal.find('#no-remorse').on('click', function() {
+			
+				$alert_modal.modal("hide");
+			
+				// get the row to delete
+				var $row_to_delete = $(event.target).parents("tr");
+				
+				// get the target index
+				var target_index = parseInt(($row_to_delete.attr("id")).split("-")[1]);
+				var entries_array = self.model.get('diameter');
+				
+				// delete it! HAHAHAHAHA
+				self.model.set('diameter', _.without(entries_array, entries_array[target_index]));
+				self.model.url = app.config.cgiDir + 'tree_data.py';
+				self.model.save({}, {
+					success: self.render,
+					error: function(model, xhr) {
+						var deleteObservationError = new errorView({
+							xhr: xhr,
+							id: "delete-observation-error"
+						});
+					}
+				});
+				
+				
+			});
+			
+		},
+		validateField: function(){
+
+			var current_row = $("#tree-observations > tbody > tr .edit_cell :visible").parents("tr");
+			//console.log(current_rowfind(".to_validate"));
+			var field_to_validate = current_row.find(".to_validate").parent().attr("class").replace("to_validate", "").replace("display_cell", "").replace("edit_cell", "").replace("show-obs-info", "").replace("edit-obs-info", "").trim();
+			console.log(field_to_validate.search("status") !== -1);
+			var error_message = false;	// on a validation error this is populated with string to display
+			var status_error_message = false;
+			var field_to_highlight;		
+			
+			//if date field lost focus 
+			if (field_to_validate == "date_select"){
+				error_message = this.validateDate(current_row);	
+				if (error_message) field_to_highlight="date_select";			
+			//if observers field lost focus				
+			} else if (field_to_validate == "observers"){
+				error_message = this.validateObservers(current_row);
+				if (error_message) field_to_highlight="observers";
+			//if diameter field lost focus				
+			} else if (field_to_validate == "diameter"){
+				error_message = this.validateDiameter(current_row);
+				if (error_message) {field_to_highlight="diameter"; console.log("didnt pass");}
+			} else if (field_to_validate.search("status") !== -1) {
+				status_error_message = this.validateStatus(current_row);
+			} else {
+				// field left was comments, which don't need to be validated (and should be allowed to be empty!)
+				return true;
+			}
+						
+			
+			if (error_message) {	// if there is an error in validation of an editable field		
+				//flag the field as invalid with a tooltip and highlighted color
+				// change the title that will be displayed in the tooltip
+				$(".edit_cell."+field_to_highlight+" :input").attr("data-original-title", error_message).addClass("alert_invalid").tooltip().tooltip('show');
+				// also remove validate flag since it has now been validated
+				current_row.find(".to_validate").removeClass("to_validate");
+				return false;
+			} else if (status_error_message) {	// if there is an error in validation of the status buttons
+				console.log(status_error_message);
+				current_row.find(".btn-group.status").tooltip('destroy').tooltip({title: status_error_message}).tooltip('show');
+				current_row.find(".to_validate").removeClass("to_validate");
+			} else {	//if field passes all tests, make sure nothing is highlighted anymore 
+				// reset everything to look normal, unflagged, etc.
+				current_row.find(".to_validate").removeClass("to_validate").attr("data-original-title", "").removeClass("alert_invalid").tooltip("destroy");
+			}
+			return true;
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
 		},
 
 		validateDate: function(currentRow) {
@@ -954,9 +1785,30 @@ $(document).ready(function(){
 				return true;
 			}
 		},
+		
+		validateStatus: function($current_row) {
+			console.log("in validate status");
+			//TODO: get the most recent status.
+
+			var last_known_status = (this.model.get("diameter")[0] !== undefined) ? this.model.get("diameter")[0].status : "alive";
+			console.log(last_known_status);
+			
+			var entered_status = $current_row.find(".status.to_validate").val();
+			console.log(entered_status);
+			
+			if (entered_status == "alive" && (last_known_status == "dead_standing" || last_known_status == "dead_fallen")) {
+				return "A dead tree doesn't usually come back to life... are you sure it is alive now???";
+			} else if (entered_status == "dead_standing" && last_known_status == "dead_fallen") {
+				return "A fallen tree doesn't usually stand itself back up... are you sure you are recording it correctly?";
+			} else {
+				return false;
+			}
+			
+		},
 
 		populateObserversArray: function(observersArray) {
 			//finds all observers that have been previously entered into the database
+<<<<<<< HEAD
 			var curObservers;
 			var curObserver;
 			observersArray = [];
@@ -994,6 +1846,14 @@ $(document).ready(function(){
 							}
 						}
 					}
+=======
+			var observers_array = [];
+			
+			$.getJSON(app.config.cgiDir + 'tree_data.py?site=allObservers', function(data) {
+				
+				for (i in data) {
+					observers_array.push(data[i]);
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
 				}
 			});
 			observersArray.sort();
@@ -1021,6 +1881,35 @@ $(document).ready(function(){
     		return parsedOptions;
     	}
 	});
+<<<<<<< HEAD
+=======
+	
+	var errorView = Backbone.View.extend({
+		
+		tagName: 'div',
+		className: 'alert alert-error fade in',
+		defaults: {
+			title: "Error",
+			message: "Hey, something just did go wrong."
+		},
+		initialize: function() {},
+		render: function() {
+			if (this.attributes.id !== undefined) {
+				$("#"+this.options.id).remove();
+				this.id = this.options.id;
+			}
+			var has_xhr = this.options.xhr !== undefined;
+		
+			this.$el.html('<button type="button" class="close" data-dismiss="alert">&times;</button>\
+			<h4>' + (has_xhr ? ("Error " + this.options.xhr.status + ": " + this.options.xhr.statusText) : this.options.title) + '</h4>\
+			' + (has_xhr ? this.options.xhr.responseText : this.options.message) + '\
+			');
+		
+			return this;
+		}
+		
+	});
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
 
 
 	//Declare the tree object (Model)
@@ -1044,7 +1933,10 @@ $(document).ready(function(){
 			collection_type: 'tree'
 		},
 		initialize: function(){
+<<<<<<< HEAD
 			this.editViewInitialize();
+=======
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
 			this.on('invalid', this.showError);
 		},
 		showError: function(){
@@ -1064,7 +1956,27 @@ $(document).ready(function(){
 			});
 		},
 		parse: function(response){
+<<<<<<< HEAD
 			response.full_tree_id = response.tree_id + (response.sub_tree_id * .1);
+=======
+			
+			// sort, the latest goes to the top
+			response.diameter = _.sortBy(response.diameter, function (entry) {
+				//console.log(entry);
+				return 0 - (entry.date.d + entry.date.m*32 + entry.date.y*366);
+			});
+			// format full tree ID for display
+			response.full_tree_id = response.tree_id + ((response.sub_tree_id == 0) ? '' : ('.' + response.sub_tree_id));
+			
+			// get latest status (dead or alive) and set to the model
+			if (response.diameter.length > 0) {
+				//alert(response.diameter[0].status);
+				response.status = response.diameter[0].status;
+			} else {
+				response.status = "alive";
+			}
+			
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
 			return response;
 		},
 		// overriding the save method, so that when the model saves it updates its inside to match what the server sends back
@@ -1072,12 +1984,19 @@ $(document).ready(function(){
 			
 			var result = Backbone.Model.prototype.save.call(this, attrs, options);
 			
+<<<<<<< HEAD
 			treeModel = this;
 			result.done(function(data) {
 				
 				treeModel.set(data);
 				
 			});
+=======
+			var self = this;
+			if (result !== false) {
+				result.done(function(data) {self.set(data);});
+			}
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
 			
 			return result;
 		},
@@ -1106,11 +2025,20 @@ $(document).ready(function(){
 		model: Tree,
 		url: "/",
   		initialize: function(){
+<<<<<<< HEAD
   			 this.on('reset', this.renderTrees); 
   			 this.on('add', this.renderTrees); 
   			 //this.on('reset', this.findAllObservers); 
   			 //this.on('add', this.findAllObservers); 
   			 //this.on('change', this.renderTrees);
+=======
+  			this.on('reset', this.renderTrees); 
+
+  		},
+  		render: function() {
+  			this.renderTrees();
+  			return this;
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
   		},
   		renderTrees: function(){
   			var siteName = "";
@@ -1131,6 +2059,7 @@ $(document).ready(function(){
   					maxDiam = numObvs;
   				}
   			}, this);
+<<<<<<< HEAD
   			
   			
   			var dataStartYear = 2002;					// data began collection in 2002
@@ -1145,6 +2074,10 @@ $(document).ready(function(){
 						
   			// populate the treeIDs dropdown menu for adding new subtrees
   			this.populateTreeIDs();
+=======
+
+
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
   			$(".dbh").attr("href", document.location.hash);
   			$(".btn").css("display", "inline-block");
     		
@@ -1165,6 +2098,7 @@ $(document).ready(function(){
   			$(".export").click(function(e) {
   				$(".export").val("Preparing data for export...");
   				// query database for all trees in the plot
+<<<<<<< HEAD
   				$.getJSON(app.config.cgiDir + 'litterfall.py?site=' + siteName + "&plot=" + plotNumber, function(data) {
 					$.each(data, function(index, value) {
 						// format Comma Separated Value string with data from each tree
@@ -1176,6 +2110,25 @@ $(document).ready(function(){
 							if (obs["notes"] != "" && obs["notes"] != undefined){
 								CSV += obs["notes"];
 							}
+=======
+  				if (j == 0) {  				
+  					$(".export").val("Preparing data for export...");
+  					$.getJSON(app.config.cgiDir + 'tree_data.py?site=' + $(".site-name").text() + "&plot=" + $(".plot-number").text(), function(data) {
+  						$.each(data, function(index, value) {
+							// format Comma Separated Value string with data from each tree
+							CSV = CSV + "\r\n" + (parseInt(value["tree_id"]) + parseInt(value["sub_tree_id"])*.1) + "," + value["species"] + "," + value["angle"] + "," + value["distance"];
+							$.each(value["diameter"], function(i) {
+								var obs = value["diameter"][i];
+								if (obs["date"] != null){
+									var formatted_date = obs["date"]["d"] + "/" + obs["date"]["m"] + "/" + obs["date"]["y"];
+									CSV += "," + formatted_date + "," + obs["value"] + ",";
+								}
+								console.log(obs["notes"].replace(/[^a-zA-Z 0-9]+/g, ''));
+								if (obs["notes"] != "" && obs["notes"] != undefined){
+									CSV += obs["notes"].replace(/[^a-zA-Z 0-9]+/g, '');
+								}
+							});
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
 						});
 
 					});
@@ -1186,12 +2139,66 @@ $(document).ready(function(){
 					j = 1;
 				});
 				// ensures information has loaded before opening the CSV file
+				/*
 				if (j > 0) {
+<<<<<<< HEAD
 					window.open('data:text/csv;charset=utf-8,' + encodeURIComponent($('#CSV').text()));    				
 					e.preventDefault();
 
 				}
 				
+=======
+					if (agt.indexOf("firefox") != -1 || agt.indexOf("msie") != -1) {
+						window.open('data:application/octet-stream;charset=utf-8,' + encodeURIComponent($('#CSV').text()));
+					} else {
+						window.open('data:text/csv;charset=utf-8,' + encodeURIComponent($('#CSV').text()));
+					}
+					e.preventDefault();   				
+				}*/
+				if (j > 0) {
+					var iframe = $('<iframe>',{
+						width:1,
+						height:1,
+						frameborder:0,
+						css:{
+							display:'none'
+						}
+					}).appendTo('body');
+			
+					var formHTML = '<form action="" method="post">'+
+						'<input type="hidden" name="filename" />'+
+						'<input type="hidden" name="content" />'+
+						'</form>';
+			
+					// Giving IE a chance to build the DOM in
+					// the iframe with a short timeout:
+			
+					setTimeout(function(){
+			
+						// The body element of the iframe document:
+			
+						var body = (iframe.prop('contentDocument') !== undefined) ?
+										iframe.prop('contentDocument').body :
+										iframe.prop('document').body;	// IE
+			
+						body = $(body);
+			
+						// Adding the form to the body:
+						body.html(formHTML);
+			
+						var form = body.find('form');
+			
+						form.attr('action', app.config.cgiDir + 'create_file.py');
+						form.find('input[name=filename]').val($(".site-name").text()+"-"+$(".plot-number").text());
+						form.find('input[name=content]').val(CSV);
+			
+						// Submitting the form to download.php. This will
+						// cause the file download dialog box to appear.
+			
+						form.submit();
+					},50);
+				}
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
   			});
   
     	},
@@ -1208,6 +2215,7 @@ $(document).ready(function(){
 				endYear = tempYear;
 			}
 			
+<<<<<<< HEAD
 			//$('.date-entry').hide();
 			for (var i=parseInt(startYear); i<=parseInt(endYear); i++){
 				$('.'+i).show();
@@ -1215,6 +2223,15 @@ $(document).ready(function(){
 
 			//format header row to make the DBH cell span all the years specified
   			//document.getElementById("DBH").colSpan = numYears;
+=======
+			$('.date-entry').hide();
+			for (var i=parseInt(start_year); i<=parseInt(end_year); i++){
+				$('.y-'+i).show();
+			}
+
+			//format header row to make the DBH cell span all the years specified
+  		//	document.getElementById("DBH").colSpan = num_years;
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
     	},
   		addTree: function(){
   			this.newTreeRowViewInitialize();	
@@ -1234,8 +2251,30 @@ $(document).ready(function(){
 				}
 			});
 
+<<<<<<< HEAD
 			// Sort the array IDs
 			ids.sort(function(a,b){return a - b;});
+=======
+  			
+  			// var random_tree = this.find(function(){return true;});
+  			
+  			var new_tree = new Tree({
+  				plot: parseInt($('.plot-number').text()),
+  				site: $('.site-name').text()
+  			});
+  			var new_model = new newTreeModal({
+  				model: new_tree
+  			});
+  			var this_plot = this;
+  			
+  			// reload the whole page
+  			// this is not a good idea
+  			// we have to somehow think about sorting
+  			new_model.on("tree_saved", function() {
+  				$('#plot-table tbody').empty();
+  				this_plot.fetch({reset: true});
+  			});
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
 
 			var treeCollection = this;
 
@@ -1299,12 +2338,19 @@ $(document).ready(function(){
     	var  templateFile = 'update.html';
 		require(['lib/text!templates/' + templateFile + '!strip'], function(templateHTML){			
 			$('#main').html(templateHTML);
+<<<<<<< HEAD
 			var locationOptions = new selectionOptions;
 			locationOptions.url = app.config.cgiDir + "litterfall.py?site=all";						//creates list with all possible locations
 			var locationSelect = new selectionOptionsView({
+=======
+			var location_options = new selectionOptions;
+			location_options.url = app.config.cgiDir + "tree_data.py?site=all";						//creates list with all possible locations
+			var location_select = new selectionOptionsView({
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
 				el: $('#site-select'),																//populates new selectionOptionsView with locations (sites)
 				collection: locationOptions
 			});
+<<<<<<< HEAD
 			locationOptions.fetch();
 			$('#update-records').click(function(){														//waits for user to select plot
 				var getPlotUrl = "data/update/" + $('#type-select').val() + '/site/' + encodeURI($('#site-select').val()) + '/plot/' + $('#plot-select').val()
@@ -1313,6 +2359,19 @@ $(document).ready(function(){
 			$('#analyze-data').click(function(){														//waits for user to select plot
 				var getPlotUrl = "data/reports/" + $('#type-select').val() + '/site/' + encodeURI($('#site-select').val()) + '/plot/' + $('#plot-select').val()
 				document.location.hash = getPlotUrl;
+=======
+			location_options.fetch({
+				success: function() {
+					$('#update-records').removeAttr("disabled").click(function(){														//waits for user to select plot
+						var getPlotUrl = "data/update/" + $('#type-select').val() + '/site/' + encodeURI($('#site-select').val()) + '/plot/' + $('#plot-select').val()
+						document.location.hash = getPlotUrl;
+					});
+					$('#analyze-data').removeAttr("disabled").click(function(){														//waits for user to select plot
+						var getPlotUrl = "data/reports/" + $('#type-select').val() + '/site/' + encodeURI($('#site-select').val()) + '/plot/' + $('#plot-select').val()
+						document.location.hash = getPlotUrl;
+					});
+				}
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
 			});
 		});
     });
@@ -1322,6 +2381,7 @@ $(document).ready(function(){
     	//reloads page based on selected location (site) and plot
 		$(".data").addClass("active");
     	$(".home").removeClass("active");
+<<<<<<< HEAD
 		// load different template depending on whether we are updating or analyzing data
 		var templateFile;		
 		if (document.location.hash.search("update") === -1) { //if url does not contain 'update' (i.e. it must contain 'reports')
@@ -1336,6 +2396,62 @@ $(document).ready(function(){
 				site: decodeURI(site), 
 				plot: plot
 			}));
+=======
+    	
+		var this_plot = new Plot();
+		//need to use site and plot variable to build url to python script
+		this_plot.url = app.config.cgiDir + 'tree_data.py?site=' + site + '&plot=' + plot;
+    	
+		// load different template depending on whether we are updating or analyzing data	
+		if (mode == 'reports') { //if url does not contain 'update' (i.e. it must contain 'reports')
+			
+			console.log("reporting");
+			
+			require(['lib/text!templates/reports2.html!strip'], function(templateHTML) {
+				$('#main').html(_.template(templateHTML, {
+					site: decodeURI(site), 
+					plot: plot
+				}));
+	
+				//jQuery calls for, DBH Tooltip and updating functionality
+				updateFunctions();
+	
+				// fetch the data. if successful, will trigger 'reset' event. 'reset' event triggers renderTrees
+				this_plot.fetch();
+				
+				
+				/* --------- Mallory's codes for dynamically populating the years ---------- */
+				
+				// add selection options for data viewing based on years data is available
+				var startYear = 2002; // year that data began collection
+				var endYear = new Date().getFullYear();	// data collection continues through current year (in theory)
+				for (var cur=startYear; cur<=endYear; cur++){
+					// add selection options
+					if (cur == startYear){
+						$("#start-year").append($("<option></option>").attr({selected: "selected", value: cur}).text(cur));
+						$("#end-year").append($("<option></option>").attr("value",cur).text(cur));
+					} else if (cur == endYear){
+						$("#start-year").append($("<option></option>").attr("value",cur).text(cur));
+						$("#end-year").append($("<option></option>").attr({selected: "selected", value: cur}).text(cur));
+					} else {
+						$("#start-year").append($("<option></option>").attr("value",cur).text(cur));
+						$("#end-year").append($("<option></option>").attr("value",cur).text(cur));
+					}
+					
+					// add sub-header columns for the years we have data for
+					$("#sub-header").append($("<th></th>").addClass("date-entry y-"+cur).text(cur));
+				}
+				
+				// make the DBH heading span all the year subheadings
+				var numYears = endYear - startYear + 1;
+				$("#DBH").attr("colspan", numYears);
+				
+				// re-populate (really just showing/hiding columns) corresponding to the date range desired when user clicks Go!
+  				$("#btn-go").click(this_plot.populateTreeDiameters);
+				
+	
+			});
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
 
 			//jQuery calls for, DBH Tooltip and updating functionality
 			updateFunctions();
@@ -1346,9 +2462,73 @@ $(document).ready(function(){
 			thisPlot.url = app.config.cgiDir + 'litterfall.py?site=' + site + '&plot=' + plot;
 			thisPlot.fetch();
 			
+<<<<<<< HEAD
 			// adding new tree
 			$('.add-new-tree').click(function(){
 				thisPlot.addTree();
+=======
+			require(['lib/text!templates/update2.html!strip'], function(templateHTML) {
+				$('#main').html(_.template(templateHTML, {
+					site: decodeURI(site), 
+					plot: plot
+				}));
+	
+				//jQuery calls for, DBH Tooltip and updating functionality
+				updateFunctions();
+	
+				this_plot.fetch();
+				
+				var $add_new_sub_tree = $('.add-new-sub-tree');
+				
+				// adding new tree
+				$('.add-new-tree').click(function(){
+					if (this_plot.choosing_parent_tree === true) {
+						$add_new_sub_tree.eq(0).trigger("not_choosing_parent_tree");
+					}
+					this_plot.addTree();
+				});
+				
+	
+				// add popover
+				
+				$('.add-new-sub-tree')
+				.popover({
+					title: 'Add a new sub-tree',
+					content: 'Choose the parent tree from below'
+				});
+				// add the toggling functions
+				$add_new_sub_tree.bind("choosing_parent_tree", function() {
+					this_plot.choosing_parent_tree = true;
+					$add_new_sub_tree.popover('show').addClass('active');
+						
+					$('#plot-table tr').css('cursor', 'pointer')
+					.bind('click.makeTreeClickable', function() {
+					
+						// add sub-tree
+						var this_tree_id = Math.floor(parseFloat($(this).children("td").eq(1).text()));
+						this_plot.addSubTree(this_tree_id);
+					});
+					
+					//$('.btn-update').attr("disabled", "disabled");
+					$('#plot-table tr .btn').attr("disabled", "disabled");
+				})
+				.bind("not_choosing_parent_tree", function() {
+					this_plot.choosing_parent_tree = false;
+					$add_new_sub_tree.popover('hide').removeClass('active');
+						
+					$('#plot-table tr').css('cursor', 'default').unbind('click.makeTreeClickable');
+					$('#plot-table tr .btn').removeAttr("disabled");
+				})
+				.click(function() {
+					if (this_plot.choosing_parent_tree === false) {
+						$(this).trigger("choosing_parent_tree");
+					} else {
+						$(this).trigger("not_choosing_parent_tree");
+					}
+				});
+				
+	
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
 			});
 			
 		});
@@ -1376,6 +2556,7 @@ $(document).ready(function(){
 			}));
 
 
+<<<<<<< HEAD
 			var thisTree = new Tree();
 			thisTree.url = app.config.cgiDir + 'litterfall.py?site=' + site + '&plot=' + plot + '&treeid=' + treeId + '&subtreeid=' + subTreeId;
 			thisTree.fetch();
@@ -1416,6 +2597,17 @@ $(document).ready(function(){
 			thisTree.set("plot", plot);
 			console.log(thisTree);
 
+=======
+			var this_tree = new Tree();
+			this_tree.url = app.config.cgiDir + 'tree_data.py?site=' + site + '&plot=' + plot + '&treeid=' + tree_id + '&subtreeid=' + sub_tree_id;
+			this_tree.fetch({
+				success: function() {
+					this_tree.editViewInitialize();
+				}
+			});
+			
+			
+>>>>>>> 114965f2c73617ad50225567f71de2a374addc3b
 			//DBH Tooltip 
 			updateFunctions();
 		});

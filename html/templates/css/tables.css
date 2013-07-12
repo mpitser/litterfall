@@ -82,9 +82,11 @@ table.table-striped > tbody.edit-historical > tr > td:last-child
 
 button a, button a:hover {color:#FFF;}
 
+/* -- is anybody using this style? I assume not. */
+/*
 #tree-info ul{
 margin:20px 40px;	
-}
+} */
 
 .edit_cell, .edit-tree-info {
 	display:none;
