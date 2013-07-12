@@ -22,8 +22,6 @@ Methods:
 	
 	validate()		Validates the data before saving. Might need to be rewritten. Its function is
 					replaced mostly by the methods in Backbone Views. Not a neat thing to do I know.
-	
-	
 
 */
 define([
