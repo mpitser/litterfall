@@ -74,7 +74,7 @@ define([
   				// query database for all trees in the plot
   				if (j == 0) {  				
   					$(".export").val("Preparing data for export...");
-  					$.getJSON(app.config.cgiDir + 'litterfall.py?site=' + $(".site-name").text() + "&plot=" + $(".plot-number").text(), function(data) {
+  					$.getJSON(app.config.cgiDir + 'tree_data.py?site=' + $(".site-name").text() + "&plot=" + $(".plot-number").text(), function(data) {
   						$.each(data, function(index, value) {
 							// format Comma Separated Value string with data from each tree
 							CSV = CSV + "\r\n" + (parseInt(value["tree_id"]) + parseInt(value["sub_tree_id"])*.1) + "," + value["species"] + "," + value["angle"] + "," + value["distance"];
