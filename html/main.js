@@ -26,6 +26,7 @@ var app = {
 	}
 };
 
+<<<<<<< HEAD
 require([
   // Load our app module and pass it to our definition function
   'app',
@@ -36,7 +37,7 @@ require([
   App.initialize();
 });
 
-Date.prototype.toLitterfallDateObject = function() {
+Date.prototype.toTreeDataDateObject = function() {
 	return {
 		'y': this.getFullYear(),
 		'm': this.getMonth() + 1,
@@ -44,7 +45,7 @@ Date.prototype.toLitterfallDateObject = function() {
 	};
 };
 
-Date.prototype.fromLitterfallDateObject = function(date) {
+Date.prototype.fromTreeDataDateObject = function(date) {
 	this.setFullYear(date.y);
 	this.setMonth(date.m - 1);
 	this.setDate(date.d);
@@ -56,8 +57,6 @@ var orig = {
     listen: $.fn.typeahead.Constructor.prototype.listen
 };
 //app object contains global app information
-
-
 
 // Start Active Nav Tracking
 
