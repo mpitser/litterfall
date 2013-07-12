@@ -2,10 +2,10 @@ define([
 	'jquery',
 	'underscore',
 	'backbone',
-	'views/plotRowUpdateView',
-	'views/plotRowReportsView',
-	'views/treeUpdateView',
-	'views/treeReportsView'
+	'tree_data/views/plotRowUpdateView',
+	'tree_data/views/plotRowReportsView',
+	'tree_data/views/treeUpdateView',
+	'tree_data/views/treeReportsView'
 ], function($, _, Backbone, plotRowUpdateView, plotRowReportsView, treeUpdateView, treeReportsView) {
 	var Tree = Backbone.Model.extend({
 		defaults: {
