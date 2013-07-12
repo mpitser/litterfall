@@ -8,8 +8,6 @@ define([
 		model: singleOption,
 		url: "data/sites.json",															//populates new selectionOptionsView with locations (sites)
 		initialize: function() {
-			this.on("reset", this.render);
-			this.on("add", this.render);
     	
 		},								//calls for server DB's location (plot, etc. information)
     	parse: function(response){												
@@ -25,12 +23,6 @@ define([
     			//}
     		}
     		return parsed_options;
-    	},
-    	render: function() {
-    		this.each(function(option){
-    			var new_option = '<option value="' + option.get('value') + '">' + option.get('name') + '</option>';
-    			$('#site-select').append(new_option);
-    		});
     	}
 	});
 	return selectionOptions;
