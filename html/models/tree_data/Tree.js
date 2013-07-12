@@ -1,3 +1,31 @@
+/* 
+Model: Tree
+Represents: An otter?
+----------------
+
+Methods:
+	initialize()	Nothing interesting...
+	
+	showError()		It shows errors in the console log
+	
+	plotViewInitialize()
+					It initializes a plotRowView. Initializing a plotRowView will automatically
+					render() the row and place it in the appropriate location.
+					
+	parse()			Format the data sent from the server before sending it to the constructor
+	save()			Is overrode because I want the model to be up-to-date with the calculated
+					data from the server side--for example, the tree_id that can only be known by
+					querying the database
+					
+	destroy()		***THIS FUNCTION IS REALLY VULNERABLE*** Seriously, though. We cannot make it
+					properly RESTful.
+	
+	validate()		Validates the data before saving. Might need to be rewritten. Its function is
+					replaced mostly by the methods in Backbone Views. Not a neat thing to do I know.
+	
+	
+
+*/
 define([
 	'jquery',
 	'underscore',
@@ -11,7 +39,7 @@ define([
 		defaults: {
 			site: '',
 			plot: '',
-			//_id: '',
+			//_id: '', it is sort of crucial that this is commented out, trust me
 			tree_id: -1,
 			sub_tree_id: 0,
 			angle: 0.0,
@@ -62,32 +90,15 @@ define([
 		},
 		parse: function(response){
 			
-			// sort, the latest goes to the top
-		//	response.diameter = _.sortBy(response.diameter, function (entry) {
-				//console.log(entry);
-		//		return 0 - (entry.date.d + entry.date.m*32 + entry.date.y*366);
-		//s	});
 			// format full tree ID for display
 			response.full_tree_id = response.tree_id + ((response.sub_tree_id == 0) ? '' : ('.' + response.sub_tree_id));
 			
 			// get latest status (dead or alive) and set to the model
 			if (response.diameter.length > 0) {
-				//alert(response.diameter[0].status);
 				response.status = response.diameter[0].status;
 			} else {
 				response.status = "alive";
 			}
-			
-			
-		//	var newEntryArray = [];
-			
-		//	console.log(response.diameter);
-		//	_.each(response.diameter, function(entry, key) {
-		//		console.log(new Date(response.diameter[key].date.$date));
-			//	response.diameter[key].date = new Date(response.diameter[key].date.$date);
-		///		console.log(response.diameter[key]);
-		//		console.log(response.diameter[key].date.getFullYear());
-		//	});
 			
 			return response;
 		},
@@ -114,14 +125,7 @@ define([
 			//this is where we validate the model's data
 			var isInt = [];
 			var isFloat = [];
-		},
-		/*
-		newSubTreeRowViewInitialize: function() {
-			var sub_tree_row = new newSubTreeRowView({
-				model: this
-			});
 		}
-		*/
 	});
 	return Tree;
 });
