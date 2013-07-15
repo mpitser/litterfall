@@ -122,9 +122,11 @@ define([
 			var tree_model = this;
 			if (result !== false) {
 				result.done(function() {
-					tree_model.trigger('destroy');
+					console.log(tree_model.collection);
+					tree_model.trigger('destroy', tree_model, tree_model.collection, options);
 				});
 			}
+			return result;
 		},
 		validate: function(attrs, options){
 			//this is where we validate the model's data

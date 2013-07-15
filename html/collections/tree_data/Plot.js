@@ -53,20 +53,12 @@ define([
   		initialize: function(){
   			
   			this.on('reset', this.renderTrees); 
+  			this.on('remove', this.updateSurvivingSiblings);
   			//this.on('add', myFunction);
   			//this.on('reset', this.findAllObservers); 
   			//this.on('add', this.findAllObservers); 
   			//this.on('change', this.renderTrees);
 
-  		},
-  		updateSiblingTrees: function(tree) {
-			_.each(this.filter(function(dumb_tree) {
-				return dumb_tree.get("tree_id") == tree.get("tree_id") && dumb_tree.get("sub_tree_id") != tree.get("sub_tree_id");
-			}),
-			function(sibling) {
-				sibling.url = app.config.cgiDir + "tree_data.py?oid=" + sibling.get("_id").$oid;
-				sibling.fetch();
-			}, this);
   		},
   		renderTrees: function(){
   			var site_name = "";
@@ -83,21 +75,10 @@ define([
   				tree.plotViewInitialize(this.mode);
   				
   				var num_obvs = tree.get("diameter").length;
-				
-				// listen to the custom event triggered when the user adds a new sub-tree from the tree row
-  				this.listenTo(tree, 'add_new_sub_tree_from_row', function() {this.addSubTree(tree.get('tree_id'));});
   				
   				// if any of the models is deleted, then make sure the data in this plot is up to date
   				tree.on('destroy', function() {
-  					var parent_tree_id = tree.get('tree_id');
-  					var parent_tree_oid = tree.get('_id');
   					this.remove(tree);
-  					this.each(function(stupid_tree) {
-  						if (parent_tree_id == stupid_tree.get('tree_id') && parent_tree_oid != stupid_tree.get('_id')) {
-  							stupid_tree.url = app.config.cgiDir + "tree_data.py?oid=" + stupid_tree.get('_id').$oid;
-  							stupid_tree.fetch();
-  						}
-  					}, this);
   				}, this);
   				
   				// determine the maximum number of observations for any tree in this plot
@@ -148,21 +129,6 @@ define([
 					});
 				});
 				CSV += "\nDisclaimer: dates before 2013 are approximate. All data during that range was collected between September and October of the specified year.";
-				// adds formatted data to a hidden input on the page
-				//$("#CSV").empty().append(CSV);
-				//$(".export").val("Click to open file");
-				//$(".export").addClass("btn-success");
-				//});
-				
-				// ensures information has loaded before opening the CSV file
-				/*if (j > 0) {
-					if (agt.indexOf("firefox") != -1 || agt.indexOf("msie") != -1) {
-						window.open('data:application/octet-stream;charset=utf-8,' + encodeURIComponent($('#CSV').text()));
-					} else {
-						window.open('data:text/csv;charset=utf-8,' + encodeURIComponent($('#CSV').text()));
-					}
-					e.preventDefault();   				
-				}*/
 				
 				
 				// --------------
@@ -237,6 +203,16 @@ define([
 
 			//format header row to make the DBH cell span all the years specified
   		//	document.getElementById("DBH").colSpan = num_years;
+    	},
+    	updateSurvivingSiblings: function(tree) {
+    		var parent_tree_id = tree.get('tree_id');
+    		var parent_tree_oid = tree.get('_id');
+			this.each(function(stupid_tree) {
+				if (parent_tree_id == stupid_tree.get('tree_id') && parent_tree_oid != stupid_tree.get('_id')) {
+					stupid_tree.url = app.config.cgiDir + "tree_data.py?oid=" + stupid_tree.get('_id').$oid;
+					stupid_tree.fetch();
+				}
+			}, this);
     	},
   		addTree: function(){
 

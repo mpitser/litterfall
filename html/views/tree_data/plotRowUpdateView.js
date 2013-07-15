@@ -95,7 +95,8 @@ define([
 			'click .btn-analyze': 'goToTree',								//if update button is clicked, runs updateTree function
 			'click .add-new-sub-tree-from-row': function() {
 				$('.add-new-sub-tree').eq(0).trigger("choosing_parent_tree");
-				this.model.trigger("add_new_sub_tree_from_row");
+				this.model.collection.addSubTree(this.model.get('tree_id'));
+				//this.model.trigger("add_new_sub_tree_from_row");
 				//this.addSubTree(this.model.get("tree_id"));
 			}
 		},
