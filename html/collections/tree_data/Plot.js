@@ -238,7 +238,7 @@ define([
   			// reload the whole page
   			// this is not a good idea
   			// we have to somehow think about sorting
-  			new_model.on("tree_saved", function() {
+  			new_model.on("treeSaved", function() {
   				$('#plot-table tbody').empty();
   				this_plot.fetch({
   					reset: true,
@@ -272,7 +272,7 @@ define([
   			// reload the whole page
   			// this is not a good idea
   			// we have to somehow think about sorting
-  			new_model.on("tree_saved", function() {
+  			new_model.on("treeSaved", function() {
   				$('#plot-table tbody').empty();
   				this_plot.fetch({
   					reset: true,

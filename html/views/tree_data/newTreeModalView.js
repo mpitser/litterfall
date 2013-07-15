@@ -99,7 +99,7 @@ define([
 			this.$el.on("hidden", function() {
 				$(this).remove();
 				if (self.isSubTree) {
-					$('.add-new-sub-tree').eq(0).trigger("not_choosing_parent_tree");
+					$('.add-new-sub-tree').eq(0).trigger("notChoosingParentTree");
 				}
 			});
 
@@ -183,7 +183,7 @@ define([
 			} else if (isNaN(parseFloat($distance.val()))) {
 				error = "A distance should be a number...";
 			} else if (parseInt($distance.val()) > 30 || parseInt($distance.val()) < 0) {
-				error = "Do you think it is a bit too far?";
+				error = "Don't you think it is a bit too far?";
 			}
 
 			return this.addErrorMessage($distance, error);
@@ -225,14 +225,14 @@ define([
 			}, {
 				success: function(model) {
 					self.$el.modal("hide");
-					if (back_to_plot == true) model.trigger("tree_saved");
+					if (back_to_plot == true) model.trigger("treeSaved");
 					else document.location.hash = document.location.hash + "/treeid/" + model.get("tree_id") + (self.isSubTree ? ("/subtreeid/" + model.get("sub_tree_id")) : "");
 				},
 				error: function(model, xhr) {
 					
 					var saveTreeError = new errorView({
 						xhr: xhr,
-						targetId: 'save_tree_error'
+						targetId: 'save-tree-error'
 					});
 					saveTreeError.render().$el.prependTo("#add-new-tree-modal > .modal-body");
 					

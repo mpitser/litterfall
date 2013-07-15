@@ -153,7 +153,7 @@ define([
 				// adding new tree
 				$('.add-new-tree').click(function(){
 					if (this_plot.choosing_parent_tree === true) {
-						$addNewSubTree.eq(0).trigger("not_choosing_parent_tree");
+						$add_new_sub_tree.eq(0).trigger("not_choosing_parent_tree");
 					}
 					this_plot.addTree();
 				});
@@ -167,7 +167,7 @@ define([
 					content: 'Choose the parent tree from below'
 				});
 				// add the toggling functions
-				$add_new_sub_tree.bind("choosing_parent_tree", function() {
+				$add_new_sub_tree.bind("choosingParentTree", function() {
 					this_plot.choosing_parent_tree = true;
 					$add_new_sub_tree.popover('show').addClass('active');
 						
@@ -182,7 +182,7 @@ define([
 					//$('.btn-update').attr("disabled", "disabled");
 					$('#plot-table tr .btn').attr("disabled", "disabled");
 				})
-				.bind("not_choosing_parent_tree", function() {
+				.bind("notChoosingParentTree", function() {
 					this_plot.choosing_parent_tree = false;
 					$add_new_sub_tree.popover('hide').removeClass('active');
 						
@@ -191,9 +191,9 @@ define([
 				})
 				.click(function() {
 					if (this_plot.choosing_parent_tree === false) {
-						$(this).trigger("choosing_parent_tree");
+						$(this).trigger("choosingParentTree");
 					} else {
-						$(this).trigger("not_choosing_parent_tree");
+						$(this).trigger("notChoosingParentTree");
 					}
 				});
 				
