@@ -22,6 +22,8 @@ define [
 		},
 		render: function() {
 			
+			if (this.options.targetId !== undefined) $('#'+targetId).remove();
+			
 			// check if the jqXHR object is specified
 			// (since Backbone uses AJAX it will send back jqXHR when it is successful or encounters some error
 			var has_xhr = this.options.xhr !== undefined;

@@ -46,14 +46,12 @@ define([
 				<%= tree.latest_DBH_message %>\
 			</td>\
 			<td>\
-				<%= tree.latest_comment %>\
+				<%= _.escape(tree.latest_comment) %>\
 			</td>',
 		initialize: function(){
 			this.render();
 			this.model.on("change:sub_tree_id", function() {
-				console.log("DSDS");
 				this.$el.find("td").eq(1).text(this.model.get("full_tree_id"));
-				
 			}, this);
 		},
 		render: function(){
@@ -92,7 +90,6 @@ define([
 		events: {
 			'click .delete-row': 'deleteTree',
 			'click .btn-update': 'goToTree',								//if update button is clicked, runs updateTree function
-			'click .btn-analyze': 'goToTree',								//if update button is clicked, runs updateTree function
 			'click .add-new-sub-tree-from-row': function() {
 				$('.add-new-sub-tree').eq(0).trigger("choosing_parent_tree");
 				this.model.collection.addSubTree(this.model.get('tree_id'));
@@ -130,7 +127,6 @@ define([
 			$('body').append($alert_modal);
 			$alert_modal.modal();
 			$alert_modal.modal('show');
-			var is_user_sure = true;
 			$alert_modal.on('hidden', function() {
 				$alert_modal.remove();
 			});

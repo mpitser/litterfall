@@ -53,7 +53,6 @@ define([
 			collection_type: 'tree'
 		},
 		initialize: function(){
-			// this.editViewInitialize();
 			this.on('invalid', this.showError);
 		},
 		showError: function(){

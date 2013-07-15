@@ -54,10 +54,6 @@ define([
   			
   			this.on('reset', this.renderTrees); 
   			this.on('remove', this.updateSurvivingSiblings);
-  			//this.on('add', myFunction);
-  			//this.on('reset', this.findAllObservers); 
-  			//this.on('add', this.findAllObservers); 
-  			//this.on('change', this.renderTrees);
 
   		},
   		renderTrees: function(){
@@ -76,11 +72,6 @@ define([
   				
   				var num_obvs = tree.get("diameter").length;
   				
-  				// if any of the models is deleted, then make sure the data in this plot is up to date
-  				tree.on('destroy', function() {
-  					this.remove(tree);
-  				}, this);
-  				
   				// determine the maximum number of observations for any tree in this plot
   				// to allocate enough columns in the CSV file
   				if (num_obvs > max_diam) {
@@ -98,91 +89,107 @@ define([
   			
   			// populate the diameter entries based on user's given years
   			// only for the analysis page
-  			this.populateTreeDiameters();
-
-  			var j = 0;
-  			
-  			// bind the export button
-  			$(".export").unbind('click.exportCSV').bind('click.exportCSV', function(e) {
-  				// query database for all trees in the plot
-  				console.log(this_plot.models);
-  				
-				// set up column headers for CSV
-				var CSV = "Full Tree ID,Species,Angle,Distance"
-				for(var i = 1; i <= max_diam; i++) {
-					CSV += "," + "Obs Date " + i + ",Diameter " + i + ",Notes " + i;
-				}
-  				
-				//$(".export").val("Preparing data for export...");
-				//$.getJSON(app.config.cgiDir + 'litterfall.py?site=' + $(".site-name").text() + "&plot=" + $(".plot-number").text(), function(data) {
-				this_plot.each(function(tree) {
-					// format Comma Separated Value string with data from each tree
-					CSV = CSV + "\r\n" + (parseInt(tree.get("tree_id")) + parseInt(tree.get("sub_tree_id"))*.1) + "," + tree.get("species") + "," + tree.get("angle") + "," + tree.get("distance");
-					_.each(tree.get("diameter"), function(obs) {
-						if (obs.date != null){
-							// var formatted_date = obs["date"]["d"] + "/" + obs["date"]["m"] + "/" + obs["date"]["y"];
-							CSV += "," + toFormattedDate(obs.date) + "," + obs.value + ",";
-						}
-						if (obs.notes != "" && obs.notes != undefined){
-							CSV += obs.notes.replace(/[^a-zA-Z 0-9]+/g, '');
-						}
-					});
-				});
-				CSV += "\nDisclaimer: dates before 2013 are approximate. All data during that range was collected between September and October of the specified year.";
-				
-				
-				// --------------
-				// the code below is copied from some random website
-				// it will post the content to a Python script file, which will create the file with the proper header
-				// and file name
-				
-				// Creating a 1 by 1 px invisible iframe:
-
-				var iframe = $('<iframe>',{
-					width:1,
-					height:1,
-					frameborder:0,
-					css:{
-						display:'none'
-					}
-				}).appendTo('body');
-		
-				var formHTML = '<form action="" method="post">'+
-					'<input type="hidden" name="filename" />'+
-					'<input type="hidden" name="content" />'+
-					'</form>';
-		
-				// Giving IE a chance to build the DOM in
-				// the iframe with a short timeout:
-		
-				setTimeout(function(){
-		
-					// The body element of the iframe document:
-		
-					var body = (iframe.prop('contentDocument') !== undefined) ?
-									iframe.prop('contentDocument').body :
-									iframe.prop('document').body;	// IE
-		
-					body = $(body);
-		
-					// Adding the form to the body:
-					body.html(formHTML);
-		
-					var form = body.find('form');
-		
-					form.attr('action',app.config.cgiDir + "create_file.py");
-					form.find('input[name=filename]').val($(".site-name").text() + "-" + $(".plot-number").text());
-					form.find('input[name=content]').val(CSV);
-		
-					// Submitting the form to download.php. This will
-					// cause the file download dialog box to appear.
-		
-					form.submit();
-				},50);
-				
-  			});
+  			if (window.location.hash.indexOf('reports')) this.populateTreeDiameters();
+			
+			// bind the export button
+  			$('.export').unbind('click.CSVExport').bind('click.CSVExport', $.proxy(this.CSVExport, this));
   			
     	},
+    	CSVExport: function() {
+  				
+			// set up column headers for CSV
+			var CSV_head = "Full Tree ID,Species,Angle,Distance"
+			/*for (var i = 1; i <= max_diam; i++) {
+				CSV += "," + "Obs Date " + i + ",Diameter " + i + ",Notes " + i;
+			}*/
+			var CSV = "";
+			
+			var max_num_entries = 0;
+			var tree_max_num_entries = 0;
+			
+			this.each(function(tree) {
+				// format Comma Separated Value string with data from each tree
+				CSV = CSV + "\r\n" + (parseInt(tree.get("tree_id")) + parseInt(tree.get("sub_tree_id"))*.1) + "," + tree.get("species") + "," + tree.get("angle") + "," + tree.get("distance");
+				
+				tree_max_num_entries = 0;
+				
+				_.each(tree.get("diameter"), function(obs) {
+				
+					tree_max_num_entries++;
+					
+					if (obs.date != null){
+						CSV += "," + toFormattedDate(obs.date) + "," + obs.value + ",";
+					}
+					
+					if (obs.notes != "" && obs.notes != undefined){
+						CSV += obs.notes.replace(/[^a-zA-Z 0-9]+/g, '');
+					}
+					
+					if (tree_max_num_entries > max_num_entries) {
+						max_num_entries++;
+						CSV_head += "," + "Obs Date " + max_num_entries + ",Diameter " + max_num_entries + ",Notes " + max_num_entries;
+					}
+					
+				});
+			});
+			
+			CSV += "\nDisclaimer: dates before 2013 are approximate. All data during that range was collected between September and October of the specified year.";
+			this.createCSVFile(CSV_head + CSV);
+				
+  			
+    	},
+    	createCSVFile: function(CSV) {
+    	
+			// --------------
+			// the code below is copied from some random website
+			// it will post the content to a Python script file, which will create the file with the proper header
+			// and file name
+			
+			// Creating a 1 by 1 px invisible iframe:
+
+			var iframe = $('<iframe>',{
+				width:1,
+				height:1,
+				frameborder:0,
+				css:{
+					display:'none'
+				}
+			}).appendTo('body');
+	
+			var formHTML = '<form action="" method="post">'+
+				'<input type="hidden" name="filename" />'+
+				'<input type="hidden" name="content" />'+
+				'</form>';
+	
+			// Giving IE a chance to build the DOM in
+			// the iframe with a short timeout:
+	
+			setTimeout(function(){
+	
+				// The body element of the iframe document:
+	
+				var body = (iframe.prop('contentDocument') !== undefined) ?
+								iframe.prop('contentDocument').body :
+								iframe.prop('document').body;	// IE
+	
+				body = $(body);
+	
+				// Adding the form to the body:
+				body.html(formHTML);
+	
+				var form = body.find('form');
+	
+				form.attr('action',app.config.cgiDir + "create_file.py");
+				form.find('input[name=filename]').val($(".site-name").text() + "-" + $(".plot-number").text());
+				form.find('input[name=content]').val(CSV);
+	
+				// Submitting the form to download.php. This will
+				// cause the file download dialog box to appear.
+	
+				form.submit();
+			}, 50);
+			
+    	}, 
 		populateTreeDiameters: function(){
     		// get year range user wished to view data from
 			var start_year = $("#start-year").val();
@@ -236,7 +243,7 @@ define([
   				this_plot.fetch({
   					reset: true,
   					success: function() {
-  					// so that the tablesorter plugin does not bring back the zombie trees
+  						// so that the tablesorter plugin does not bring back the zombie trees
   						$('#plot-table').trigger('update');
   					}
   				});

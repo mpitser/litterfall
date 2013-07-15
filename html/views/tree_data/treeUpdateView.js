@@ -113,7 +113,7 @@ define([
   					<button type="button" class="btn btn-mini btn-warning status dead_standing" style="width: 120px" value="dead_standing">Dead (standing)</button>\
  					<button type="button" class="btn btn-mini btn-danger status dead_fallen" style="width: 120px" value="dead_fallen">Dead (fallen)</button>\
 					</div></span></td>\
-					<td class="editable"><span class="show-obs-info display_cell notes"><%= entry.notes %></span><span class="edit-obs-info edit_cell notes"><input type="text" value="<%= htmlEntities(entry.notes) %>"></span></span></td>\
+					<td class="editable"><span class="show-obs-info display_cell notes"><%= _.escape(entry.notes) %></span><span class="edit-obs-info edit_cell notes"><input type="text" value="<%= _.escape(entry.notes) %>"></span></span></td>\
 				</tr>\
 			<% }); %>\
 			</tbody>\

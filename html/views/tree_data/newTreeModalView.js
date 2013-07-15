@@ -207,7 +207,7 @@ define([
 			var self = this;
 			
 			this.model.validate = function() {
-				if (!(self.validateAngle() && self.validateDistance() && self.validateSpecies())) {
+				if (!(self.validateSpecies() && self.validateAngle() && self.validateDistance())) {
 					return "Invalid data";
 				}
 				
@@ -221,22 +221,19 @@ define([
 			this.model.save({
 				species: $('#new-tree-species').val(),
 				angle: parseInt($('#new-tree-angle').val()),
-				distance: parseInt($('#new-tree-distance').val())
+				distance: parseFloat($('#new-tree-distance').val())
 			}, {
 				success: function(model) {
 					self.$el.modal("hide");
-					if (back_to_plot == true) {
-						/* if (self.isSubTree === true) {
-							$(".add-new-sub-tree").trigger("click");
-						} */
-						self.trigger("tree_saved");
-					} else {
-						document.location.hash = document.location.hash + "/treeid/" + model.get("tree_id") + (self.isSubTree ? ("/subtreeid/" + model.get("sub_tree_id")) : "");
-					}
+					if (back_to_plot == true) model.trigger("tree_saved");
+					else document.location.hash = document.location.hash + "/treeid/" + model.get("tree_id") + (self.isSubTree ? ("/subtreeid/" + model.get("sub_tree_id")) : "");
 				},
 				error: function(model, xhr) {
 					
-					var saveTreeError = new errorView({xhr: xhr});
+					var saveTreeError = new errorView({
+						xhr: xhr,
+						targetId: 'save_tree_error'
+					});
 					saveTreeError.render().$el.prependTo("#add-new-tree-modal > .modal-body");
 					
 				}

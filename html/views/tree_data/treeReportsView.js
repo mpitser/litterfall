@@ -37,7 +37,7 @@ define([
 				<td><span class="display_cell observers"><%= entry.observers.join(", ") %></span>\
 				<td><span class="display_cell diameter"><%= entry.value %></span>\
 				<td><span class="display_cell status"><%= entry.status %></span>\
-				<td><span class="display_cell notes"><%= entry.notes %></span>\
+				<td><span class="display_cell notes"><%= _.escape(entry.notes) %></span>\
 			</tr>\
 			<% }); %>\
 			</tbody>\
