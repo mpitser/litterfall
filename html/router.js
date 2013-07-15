@@ -5,9 +5,11 @@ define([
 	'models/tree_data/singleOption',
 	'collections/tree_data/selectionOptions',
 	'views/tree_data/selectionOptionsView',
+	'views/litterfall/litterfallQueryView',
 	'collections/tree_data/Plot',
-	'models/tree_data/Tree'
-], function($, _, Backbone, singleOption, selectionOptions, selectionOptionsView, Plot, Tree) {
+	'models/tree_data/Tree',
+	'models/litterfall/litterfallQuery'
+], function($, _, Backbone, singleOption, selectionOptions, selectionOptionsView, litterfallQueryView, Plot, Tree, litterfallQuery) {
 
 	var AppRouter = Backbone.Router.extend({
 			routes: {
@@ -81,12 +83,16 @@ define([
 		});
 		
 		app_router.on('route:accessLitterfallReports', function () {
+			$(".litterfall").addClass("active");
+			$(".litterfall").siblings().removeClass("active");
 			var template_file = 'query-litterfall.html';
 			console.log("querying");
-			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){			
+			
+			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){							
 				$('#main').html(templateHTML);
-				
+				var queryView = new litterfallQueryView();				
 			});
+			
 		});
 		
 		//Plot view

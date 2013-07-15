@@ -13,15 +13,13 @@ define([
     	parse: function(response){												
     		var parsed_options = [];												
     		for (element in response){											//for objects within JSON return object
-    			//if (_.isString(response[element])){								//if the response is a string (e.g., a location), store it in the array:
     				parsed_options.push({										//for Backbone's use, stores object from JSON information as key:value pair (object)
     					value: response[element],
     					name: response[element].charAt(0).toUpperCase() + response[element].slice(1)
     				});
-    			//} else {
-    			//	parsed_options.push(response[element]);						//<WHAT DOES THIS DO?> [ ]
-    			//}
+
     		}
+    		console.log(parsed_options);
     		return parsed_options;
     	}
 	});
