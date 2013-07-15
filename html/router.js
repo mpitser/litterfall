@@ -13,6 +13,7 @@ define([
 			routes: {
 				"data/trees": "accessTrees", //inits the add record "wizard", leads to the edit pages
 				"data/litterfall": "accessLitterfall", //inits the add record "wizard", leads to the edit pages
+				"data/litterfall/reports":"accessLitterfallReports",
 				"data/trees/reports/site/:location/plot/:plot": "goToReportsPlot",
 				"data/trees/update/site/:location/plot/:plot": "goToUpdatePlot",
 				"data/trees/:mode/site/:location/plot/:plot/treeid/:tree_id(/subtreeid/:sub_tree_id)": "goToTree",
@@ -72,6 +73,19 @@ define([
 			console.log("access");
 			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){			
 				$('#main').html(templateHTML);
+				$('#analyze-data').click(function() {
+					var Url = "data/litterfall/reports";
+					document.location.hash = Url;
+				});
+			});
+		});
+		
+		app_router.on('route:accessLitterfallReports', function () {
+			var template_file = 'query_litterfall.html';
+			console.log("querying");
+			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){			
+				$('#main').html(templateHTML);
+				
 			});
 		});
 		
