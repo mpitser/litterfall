@@ -249,7 +249,6 @@ define([
 		
 	// Start Backbone history a necessary step for bookmarkable URL's; enables user to click BACK without navigating to entirely different domain
 	//
-	console.log("hm");
 	Backbone.history.start();
 	
 	};

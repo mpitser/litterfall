@@ -105,19 +105,26 @@ define([
 			
 			var result = Backbone.Model.prototype.save.call(this, attrs, options);
 			
-			tree_model = this;
-			result.done(function(data) {
-				
-				tree_model.set(data);
-				
-			});
+			var tree_model = this;
+			if (result !== false) {
+				result.done(function(data) {
+					tree_model.set(data);
+				});
+			}
 			
 			return result;
 		},
 		// ** Normally, it would not have to go through save, but somehow destroy doesn't work
 		// I think there is something wrong with the DELETE request method
 		destroy: function(options) {
-			return this.save({delete: true}, options);
+			
+			var result = this.save({delete: true}, options);
+			var tree_model = this;
+			if (result !== false) {
+				result.done(function() {
+					tree_model.trigger('destroy');
+				});
+			}
 		},
 		validate: function(attrs, options){
 			//this is where we validate the model's data

@@ -59,6 +59,15 @@ define([
   			//this.on('change', this.renderTrees);
 
   		},
+  		updateSiblingTrees: function(tree) {
+			_.each(this.filter(function(dumb_tree) {
+				return dumb_tree.get("tree_id") == tree.get("tree_id") && dumb_tree.get("sub_tree_id") != tree.get("sub_tree_id");
+			}),
+			function(sibling) {
+				sibling.url = app.config.cgiDir + "tree_data.py?oid=" + sibling.get("_id").$oid;
+				sibling.fetch();
+			}, this);
+  		},
   		renderTrees: function(){
   			var site_name = "";
   			var plot_number = 0;
@@ -69,22 +78,34 @@ define([
   			var this_plot = this;
   			
   			// for each tree in the collection, creates a plotRowView
-  			this.each(function(tree){
+  			this.each(function(tree) {
   				
   				tree.plotViewInitialize(this.mode);
   				
   				var num_obvs = tree.get("diameter").length;
 				
 				// listen to the custom event triggered when the user adds a new sub-tree from the tree row
-  				this_plot.listenTo(tree, 'add_new_sub_tree_from_row', function() {this_plot.addSubTree(tree.get('tree_id'));});
+  				this.listenTo(tree, 'add_new_sub_tree_from_row', function() {this.addSubTree(tree.get('tree_id'));});
+  				
   				// if any of the models is deleted, then make sure the data in this plot is up to date
-  				this_plot.listenTo(tree, 'destroy', function() {this_plot.fetch({silent: true});});
+  				tree.on('destroy', function() {
+  					var parent_tree_id = tree.get('tree_id');
+  					var parent_tree_oid = tree.get('_id');
+  					this.remove(tree);
+  					this.each(function(stupid_tree) {
+  						if (parent_tree_id == stupid_tree.get('tree_id') && parent_tree_oid != stupid_tree.get('_id')) {
+  							stupid_tree.url = app.config.cgiDir + "tree_data.py?oid=" + stupid_tree.get('_id').$oid;
+  							stupid_tree.fetch();
+  						}
+  					}, this);
+  				}, this);
   				
   				// determine the maximum number of observations for any tree in this plot
   				// to allocate enough columns in the CSV file
   				if (num_obvs > max_diam) {
   					max_diam = num_obvs;
   				}
+  				
   			}, this);
 
 			
@@ -98,43 +119,39 @@ define([
   			// only for the analysis page
   			this.populateTreeDiameters();
 
-  			// set up column headers for CSV
-  			var CSV = "Full Tree ID,Species,Angle,Distance"
-  			for(var i = 1; i <= max_diam; i++) {
-  				CSV += "," + "Obs Date " + i + ",Diameter " + i + ",Notes " + i;
-  			}
-
   			var j = 0;
   			
   			// bind the export button
-  			$(".export").click(function(e) {
+  			$(".export").unbind('click.exportCSV').bind('click.exportCSV', function(e) {
   				// query database for all trees in the plot
+  				console.log(this_plot.models);
   				
-  				if (j == 0) {
-  				
-					$(".export").val("Preparing data for export...");
-					//$.getJSON(app.config.cgiDir + 'litterfall.py?site=' + $(".site-name").text() + "&plot=" + $(".plot-number").text(), function(data) {
-					this_plot.each(function(tree) {
-						// format Comma Separated Value string with data from each tree
-						CSV = CSV + "\r\n" + (parseInt(tree.get("tree_id")) + parseInt(tree.get("sub_tree_id"))*.1) + "," + tree.get("species") + "," + tree.get("angle") + "," + tree.get("distance");
-						_.each(tree.get("diameter"), function(obs) {
-							if (obs.date != null){
-								// var formatted_date = obs["date"]["d"] + "/" + obs["date"]["m"] + "/" + obs["date"]["y"];
-								CSV += "," + toFormattedDate(obs.date) + "," + obs.value + ",";
-							}
-							if (obs.notes != "" && obs.notes != undefined){
-								CSV += obs.notes.replace(/[^a-zA-Z 0-9]+/g, '');
-							}
-						});
-					});
-					CSV += "\nDisclaimer: dates before 2013 are approximate. All data during that range was collected between September and October of the specified year.";
-					// adds formatted data to a hidden input on the page
-					$("#CSV").empty().append(CSV);
-					$(".export").val("Click to open file");
-					$(".export").addClass("btn-success");
-					j = 1;
-					return;
+				// set up column headers for CSV
+				var CSV = "Full Tree ID,Species,Angle,Distance"
+				for(var i = 1; i <= max_diam; i++) {
+					CSV += "," + "Obs Date " + i + ",Diameter " + i + ",Notes " + i;
 				}
+  				
+				//$(".export").val("Preparing data for export...");
+				//$.getJSON(app.config.cgiDir + 'litterfall.py?site=' + $(".site-name").text() + "&plot=" + $(".plot-number").text(), function(data) {
+				this_plot.each(function(tree) {
+					// format Comma Separated Value string with data from each tree
+					CSV = CSV + "\r\n" + (parseInt(tree.get("tree_id")) + parseInt(tree.get("sub_tree_id"))*.1) + "," + tree.get("species") + "," + tree.get("angle") + "," + tree.get("distance");
+					_.each(tree.get("diameter"), function(obs) {
+						if (obs.date != null){
+							// var formatted_date = obs["date"]["d"] + "/" + obs["date"]["m"] + "/" + obs["date"]["y"];
+							CSV += "," + toFormattedDate(obs.date) + "," + obs.value + ",";
+						}
+						if (obs.notes != "" && obs.notes != undefined){
+							CSV += obs.notes.replace(/[^a-zA-Z 0-9]+/g, '');
+						}
+					});
+				});
+				CSV += "\nDisclaimer: dates before 2013 are approximate. All data during that range was collected between September and October of the specified year.";
+				// adds formatted data to a hidden input on the page
+				//$("#CSV").empty().append(CSV);
+				//$(".export").val("Click to open file");
+				//$(".export").addClass("btn-success");
 				//});
 				
 				// ensures information has loaded before opening the CSV file

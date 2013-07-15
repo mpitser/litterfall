@@ -50,6 +50,11 @@ define([
 			</td>',
 		initialize: function(){
 			this.render();
+			this.model.on("change:sub_tree_id", function() {
+				console.log("DSDS");
+				this.$el.find("td").eq(1).text(this.model.get("full_tree_id"));
+				
+			}, this);
 		},
 		render: function(){
 			var this_tree = this.model.toJSON();
@@ -138,49 +143,17 @@ define([
 
 		},
 		deleteTreeFunction: function() {
-
 			var this_tree_el = this.$el;
 			this.model.url = app.config.cgiDir + 'tree_data.py';
 			var result = this.model.destroy({
 			
 				success: function(model) { // once done
 					
-					var this_model = model;					
+					var this_model = model;				
 					this_tree_el.fadeOut("slow", function() {						//function called after fadeOut is done
 						
 						// remove the row--we need this because if we just hide (using visibility:hidden) the row then the table-stripe class will not work
-						$("#"+model.get('_id').$oid).remove();
-
-						var target_tree_id = model.get('tree_id');
-
-						// update all the trees under the same tree_id
-						$(".tree-cluster-"+target_tree_id).each(function(i) {
-						
-							// only the full_tree_id would be updated
-							var updated_tree = new Tree();
-							
-							// grab the second child
-							var full_tree_id_td = $(this).children('td').eq(1);
-							var target_full_tree_id = parseInt(parseFloat(full_tree_id_td.text())*10);
-							console.log(target_full_tree_id);
-							
-							// get the data
-							// using oid, because that's the only way it's stable
-							updated_tree.url = app.config.cgiDir + 'tree_data.py?oid=' + $(this).attr('id');
-							updated_tree.fetch({
-								success: function() {
-									console.log(updated_tree);
-									// update it, only the full tree id, for now
-									console.log("tree_id: " + updated_tree.get('tree_id'));
-									updated_full_tree_id = updated_tree.get('tree_id') + (updated_tree.get('sub_tree_id') * .1);
-									console.log(updated_full_tree_id);
-									if (target_full_tree_id * .1 != updated_full_tree_id) {
-										full_tree_id_td.text(updated_full_tree_id);
-									}
-								}
-							});
-							
-						});
+						$(this).remove();
 						
 					});
 					

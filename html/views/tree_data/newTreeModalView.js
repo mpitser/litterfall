@@ -1,3 +1,19 @@
+/*
+View: newTreeModalView
+Model: Tree
+-------------------
+
+A Bootstrap-powered modal that is prompted when the user tries to add a new tree or a new sub-tree.
+It does not generate the new Tree model for you automatically, because it is my concern to separate
+Views from Models--which is not successful by the way, as you can see.
+
+Methods:
+	addAutocomplete()
+				Adds autocomplete to the species field. Powered by Bootstrap's typeahead.
+	
+	validateSpecies()
+				Check whether species is acceptable.
+*/
 define([ 
 	'jquery',
 	'underscore', 
@@ -49,7 +65,9 @@ define([
 		</div>\
 		',
 		initialize: function() {
+			// find out whether user is adding new tree or new sub-tree
 			this.isSubTree = this.model.get('tree_id') > 0;
+			// render!
 			this.render();
 		},
 		render: function() {
@@ -58,6 +76,7 @@ define([
 			this.$el.html(_.template(this.template, {}));
 
 			// This is a bit ugly--to be fixed later
+			// Nah, i'm not going to fix it
 			if (this.isSubTree) {
 				this.$el.find(".modal-header h3").html("Add a new sub-tree <small>Tree ID:  "+this.model.get("tree_id")+"</small>");
 				this.$el.find("#new-tree-species").tooltip({title: "The species of all sub-trees should be the same, no?"})
@@ -184,7 +203,7 @@ define([
 		addAndSaveTree: function(back_to_plot) {
 
 			// Set the URL--don't you think we should not have to specify the URL every time we call the server?
-			this.model.url = app.config.cgiDir + 'litterfall.py';
+			this.model.url = app.config.cgiDir + 'tree_data.py';
 			var self = this;
 			
 			this.model.validate = function() {
