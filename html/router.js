@@ -122,6 +122,8 @@ define([
 				// re-populate (really just showing/hiding columns) corresponding to the date range desired when user clicks Go!
 				$("#btn-go").click(this_plot.populateTreeDiameters);
 				
+				$('.export').tooltip({trigger: 'hover'});
+				
 	
 			});
 		});
@@ -197,8 +199,9 @@ define([
 					}
 				});
 				
-	
 				
+				$('.export').tooltip({trigger: 'hover'});
+								
 			});
 		});
 		
