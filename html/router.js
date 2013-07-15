@@ -81,7 +81,7 @@ define([
 		});
 		
 		app_router.on('route:accessLitterfallReports', function () {
-			var template_file = 'query_litterfall.html';
+			var template_file = 'query-litterfall.html';
 			console.log("querying");
 			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){			
 				$('#main').html(templateHTML);
