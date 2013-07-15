@@ -13,6 +13,8 @@ define([
 			routes: {
 				"data/trees": "accessTrees", //inits the add record "wizard", leads to the edit pages
 				"data/litterfall": "accessLitterfall", //inits the add record "wizard", leads to the edit pages
+				"data/litterfall/query": "litterfallQuery",
+				"data/litterfall/add": "litterfallAddObservation",
 				"data/trees/reports/site/:location/plot/:plot": "goToReportsPlot",
 				"data/trees/update/site/:location/plot/:plot": "goToUpdatePlot",
 				"data/trees/:mode/site/:location/plot/:plot/treeid/:tree_id(/subtreeid/:sub_tree_id)": "goToTree",
@@ -56,7 +58,7 @@ define([
 							document.location.hash = getPlotUrl;
 						});
 						$('#analyze-data').removeAttr("disabled").click(function(){														//waits for user to select plot
-							var getPlotUrl = "data/trees/reports/site/" + encodeURI($('#site-select').val()) + '/plot/' + $('#plot-select').val()
+							var getPlotUrl = "data/reports/site/" + encodeURI($('#site-select').val()) + '/plot/' + $('#plot-select').val()
 							document.location.hash = getPlotUrl;
 						});
 					}
@@ -72,7 +74,20 @@ define([
 			console.log("access");
 			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){			
 				$('#main').html(templateHTML);
+				$('#query-records').click(function(){	
+						document.location.hash = "data/litterfall/query";
+				});
+				$('#new-observation').click(function(){														//waits for user to select plot
+						document.location.hash = "data/litterfall/add";
+				});
 			});
+			
+		});
+		
+		app_router.on('route:litterfallQuery', function() {
+		});
+		
+		app_router.on('route:litterfallAddObservation', function() {
 		});
 		
 		//Plot view
