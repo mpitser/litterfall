@@ -11,11 +11,11 @@ define([
 
 	var AppRouter = Backbone.Router.extend({
 			routes: {
-				"data": "accessObservations", //inits the add record "wizard", leads to the edit pages
-				"data/:mode": "accessObservations", //inits the add record "wizard", leads to the edit pages
-				"data/reports/trees/site/:location/plot/:plot": "goToReportsPlot",
-				"data/update/trees/site/:location/plot/:plot": "goToUpdatePlot",
-				"data/:mode/trees/site/:location/plot/:plot/treeid/:tree_id(/subtreeid/:sub_tree_id)": "goToTree",
+				"data/trees": "accessTrees", //inits the add record "wizard", leads to the edit pages
+				"data/litterfall": "accessLitterfall", //inits the add record "wizard", leads to the edit pages
+				"data/trees/reports/site/:location/plot/:plot": "goToReportsPlot",
+				"data/trees/update/site/:location/plot/:plot": "goToUpdatePlot",
+				"data/trees/:mode/site/:location/plot/:plot/treeid/:tree_id(/subtreeid/:sub_tree_id)": "goToTree",
 				"*actions": "defaultRoute" // Backbone will try match the route above first
 			}
 	});
@@ -27,7 +27,7 @@ define([
 		//default route is the App Home Page
 		app_router.on('route:defaultRoute', function (actions) {
 			$(".home").addClass("active");
-			$(".data").removeClass("active");
+			$(".home").siblings().removeClass("active");
 			var  template_file = 'index.html';
 			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){			//require's library takes HTML templates
 				$('#main').html(templateHTML);
@@ -35,10 +35,10 @@ define([
 		});
 		
 		//Site, plot selection
-		app_router.on('route:accessObservations', function () {											//listening for user action (for user to select location and plot)
-			$(".data").addClass("active");
-			$(".home").removeClass("active");
-			var  template_file = 'update.html';
+		app_router.on('route:accessTrees', function () {											//listening for user action (for user to select location and plot)
+			$(".tree-data").addClass("active");
+			$(".tree-data").siblings().removeClass("active");
+			var  template_file = 'access-tree.html';
 			console.log("access");
 			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){			
 				$('#main').html(templateHTML);
@@ -52,16 +52,26 @@ define([
 				location_options.fetch({
 					success: function() {
 						$('#update-records').removeAttr("disabled").click(function(){														//waits for user to select plot
-							var getPlotUrl = "data/update/" + $('#type-select').val() + '/site/' + encodeURI($('#site-select').val()) + '/plot/' + $('#plot-select').val()
+							var getPlotUrl = "data/trees/update/site/" + encodeURI($('#site-select').val()) + '/plot/' + $('#plot-select').val()
 							document.location.hash = getPlotUrl;
 						});
 						$('#analyze-data').removeAttr("disabled").click(function(){														//waits for user to select plot
-							var getPlotUrl = "data/reports/" + $('#type-select').val() + '/site/' + encodeURI($('#site-select').val()) + '/plot/' + $('#plot-select').val()
+							var getPlotUrl = "data/reports/site/" + encodeURI($('#site-select').val()) + '/plot/' + $('#plot-select').val()
 							document.location.hash = getPlotUrl;
 						});
 					}
 				});
 
+			});
+		});
+		
+		app_router.on('route:accessLitterfall', function () {											//listening for user action (for user to select location and plot)
+			$(".litterfall").addClass("active");
+			$(".litterfall").siblings().removeClass("active");
+			var  template_file = 'access-litterfall.html';
+			console.log("access");
+			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){			
+				$('#main').html(templateHTML);
 			});
 		});
 		
