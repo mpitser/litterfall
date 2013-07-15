@@ -225,8 +225,11 @@ define([
 			}, {
 				success: function(model) {
 					self.$el.modal("hide");
-					if (back_to_plot == true) model.trigger("treeSaved");
-					else document.location.hash = document.location.hash + "/treeid/" + model.get("tree_id") + (self.isSubTree ? ("/subtreeid/" + model.get("sub_tree_id")) : "");
+					if (back_to_plot == true) {
+						self.trigger("treeSaved");
+					} else {
+						document.location.hash = document.location.hash + "/treeid/" + model.get("tree_id") + (self.isSubTree ? ("/subtreeid/" + model.get("sub_tree_id")) : "");
+					}
 				},
 				error: function(model, xhr) {
 					
