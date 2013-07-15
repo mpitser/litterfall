@@ -52,7 +52,10 @@ define([
 			var dates = this_tree.diameter.sort(function(a,b){return (b.year-a.year)});
 			this_tree.dates_desc = dates;
 			this.$el.html(_.template(this.templateReport, {tree: this_tree}));
-			$(".back > a").attr("href", "#data/reports/trees/site/" + $(".site-name").text() + "/plot/" + $(".plot-number").text());
+			//$(".back > a").attr("href", "#data/reports/trees/site/" + $(".site-name").text() + "/plot/" + $(".plot-number").text());
+			$(".back").unbind("click.back").bind("click.back", $.proxy(function() {
+				window.location.hash = "#data/reports/trees/site/" + this.model.get('site') + "/plot/" + this.model.get('plot');
+			}, this));
 			$(".title").text("Analyzing Tree Data ");
 			$("#tree-observations").tablesorter();
 		},

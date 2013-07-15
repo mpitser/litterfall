@@ -77,19 +77,20 @@ table.table-striped > tbody.edit-historical > tr > td:last-child
 
 .button-row .btn
 {
-	margin:10px;
+	margin:10px 0 10px 10px;
+}
+.button-row .btn.pull-right
+{
+	margin:10px 10px 10px 0;
 }
 
-button a, button a:hover {color:#FFF;}
-
-/* -- is anybody using this style? I assume not. */
-/*
-#tree-info ul{
-margin:20px 40px;	
-} */
+button a, button a:hover {
+	color:#FFF;
+}
 
 .edit_cell, .edit-tree-info {
-	display:none;
+	display: none;
 }
-.site-name, .plot-number{
-display:none;}
+.site-name, .plot-number {
+	display: none;
+}
