@@ -56,7 +56,7 @@ define([
 							document.location.hash = getPlotUrl;
 						});
 						$('#analyze-data').removeAttr("disabled").click(function(){														//waits for user to select plot
-							var getPlotUrl = "data/reports/site/" + encodeURI($('#site-select').val()) + '/plot/' + $('#plot-select').val()
+							var getPlotUrl = "data/trees/reports/site/" + encodeURI($('#site-select').val()) + '/plot/' + $('#plot-select').val()
 							document.location.hash = getPlotUrl;
 						});
 					}
