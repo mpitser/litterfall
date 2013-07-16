@@ -3,9 +3,8 @@ define([
 	'underscore', 
 	'backbone',
 	'collections/tree_data/selectionOptions',
-	'views/tree_data/selectionOptionsView',
-	'models/litterfall/Observation'
-], function($, _, Backbone, newObservation, selectionOptions, selectionOptionsView, Observation){
+	'views/tree_data/selectionOptionsView'
+], function($, _, Backbone, newObservation, selectionOptions, selectionOptionsView){
 	var newObservationView = Backbone.View.extend({
 		initialize: function() {
 			_.bindAll(this, 'validate'); // fixes loss of context for 'this' within methods
