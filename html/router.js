@@ -9,7 +9,7 @@ define([
 	'collections/tree_data/Plot',
 	'models/tree_data/Tree',
 	'models/litterfall/newObservation.js',
-	'views/litterfall/newObservationView.js'
+	'views/litterfall/newObservationView.js',
 	'models/litterfall/litterfallQuery'
 ], function($, _, Backbone, singleOption, selectionOptions, selectionOptionsView, litterfallQueryView, Plot, Tree, newObservation, newObservationView, litterfallQuery) {
 
