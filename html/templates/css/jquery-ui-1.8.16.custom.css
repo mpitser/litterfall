@@ -1323,3 +1323,35 @@ div.wijmo-wijmenu .wijmo-wijmenu-child .wijmo-wijmenu-text
   filter: none;
 }
 
+.go-top {
+	position: fixed;
+	bottom: 2em;
+	right: 2em;
+	text-decoration: none;
+	color: white;
+	background-color: rgba(0, 0, 0, 0.3);
+	font-size: 12px;
+	padding: 1em;
+	display: none;
+}
+.go-bottom {
+	position: fixed;
+	top: 5em;
+	right: 2em;
+	text-decoration: none;
+	color: white;
+	background-color: rgba(0, 0, 0, 0.3);
+	font-size: 12px;
+	padding: 1em;
+	display: inline-block;
+}
+.go-bottom:hover {
+	background-color: #0088cc;
+	color: #fff;
+	text-decoration: none;
+}
+.go-top:hover {
+	background-color: #0088cc;
+	color: #fff;
+	text-decoration: none;
+}

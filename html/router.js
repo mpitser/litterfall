@@ -6,8 +6,10 @@ define([
 	'collections/tree_data/selectionOptions',
 	'views/tree_data/selectionOptionsView',
 	'collections/tree_data/Plot',
-	'models/tree_data/Tree'
-], function($, _, Backbone, singleOption, selectionOptions, selectionOptionsView, Plot, Tree) {
+	'models/tree_data/Tree',
+	'models/litterfall/newObservation.js',
+	'views/litterfall/newObservationView.js'
+], function($, _, Backbone, singleOption, selectionOptions, selectionOptionsView, Plot, Tree,  newObservation, newObservationView) {
 
 	var AppRouter = Backbone.Router.extend({
 			routes: {
@@ -85,16 +87,39 @@ define([
 		});
 		
 		app_router.on('route:litterfallQuery', function() {
+			$(".litterfall").addClass("active");
+			$(".litterfall").siblings().removeClass("active");
 		});
 		
 		app_router.on('route:litterfallAddObservation', function() {
+			$(".litterfall").addClass("active");
+			$(".litterfall").siblings().removeClass("active");
+			var template_file = 'litterfall-add-observation.html';
+			console.log('add obs');
+			console.log(typeof(newObservationView));
+			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){
+				$('#main').html(templateHTML);
+				new_obs = new newObservation;
+				new_obs_view = new newObservationView({
+					model: new_obs,
+					el: this
+				});
+				console.log(typeof(selectionOptionsView));
+				location_options = new selectionOptions;
+				location_options.url = app.config.cgiDir + "tree_data.py?site=all";						//creates list with all possible locations
+				location_select = new selectionOptionsView({
+					el: $('#site'),																//populates new selectionOptionsView with locations (sites)
+					collection: location_options
+				});
+				location_options.fetch();
+			});
 		});
 		
 		//Plot view
 		app_router.on('route:goToReportsPlot', function(site, plot) {		
 			//reloads page based on selected location (site) and plot
-			$(".data").addClass("active");
-			$(".home").removeClass("active");
+			$(".tree-data").addClass("active");
+			$(".tree-data").siblings().removeClass("active");
 			var this_plot = new Plot;
 			//need to use site and plot variable to build url to python script
 			this_plot.url = app.config.cgiDir + 'tree_data.py?site=' + site + '&plot=' + plot;
@@ -154,8 +179,8 @@ define([
 		});
 
 		app_router.on('route:goToUpdatePlot', function(site, plot) {		
-			$(".data").addClass("active");
-			$(".home").removeClass("active");
+			$(".tree-data").addClass("active");
+			$(".tree-data").siblings().removeClass("active");
 			var this_plot = new Plot;
 			this_plot.mode = 'update';
 			//need to use site and plot variable to build url to python script
@@ -232,8 +257,8 @@ define([
 		
 		//Edit tree view
 		app_router.on('route:goToTree', function(mode, site, plot, tree_id, sub_tree_id) {						//reloads page based on selected location (site) and plot
-			$(".data").addClass("active");
-			$(".home").removeClass("active");
+			$(".tree-data").addClass("active");
+			$(".tree-data").siblings().removeClass("active");
 			var  template_file = 'update-tree.html';
 			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){			//<WHAT DOES THIS FUNCTION DO?> [ ] (some sort of require wrapper)
 	

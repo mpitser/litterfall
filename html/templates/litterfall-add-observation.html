@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Crum Woods - Above and Belowground Productivity Database</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="css/boots.css" rel="stylesheet">
+    <link href="css/tables.css" rel="stylesheet">
+
+    <style>
+      body {
+        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+      }
+    </style>
+    <link href="css/boots-responsive.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="ico/apple-touch-icon-114-precomposed.png">
+      <link rel="apple-touch-icon-precomposed" sizes="72x72" href="ico/apple-touch-icon-72-precomposed.png">
+                    <link rel="apple-touch-icon-precomposed" href="ico/apple-touch-icon-57-precomposed.png">
+                                   <link rel="shortcut icon" href="ico/favicon.png">
+  </head>
+
+  <body>
+    <div class="container">
+      <h2>Add New Observation to Litterfall Database</h2>
+    <div class="record-details">
+    <form class="record-details">
+    	<input id="date" type="text" class="input date-picker input-medium" placeholder="Enter date..."></input>
+    	<select id="site" class="site select">
+    		<option class="placeholder">Choose site...</option></select>
+    	<select id="plot" class="plot select">
+    		<option class="placeholder">Choose plot...</option>
+    		<option>1</option>
+			<option>2</option></select>
+    	<select id="type" class="type select">
+    		<option class="placeholder type">Choose collection type...</option>
+    		<option value="standing">Standing</option>
+    		<option value="seasonal">Seasonal</option></select>
+   		<select id="sky" class="sky select">
+   			<option class="placeholder sky">Choose sky conditions...</option>
+    		<option value="clear">Clear</option>
+    		<option value="light-clouds">Light Clouds</option>
+    		<option value="partly-cloudy">Partly Cloudy</option></select>
+   		<select id="precipitation" class="precipitation select">
+   		 	<option class="placeholder precipitation">Choose precipitation...</option>
+    		<option value="dry">Dry</option>
+    		<option value="rain">Rain</option>
+    		<option value="snow">Snow</option></select>
+    	<input type="text" id="observers" class="input observers" placeholder="Observers"></input>
+    	<textarea id="notes" class="input notes" rows=1 placeholder="Notes"></textarea><br>
+    	<button class="btn btn-danger clearall">Clear All</button>
+    	<button class="btn btn-success btn-save">Save</button><br>
+    	<p style='background-color:#F5A9A9; display:none' class='warning'>Please complete the above information before proceeding. Errors are highlighted in red.</p>
+		<p>Enter weight (in grams) of leaves or other material (click Save to finalize).</p>
+		<h5>Non-leaf material:</h5><table class='table table-striped data_table' id='non-leaf-table'>
+		<tr>
+		<th>Sample Type</th>
+		<th>Trap 1 <button class="btn btn-danger btn-mini clear pull-right" name="data-non-leaf1">Clear</button></th>
+		<th>Trap 2 <button class="btn btn-danger btn-mini clear pull-right" name="data-non-leaf2">Clear</button></th>
+		<th>Trap 3 <button class="btn btn-danger btn-mini clear pull-right" name="data-non-leaf3">Clear</button></th>
+		<th>Trap 4 <button class="btn btn-danger btn-mini clear pull-right" name="data-non-leaf4">Clear</button></th>
+		<th>Trap 5 <button class="btn btn-danger btn-mini clear pull-right" name="data-non-leaf5">Clear</button></th>
+
+		</tr>
+		<tr><td class='sample_type'>Acorns reproductive</td>
+		<td><input type=text size=7 name='acorns1' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 name='acorns2' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 name='acorns3' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 name='acorns4' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 name='acorns5' class='data-non-leaf input-small'></td>
+		</tr>
+		<tr><td class='sample_type'>All reproductive</td>
+		<td><input type=text size=7 name='reproductive1' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 name='reproductive2' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 name='reproductive3' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 name='reproductive4' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 name='reproductive5' class='data-non-leaf input-small'></td>
+		</tr>
+		<tr><td class='sample_type'>All twigs</td>
+		<td><input type=text size=7 name='twigs1' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 name='twigs2' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 name='twigs3' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 name='twigs4' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 name='twigs5' class='data-non-leaf input-small'></td>
+		</tr>
+		<tr><td class='sample_type'>Bark</td>
+		<td><input type=text size=1 name='bark1' class='data-non-leaf input-small'></td>
+		<td><input type=text size=1 name='bark2' class='data-non-leaf input-small'></td>
+		<td><input type=text size=1 name='bark3' class='data-non-leaf input-small'></td>
+		<td><input type=text size=1 name='bark4' class='data-non-leaf input-small'></td>
+		<td><input type=text size=1 name='bark5' class='data-non-leaf input-small'></td>
+		</tr>
+		<tr><td class='sample_type'>Miscellaneous</td>
+		<td><input type=text size=1 name='miscellaneous1' class='data-non-leaf input-small'></td>
+		<td><input type=text size=1 name='miscellaneous2' class='data-non-leaf input-small'></td>
+		<td><input type=text size=1 name='miscellaneous3' class='data-non-leaf input-small'></td>
+		<td><input type=text size=1 name='miscellaneous4' class='data-non-leaf input-small'></td>
+		<td><input type=text size=1 name='miscellaneous5' class='data-non-leaf input-small'></td>
+		</tr></table>
+		
+		<h5>Leaves: <small>(<a href="../productivity/species.htm">Scientific and Common names of Plants in the Crum Woods</a>)</small></h5>
+		<table class='table table-striped' id='leaf-table'>
+		<tr>
+		<th>Sample Type</th>
+		<th>Trap 1 <button class="btn btn-danger btn-mini clear pull-right" name="data-leaf1">Clear</button></th>
+		<th>Trap 2 <button class="btn btn-danger btn-mini clear pull-right" name="data-leaf2">Clear</button></th>
+		<th>Trap 3 <button class="btn btn-danger btn-mini clear pull-right" name="data-leaf3">Clear</button></th>
+		<th>Trap 4 <button class="btn btn-danger btn-mini clear pull-right" name="data-leaf4">Clear</button></th>
+		<th>Trap 5 <button class="btn btn-danger btn-mini clear pull-right" name="data-leaf5">Clear</button></th>
+		</tr>
+		</table>
+  	</form>
+  	 <button class="btn btn-success btn-save">Save</button>
+	<br>
+    </div> <!-- /container -->
+    <footer>
+    <a href="#" class="go-top">Top</a>
+    <a href="#" class="go-bottom">Bottom</a>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<script>
+		$(document).ready(function() {	
+			$(window).scroll(function() {
+				var y = $("body").height() - $(window).height();
+				var x = $(window).scrollTop();
+				if (x > 200) {
+					$('.go-top').fadeIn(200);
+				} else {
+					$('.go-top').fadeOut(200);
+				}
+				if (x < y) {
+					$('.go-bottom').fadeIn(200);	
+				} else {
+					$('.go-bottom').fadeOut(200);
+				}
+			});
+			
+			// Animate the scroll to top
+			$('.go-top').click(function(event) {
+				event.preventDefault();
+				$('html, body').animate({scrollTop: 0}, 300);
+			})
+			$('.go-bottom').click(function(event) {
+				event.preventDefault();
+				$('html, body').animate({scrollTop: $(document).height()}, 300);
+			})
+		});
+	</script>
+	<br><br>
+    </footer>
+	</body>
+</html>
