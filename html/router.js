@@ -5,11 +5,13 @@ define([
 	'models/tree_data/singleOption',
 	'collections/tree_data/selectionOptions',
 	'views/tree_data/selectionOptionsView',
+	'views/litterfall/litterfallQueryView',
 	'collections/tree_data/Plot',
 	'models/tree_data/Tree',
 	'models/litterfall/newObservation.js',
 	'views/litterfall/newObservationView.js'
-], function($, _, Backbone, singleOption, selectionOptions, selectionOptionsView, Plot, Tree,  newObservation, newObservationView) {
+	'models/litterfall/litterfallQuery'
+], function($, _, Backbone, singleOption, selectionOptions, selectionOptionsView, litterfallQueryView, Plot, Tree, newObservation, newObservationView, litterfallQuery) {
 
 	var AppRouter = Backbone.Router.extend({
 			routes: {
@@ -17,6 +19,7 @@ define([
 				"data/litterfall": "accessLitterfall", //inits the add record "wizard", leads to the edit pages
 				"data/litterfall/query": "litterfallQuery",
 				"data/litterfall/add": "litterfallAddObservation",
+				"data/litterfall/reports":"accessLitterfallReports",
 				"data/trees/reports/site/:location/plot/:plot": "goToReportsPlot",
 				"data/trees/update/site/:location/plot/:plot": "goToUpdatePlot",
 				"data/trees/:mode/site/:location/plot/:plot/treeid/:tree_id(/subtreeid/:sub_tree_id)": "goToTree",
@@ -77,18 +80,13 @@ define([
 			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){			
 				$('#main').html(templateHTML);
 				$('#query-records').click(function(){	
-						document.location.hash = "data/litterfall/query";
+						document.location.hash = "data/litterfall/reports";
 				});
 				$('#new-observation').click(function(){														//waits for user to select plot
 						document.location.hash = "data/litterfall/add";
 				});
 			});
 			
-		});
-		
-		app_router.on('route:litterfallQuery', function() {
-			$(".litterfall").addClass("active");
-			$(".litterfall").siblings().removeClass("active");
 		});
 		
 		app_router.on('route:litterfallAddObservation', function() {
@@ -113,6 +111,19 @@ define([
 				});
 				location_options.fetch();
 			});
+		});
+		
+		app_router.on('route:accessLitterfallReports', function () {
+			$(".litterfall").addClass("active");
+			$(".litterfall").siblings().removeClass("active");
+			var template_file = 'query-litterfall.html';
+			console.log("querying");
+			
+			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){							
+				$('#main').html(templateHTML);
+				var queryView = new litterfallQueryView();				
+			});
+			
 		});
 		
 		//Plot view

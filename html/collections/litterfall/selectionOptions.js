@@ -15,7 +15,8 @@ define([
     		for (element in response){											//for objects within JSON return object
     				parsed_options.push({										//for Backbone's use, stores object from JSON information as key:value pair (object)
     					value: response[element],
-    					name: response[element].charAt(0).toUpperCase() + response[element].slice(1)
+    					name: response[element].charAt(0).toUpperCase() + response[element].slice(1),
+    					type: "site"
     				});
 
     		}

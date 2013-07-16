@@ -13,6 +13,23 @@
 #current.alert-valid  { background-color: #ffe9e8;}
 .species { font-style: italic; }
 
+.i.icon-black:hover{opacity:0.5}
+.dropdown-menu > li > a:hover > [class^="icon-"],
+.dropdown-menu > li > a:hover > [class*=" icon-"]{
+	background-image: url("../img/glyphicons-halflings.png");
+	opacity:0.5;
+}
+.not-in-query > i.icon-black{opacity:0.1}
+.in-query > i.icon-black{opacity:0.8}
+
+.dropdown-menu.query-options li > a:hover,
+.dropdown-menu.query-options li > a:focus,
+.dropdown-submenu:hover > a  {
+  color: #000000;
+  text-decoration: none;
+  background-color: #ffffff;
+}
+
 
 /* Layout helpers
 ----------------------------------*/
