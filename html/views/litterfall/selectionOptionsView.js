@@ -2,10 +2,10 @@ define([
   'jquery',
   'underscore',
   'backbone',
-  'collections/tree_data/selectionOptions'
+  'collections/litterfall/selectionOptions'
 ], function($, _, Backbone, selectionOptions) {
 	var selectionOptionsView = Backbone.View.extend({
-    	template: "<li><a class='not-in-query' name='<%= value %>'><i class='icon-black icon-ok'></i><%= name %></a></li>",
+    	template: "<li><a class='not-in-query <%= type %>' name='<%= value %>'><i class='icon-black icon-ok'></i><%= name %></a></li>",
     	initialize: function(){
     		_.bindAll(this, 'render'); // fixes loss of context for 'this' within methods
     		console.log(this);
@@ -15,8 +15,9 @@ define([
     	},
     	render: function(){ 
     		//console.log(this.$el);
+    		console.log(this.collection);
     		this.collection.each(function(option){
-    		console.log(option.toJSON());
+    			console.log(option.toJSON());
     			this.$el.append(_.template(this.template, option.toJSON()));
     		}, this);
     	}
