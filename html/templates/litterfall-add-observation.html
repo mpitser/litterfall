@@ -59,9 +59,10 @@
     		<option value="snow">Snow</option></select>
     	<input type="text" id="observers" class="input observers" placeholder="Observers"></input>
     	<textarea id="notes" class="input notes" rows=1 placeholder="Notes"></textarea><br>
-    	<button class="btn btn-danger clearall">Clear All</button>
-    	<button class="btn btn-success btn-save">Save</button><br>
-    	<p style='background-color:#F5A9A9; display:none' class='warning'>Please complete the above information before proceeding. Errors are highlighted in red.</p>
+    	<div style='display:none' class='alert alert-danger warning'>Please complete the above information before proceeding. Errors are highlighted in red.</div>
+		<div style='display:none' class='alert alert-success save-success'>Observation saved successfully!<a class="close">&times;</a></div>
+		<button class="btn btn-danger clearall">Clear All</button>
+    	<button class="btn btn-success btn-save">Save</button><br><br>
 		<p>Enter weight (in grams) of leaves or other material (click Save to finalize).</p>
 		<h5>Non-leaf material:</h5><table class='table table-striped data_table' id='non-leaf-table'>
 		<tr>
@@ -125,8 +126,8 @@
 	<br>
     </div> <!-- /container -->
     <footer>
-    <a href="#" class="go-top">Top</a>
-    <a href="#" class="go-bottom">Bottom</a>
+    <a href="#" class="go-to go-top">Top</a>
+    <a href="#" class="go-to go-bottom">Bottom</a>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 	<script>
 		$(document).ready(function() {	

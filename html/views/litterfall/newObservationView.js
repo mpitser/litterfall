@@ -8,6 +8,7 @@ define([
 	var newObservationView = Backbone.View.extend({
 		initialize: function() {
 			_.bindAll(this, 'validate'); // fixes loss of context for 'this' within methods
+			_.bindAll(this, 'save'); // fixes loss of context for 'this' within methods
 			this.render();
 
 		},
@@ -38,10 +39,9 @@ define([
 			
 			var self = this;
 
-			$(".btn-save").click(self.validate);
+			$(".btn-save").click(self.save);
 			$(".clear").click(this.clear);
 			$(".clearall").click(this.clearAll);
-			
 		},
 		clearAll: function() {
 			event.preventDefault();
@@ -74,7 +74,6 @@ define([
 				$(".placeholder").attr("selected", "selected");
 				$("input").val("");
 			});
-			
 		},
 		clear: function(event) {			
 			event.preventDefault();
@@ -120,33 +119,44 @@ define([
 			event.preventDefault();
 			var self = this;
 			var error = false;
-			console.log("validate");
 			$.each($(".placeholder"), function(index, value){
 				if (value.selected) {
 					$(value).parent().addClass("btn-danger");
+					$(value).parent().addClass("alert_invalid");
 					$(".warning").show();
 					error = true;
 				} else {
 					$(value).parent().removeClass("btn-danger");
+					$(value).parent().removeClass("alert_invalid");
+
 				}
 			});
 			if ($(".observers").val() == "") {
-				$(".observers").css("background-color", "#F5A9A9");
+				//$(".observers").css("background-color", "#f2dede");
+				$(".observers").addClass("alert_invalid");
 				$(".warning").show();
 				error = true;
 			} else {
-				$(".observers").css("background-color", "#FFFFFF");
+				//$(".observers").css("background-color", "#FFFFFF");
+				$(".observers").removeClass("alert_invalid");
 			}
+			$(".alert_invalid").on("change", self.validate);
+
 			if (error != true) {
+				console.log("validation passed");
 				$(".warning").hide()
-				this.save();
+				return true;
 			}
+			return false;
 
 		},
 		save: function() {
 			event.preventDefault();
+			if (this.validate() == false) {
+				$('html, body').animate({scrollTop: 0}, 300)
+				return;
+			} else {
 			console.log("save");
-			//this.validate();
 			trap_data = [];
 			$.each($(".data-leaf"), function(index, td){
 				if (td.value != "") {
@@ -175,7 +185,15 @@ define([
 			});
 			this.model.url = app.config.cgiDir + 'litterfall.py';
 			this.model.save(new_obs);
-			document.location.hash = document.location.hash;
+			success: $(".save-success").show();
+			$(".placeholder").attr("selected", "selected");
+			$("input").val("");
+			$(".close-icon").click(function() {
+				event.preventDefault();
+				$(".save-success").hide();
+			});
+			//document.location.hash = document.location.hash;
+			}
 		}
 	
 	});
