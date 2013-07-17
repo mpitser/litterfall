@@ -15,7 +15,6 @@ define([
   
 	$.extend($.fn.typeahead.Constructor.prototype, {
 		matcher: function(item) {
-			//console.log(this.source);
 			if (this.options.type == 'observers') {
 				var observers = this.query.split(",");
 				var last_observer = observers[observers.length - 1];
@@ -44,12 +43,34 @@ define([
 				if (query_genus.toLowerCase() == item_genus.toLowerCase() && item.toLowerCase() == query_genus.toLowerCase() + " spp.") return true;
 				
 				return false;
-			} else {
-				return orig.matcher.call(this, item);
-			}
+			} else if (this.options.type == 'observer') {
+				//console.log(this.query);
+				//console.log(this.options.source);
+				//console.log(this.options.source.indexOf(this.query.toString()) != -1);
+				//console.log(this.query == "");
+				
+				var is_matched = false;
+				for (i in this.options.source) {
+					if (this.options.source[i].toLowerCase().indexOf(this.query.toLowerCase()) == 0) is_matched = true;
+				}
+				
+				//console.log(is_matched);
+				if ((! is_matched) && (item != 'All Observers') && (this.query != "")) {
+					this.$element.parent().addClass("error");
+					this.$element.parent().tooltip({title:"No such observer"}).tooltip("show");
+					return false;
+				} else {
+					this.$element.parent().removeClass("error");
+					this.$element.parent().tooltip("destroy");
+					return true;
+				}
+			
+			} 
+			return orig.matcher.call(this, item);
+			
 		},
 		updater: function(item) {
-			
+			console.log("updater called");
 			if (this.options.type != 'observers') {
 				return orig.updater.call(this, item);
 			}
@@ -60,18 +81,21 @@ define([
 			
 		},
 		select: function() {
-			
+			console.log("select called");
 			if (this.options.type != 'observers') {
+				this.$element.parent().removeClass("error");
+				this.$element.parent().tooltip("destroy");
 				return orig.select.call(this);
 			}
 			
+
 			var to_return = orig.select.call(this);
 			this.$element.focus();
 			return to_return;
 			
 		},
 		listen: function() {
-			if (this.options.type == 'species') {
+			if ((this.options.type == 'species') || (this.options.type == 'observer')) {
 				this.$element.on('focus', $.proxy(this.lookup, this));
 				this.$menu.css({
 					'overflow-x': 'hidden',

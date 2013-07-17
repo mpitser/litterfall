@@ -37,8 +37,8 @@ input.alert_invalid:focus{
 .not-in-query > i.icon-black{opacity:0.1}
 .in-query > i.icon-black{opacity:0.8}
 
-.dropdown-menu.query-options li > a:hover,
-.dropdown-menu.query-options li > a:focus,
+.dropdown-menu.query-options-dropdown li > a:hover,
+.dropdown-menu.query-options-dropdown li > a:focus,
 .dropdown-submenu:hover > a  {
   color: #000000;
   text-decoration: none;

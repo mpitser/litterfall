@@ -35,7 +35,7 @@
 
     	<h1>Access Data Records</h1>
 		<div style="margin:25px 0px;">
-			<button id="analyze-data"class="btn btn-large btn-primary" type="button" disabled="disabled">Analyze data ></button>
+			<button id="analyze-data"class="btn btn-large btn-primary" type="button">Analyze data ></button>
 		</div>
 		<div style="margin:25px 0px;">
 			<div id="query-items-selected" class="well well-small"></div>
@@ -44,39 +44,39 @@
 		<div>
 			<div class="btn-group">
   				<button class="btn dropdown-toggle" data-toggle="dropdown"> Site <span class="caret"></span></button>
-  				<ul class="dropdown-menu query-options site" role="menu" aria-labelledby="dLabel">
+  				<ul class="dropdown-menu query-options-dropdown site" role="menu" aria-labelledby="dLabel">
     				<!-- dropdown menu links -->
   				</ul>
 			</div>
 			<div class="btn-group">
   				<button class="btn dropdown-toggle" data-toggle="dropdown"> Plot <span class="caret"></span></button>
-  				<ul class="dropdown-menu">
+  				<ul class="dropdown-menu query-options-dropdown plot" role="menu" aria-labelledby="dLabel">
     				<!-- dropdown menu links -->
+    				<li><a name='plot_1' class='not-in-query plot'><i class='icon-black icon-ok'></i>1</a></li>
+    				<li><a name='plot_2' class='not-in-query plot'><i class='icon-black icon-ok'></i>2</a></li>
   				</ul>
 			</div>
 			<div class="btn-group">
   				<button class="btn dropdown-toggle" data-toggle="dropdown"> Trap <span class="caret"></span></button>
-  				<ul class="dropdown-menu">
+  				<ul class="dropdown-menu query-options-dropdown trap" role="menu" aria-labelledby="dLabel">
     				<!-- dropdown menu links -->
+    				<li><a name='trap_1' class='not-in-query trap'><i class='icon-black icon-ok'></i>1</a></li>
+    				<li><a name='trap_2' class='not-in-query trap'><i class='icon-black icon-ok'></i>2</a></li>
+    				<li><a name='trap_3' class='not-in-query trap'><i class='icon-black icon-ok'></i>3</a></li>
+    				<li><a name='trap_4' class='not-in-query trap'><i class='icon-black icon-ok'></i>4</a></li>
+    				<li><a name='trap_5' class='not-in-query trap'><i class='icon-black icon-ok'></i>5</a></li>
   				</ul>
 			</div>
 			<div class="btn-group">
-  				<button class="btn dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
-  				<ul class="dropdown-menu">
+  				<button class="btn dropdown-toggle" data-toggle="dropdown"> Collection Type <span class="caret"></span></button>
+  				<ul class="dropdown-menu query-options-dropdown collection_type" role="menu" aria-labelledby="dLabel">
     				<!-- dropdown menu links -->
+    				<li><a name='seasonal' class='not-in-query collection_type'><i class='icon-black icon-ok'></i>Seasonal</a></li>
+    				<li><a name='standing' class='not-in-query collection_type'><i class='icon-black icon-ok'></i>Standing</a></li>
   				</ul>
 			</div>
-			<div class="btn-group">
-  				<button class="btn dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
-  				<ul class="dropdown-menu">
-    				<!-- dropdown menu links -->
-  				</ul>
-			</div>
-			<div class="btn-group">
-  				<button class="btn dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
-  				<ul class="dropdown-menu">
-    				<!-- dropdown menu links -->
-  				</ul>
+			<div class="control-group">
+				<input type="text" data-provide="typeahead" class="query-options-typeahead observers" placeholder="Observers" style="font-style: italic"></input>
 			</div>
 		</div>
 	</div> <!-- span4-->	
