@@ -109,6 +109,7 @@ define([
 		addAutocomplete: function() {
 			// get the species list from the text file and populate array
         	$.getJSON('data/tree_species.json', function(data){
+           	 	console.log(data);
            	 	
            	 	// Add autocomplete
 				$("#new-tree-species").typeahead({

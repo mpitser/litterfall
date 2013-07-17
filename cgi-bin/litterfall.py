@@ -110,6 +110,15 @@ def getdata(db, query):
 	
 	return data
 	
+def getObservers(db):
+	# get all observers from last X years
+	num_years = 1000  #change if you want to constrict the number of observers that are in autocomplete
+	data = db.find({'date.y' : {'$gte': date.today().year - num_years}}, {'fields':'observers'}).distinct('observers')
+	data.sort()
+	n = len(data)
+	
+	return data
+	
 def main():
 	# global Observation #not sure if needed
 
@@ -134,14 +143,18 @@ def main():
 		print 'Content-Type: application/json\n'
 		query = cgi.FieldStorage()
 		
-		# get data associated with specifications entered
-		data = getdata(db, query)
-		
-		print 'Content-Type: application/json\n'
-		if data.count() > 0:
-			for i in range(0,data.count()):
-				print json.dumps(data[i], default=json_util.default, separators=(',', ':'))
-				print ""
+		if query.getvalue("observers") == "all":
+			data = getObservers(db)
+			print json.dumps(data, default=json_util.default, separators=(',', ':'))
+			
+		else:
+			# get data associated with specifications entered
+			data = getdata(db, query)
+			print 'Content-Type: application/json\n'
+			if data.count() > 0:
+				for i in range(0,data.count()):
+					print json.dumps(data[i], default=json_util.default, separators=(',', ':'))
+					print ""		
 
 	elif method == 'POST' or method == 'PUT':
 		# we want to send data to server (without url) 
