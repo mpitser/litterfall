@@ -9,9 +9,24 @@
  */
 /* Alert user of invalid input
 ----------------------------------*/
-.edit_cell .alert_invalid { background-color: #ffe9e8;}
-#current.alert-valid  { background-color: #ffe9e8;}
+input.alert_invalid { background-color: #f2dede;
+}
+input.alert_invalid::-webkit-input-placeholder {
+    color:    #b94a48;
+}
+input.alert_invalid:-moz-placeholder {
+    color: #b94a48;
+}​
+
+#current.alert-valid  { background-color: #f2dede;}
 .species { font-style: italic; }
+
+input.alert_invalid:focus{
+	border-color: #b94a48;
+	-webkit-box-shadow: 0 0 6px #f8b9b7;
+	-moz-box-shadow: 0 0 6px #f8b9b7;
+	box-shadow: 0 0 6px #f8b9b7;
+}
 
 .i.icon-black:hover{opacity:0.5}
 .dropdown-menu > li > a:hover > [class^="icon-"],
@@ -1340,3 +1355,26 @@ div.wijmo-wijmenu .wijmo-wijmenu-child .wijmo-wijmenu-text
   filter: none;
 }
 
+.go-to {
+	border-radius: 4px;
+	position: fixed;
+	right: 2em;
+	text-decoration: none;
+	color: white;
+	background-color: rgba(0, 0, 0, 0.3);
+	font-size: 12px;
+	padding: 1em;
+	display: none;
+}
+.go-top {
+	bottom: 2em;
+}
+.go-bottom {
+	top: 5em;
+	display: inline-block;
+}
+.go-to:hover {
+	background-color: rgba(0, 136, 204, 0.5);
+	color: #fff;
+	text-decoration: none;
+}

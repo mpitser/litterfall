@@ -8,13 +8,17 @@ define([
 	'views/litterfall/litterfallQueryView',
 	'collections/tree_data/Plot',
 	'models/tree_data/Tree',
+	'models/litterfall/newObservation.js',
+	'views/litterfall/newObservationView.js',
 	'models/litterfall/litterfallQuery'
-], function($, _, Backbone, singleOption, selectionOptions, selectionOptionsView, litterfallQueryView, Plot, Tree, litterfallQuery) {
+], function($, _, Backbone, singleOption, selectionOptions, selectionOptionsView, litterfallQueryView, Plot, Tree, newObservation, newObservationView, litterfallQuery) {
 
 	var AppRouter = Backbone.Router.extend({
 			routes: {
 				"data/trees": "accessTrees", //inits the add record "wizard", leads to the edit pages
 				"data/litterfall": "accessLitterfall", //inits the add record "wizard", leads to the edit pages
+				"data/litterfall/query": "litterfallQuery",
+				"data/litterfall/add": "litterfallAddObservation",
 				"data/litterfall/reports":"accessLitterfallReports",
 				"data/trees/reports/site/:location/plot/:plot": "goToReportsPlot",
 				"data/trees/update/site/:location/plot/:plot": "goToUpdatePlot",
@@ -72,13 +76,36 @@ define([
 			$(".litterfall").addClass("active");
 			$(".litterfall").siblings().removeClass("active");
 			var  template_file = 'access-litterfall.html';
-			console.log("access");
 			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){			
 				$('#main').html(templateHTML);
-				$('#analyze-data').click(function() {
-					var Url = "data/litterfall/reports";
-					document.location.hash = Url;
+				$('#query-records').click(function(){	
+						document.location.hash = "data/litterfall/reports";
 				});
+				$('#new-observation').click(function(){														//waits for user to select plot
+						document.location.hash = "data/litterfall/add";
+				});
+			});
+			
+		});
+		
+		app_router.on('route:litterfallAddObservation', function() {
+			$(".litterfall").addClass("active");
+			$(".litterfall").siblings().removeClass("active");
+			var template_file = 'litterfall-add-observation.html';
+			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){
+				$('#main').html(templateHTML);
+				new_obs = new newObservation;
+				new_obs_view = new newObservationView({
+					model: new_obs,
+					el: this
+				});
+				location_options = new selectionOptions;
+				location_options.url = app.config.cgiDir + "tree_data.py?site=all";						//creates list with all possible locations
+				location_select = new selectionOptionsView({
+					el: $('#site'),																//populates new selectionOptionsView with locations (sites)
+					collection: location_options
+				});
+				location_options.fetch();
 			});
 		});
 		
@@ -98,8 +125,8 @@ define([
 		//Plot view
 		app_router.on('route:goToReportsPlot', function(site, plot) {		
 			//reloads page based on selected location (site) and plot
-			$(".data").addClass("active");
-			$(".home").removeClass("active");
+			$(".tree-data").addClass("active");
+			$(".tree-data").siblings().removeClass("active");
 			var this_plot = new Plot;
 			//need to use site and plot variable to build url to python script
 			this_plot.url = app.config.cgiDir + 'tree_data.py?site=' + site + '&plot=' + plot;
@@ -159,8 +186,8 @@ define([
 		});
 
 		app_router.on('route:goToUpdatePlot', function(site, plot) {		
-			$(".data").addClass("active");
-			$(".home").removeClass("active");
+			$(".tree-data").addClass("active");
+			$(".tree-data").siblings().removeClass("active");
 			var this_plot = new Plot;
 			this_plot.mode = 'update';
 			//need to use site and plot variable to build url to python script
@@ -237,8 +264,8 @@ define([
 		
 		//Edit tree view
 		app_router.on('route:goToTree', function(mode, site, plot, tree_id, sub_tree_id) {						//reloads page based on selected location (site) and plot
-			$(".data").addClass("active");
-			$(".home").removeClass("active");
+			$(".tree-data").addClass("active");
+			$(".tree-data").siblings().removeClass("active");
 			var  template_file = 'update-tree.html';
 			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){			//<WHAT DOES THIS FUNCTION DO?> [ ] (some sort of require wrapper)
 	

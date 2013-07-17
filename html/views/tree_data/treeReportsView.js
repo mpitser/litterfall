@@ -54,7 +54,7 @@ define([
 			this.$el.html(_.template(this.templateReport, {tree: this_tree}));
 			//$(".back > a").attr("href", "#data/reports/trees/site/" + $(".site-name").text() + "/plot/" + $(".plot-number").text());
 			$(".back").unbind("click.back").bind("click.back", $.proxy(function() {
-				window.location.hash = "#data/reports/trees/site/" + this.model.get('site') + "/plot/" + this.model.get('plot');
+				document.location.hash = "#data/trees/reports/site/" + this.model.get('site') + "/plot/" + this.model.get('plot');
 			}, this));
 			$(".title").text("Analyzing Tree Data ");
 			$("#tree-observations").tablesorter();

@@ -146,7 +146,7 @@ define([
 			if ($species.val() == '') {
 				error = "This cannot be empty";
 			} else if ($.inArray($species.val(), $all_species) == -1) {
-				$species.val("Unidentified, spp.");
+				$species.val("Unidentified spp.");
 				console.log($species);
 				error = "The species entered did not match a species name on file.  It has been given a species name of Unidentified.  If this is an error, please edit your entry to choose one of the options or contact the professor.";
 			}
