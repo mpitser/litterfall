@@ -1,5 +1,3 @@
-//TODO: date validation
-//TODO: observers type-ahead
 //TODO: sample type validation
 define([ 
 	'jquery',
@@ -18,6 +16,7 @@ define([
 		render: function() {
 			var j;			
 			this.addAutocomplete();
+			var self = this;
 			$.getJSON('data/tree_species.json', function(data){
 				$.each(data, function(index, val) {
 					new_row = "<tr><td class='sample-type' id='" + val + "'>"+ val + " leaves</td>";
@@ -26,7 +25,7 @@ define([
 					}
 					$("#leaf-table").append(new_row);
 				});
-				j = 3;
+				self.addValidate();
 			});
 			$("#date").datepicker({
 				maxDate: 0,
@@ -38,9 +37,6 @@ define([
 					$(".ui-datepicker a").removeAttr("href");
 				}
 			});
-			
-			var self = this;
-
 			$(".btn-save").click(self.save);
 			$(".clear").click(this.clear);
 			$(".clearall").click(this.clearAll);
@@ -49,20 +45,33 @@ define([
 				$(".save-success").hide();
 			});
 		},
+		addValidate: function() {
+			$("input").blur(this.check);
+		},
+		check: function() {
+			if($(this).hasClass("data-leaf") || $(this).hasClass("data-non-leaf")){
+				if (isNaN(this.value)){
+					$(this).addClass("alert_invalid");
+					$(this).attr("data-original-title", "Please enter a valid number");	
+					$(this).tooltip();
+					$(this).tooltip("show");
+				} else {
+					$(this).removeClass("alert_invalid");
+					$(this).attr("data-original-title", "");
+					$(this).tooltip("destroy");
+				}	
+			}
+		},		
 		addAutocomplete: function() {
-			// get the species list from the text file and populate array
-        	$.getJSON('data/tree_species.json', function(data){
-           	 	
-           	 	// Add autocomplete
+			$.getJSON(app.config.cgiDir + '/litterfall.py?observers=all', function(data){
+           	 	//console.log(data);
 				$("#observers").typeahead({
 					minLength: 0,
 					items: Infinity,
 					source: data,
 					jsonSource: data,
-					type: "observers"
+					type: "observer"
 				});
-				
-				
    			});
 		},
 		clearAll: function() {
@@ -188,12 +197,12 @@ define([
 				console.log("save");
 				trap_data = [];
 				$.each($(".data-leaf"), function(index, td){
-					if (td.value != "") {
+					if (td.value != "" && !isNaN(td.value)) {
 						trap_data.push({'material': 'leaf', 'value': parseFloat(td.value), 'species': td.name.substring(0, td.name.length-1), 'trap': parseInt(td.name.substring(td.name.length-1, td.name.length))});
 					}
 				});
 				$.each($(".data-non-leaf"), function(index, td){
-					if (td.value != "") {
+					if (td.value != "" && !isNaN(td.value)) {
 						trap_data.push({'material': 'non-leaf', 'value': parseFloat(td.value), 'species': td.name.substring(0, td.name.length-1), 'trap': parseInt(td.name.substring(td.name.length-1, td.name.length))});
 					}
 				});
