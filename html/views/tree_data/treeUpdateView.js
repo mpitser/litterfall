@@ -468,7 +468,7 @@ define([
 			var self = this;
 			
 			$("#tree-observations > tr").removeClass("edit");
-			this.model.url = app.config.cgiDir + 'litterfall.py';
+			this.model.url = app.config.cgiDir + 'tree_data.py';
 			this.model.save({}, {
 				success: function() {
 					self.render();
@@ -529,7 +529,7 @@ define([
 				
 				// delete it! HAHAHAHAHA
 				self.model.set('diameter', _.without(entries_array, entries_array[target_index]));
-				self.model.url = app.config.cgiDir + 'litterfall.py';
+				self.model.url = app.config.cgiDir + 'tree_data.py';
 				self.model.save();
 				self.render();
 				
@@ -667,7 +667,7 @@ define([
 			//finds all observers that have been previously entered into the database
 			var observers_array = [];
 			
-			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allObservers', function(data) {
+			$.getJSON(app.config.cgiDir + 'tree_data.py?site=allObservers', function(data) {
 				
 				for (i in data) {
 					observers_array.push(data[i]);

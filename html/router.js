@@ -76,7 +76,6 @@ define([
 			$(".litterfall").addClass("active");
 			$(".litterfall").siblings().removeClass("active");
 			var  template_file = 'access-litterfall.html';
-			console.log("access");
 			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){			
 				$('#main').html(templateHTML);
 				$('#query-records').click(function(){	
@@ -93,8 +92,6 @@ define([
 			$(".litterfall").addClass("active");
 			$(".litterfall").siblings().removeClass("active");
 			var template_file = 'litterfall-add-observation.html';
-			console.log('add obs');
-			console.log(typeof(newObservationView));
 			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){
 				$('#main').html(templateHTML);
 				new_obs = new newObservation;
@@ -102,7 +99,6 @@ define([
 					model: new_obs,
 					el: this
 				});
-				console.log(typeof(selectionOptionsView));
 				location_options = new selectionOptions;
 				location_options.url = app.config.cgiDir + "tree_data.py?site=all";						//creates list with all possible locations
 				location_select = new selectionOptionsView({

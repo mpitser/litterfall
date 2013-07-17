@@ -19,12 +19,10 @@ define([
 			var j;			
 			this.addAutocomplete();
 			$.getJSON('data/tree_species.json', function(data){
-				$.each(data, function(index, value) {
-					if (value.indexOf(".") == -1) {
-						new_row = "<tr><td class='sample-type' id='" + value + "'>"+value+ " leaves</td>";
-						for (var i = 1; i < 6; i++)  {
-							new_row += "<td class='data-entry'><input type='text' size=1 name='" + value + i + "'class='data-leaf input-small'></td>";
-						}
+				$.each(data, function(index, val) {
+					new_row = "<tr><td class='sample-type' id='" + val + "'>"+ val + " leaves</td>";
+					for (var i = 1; i < 6; i++)  {
+						new_row += "<td class='data-entry'><input type='text' size=1 name='" + val + i + "'class='data-leaf input-small'></td>";
 					}
 					$("#leaf-table").append(new_row);
 				});
@@ -52,7 +50,6 @@ define([
 			});
 		},
 		addAutocomplete: function() {
-			console.log("adding autocomplete");
 			// get the species list from the text file and populate array
         	$.getJSON('data/tree_species.json', function(data){
            	 	
@@ -67,12 +64,6 @@ define([
 				
 				
    			});
-		},
-		events: {
-			"click .close": function() {
-				event.preventDefault();
-				$(".save-success").hide();
-			}
 		},
 		clearAll: function() {
 			event.preventDefault();
@@ -104,6 +95,7 @@ define([
 				$alert_modal.modal("hide");
 				$(".placeholder").attr("selected", "selected");
 				$("input").val("");
+				$("textarea").val("");
 			});
 		},
 		clear: function(event) {			
@@ -193,41 +185,42 @@ define([
 				$('html, body').animate({scrollTop: 0}, 300)
 				return;
 			} else {
-			console.log("save");
-			trap_data = [];
-			$.each($(".data-leaf"), function(index, td){
-				if (td.value != "") {
-					trap_data.push({'material': 'leaf', 'value': parseFloat(td.value), 'species': td.name.substring(0, td.name.length-1), 'trap': td.name.substring(td.name.length-1, td.name.length)});
+				console.log("save");
+				trap_data = [];
+				$.each($(".data-leaf"), function(index, td){
+					if (td.value != "") {
+						trap_data.push({'material': 'leaf', 'value': parseFloat(td.value), 'species': td.name.substring(0, td.name.length-1), 'trap': parseInt(td.name.substring(td.name.length-1, td.name.length))});
+					}
+				});
+				$.each($(".data-non-leaf"), function(index, td){
+					if (td.value != "") {
+						trap_data.push({'material': 'non-leaf', 'value': parseFloat(td.value), 'species': td.name.substring(0, td.name.length-1), 'trap': parseInt(td.name.substring(td.name.length-1, td.name.length))});
+					}
+				});
+				var new_observers_orig = $("#observers").val().split(",");
+				var new_observers = [];
+				var new_observer = "";
+				for (var i = 0; i < new_observers_orig.length; i++){
+					new_observer = new_observers_orig[i].trim(" ");
+					if (new_observer != "") new_observers.push(new_observer);
 				}
-			});
-			$.each($(".data-non-leaf"), function(index, td){
-				if (td.value != "") {
-					trap_data.push({'material': 'non-leaf', 'value': parseFloat(td.value), 'species': td.name.substring(0, td.name.length-1), 'trap': td.name.substring(td.name.length-1, td.name.length)});
-				}
-			});
-			var new_observers_orig = $("#observers").val().split(",");
-			var new_observers = [];
-			var new_observer = "";
-			for (var i = 0; i < new_observers_orig.length; i++){
-				new_observer = new_observers_orig[i].trim(" ");
-				if (new_observer != "") new_observers.push(new_observer);
-			}
-			var date = new Date($("#date").val());
-			new_obs = ({
-				date: date,
-				weather: {"precipitation": $("#precipitation").val(), "sky": $("#sky").val()},
-				collection_type: $("#type").val(),
-				observers: new_observers,
-				trap_data: trap_data,
-				notes: $("#notes").val()
-			});
-			this.model.url = app.config.cgiDir + 'litterfall.py';
-			this.model.save(new_obs);
-			success: $(".save-success").show();
-			$(".placeholder").attr("selected", "selected");
-			$("input").val("");
-
-			//document.location.hash = document.location.hash;
+				var date = new Date($("#date").val());
+				new_obs = ({
+					date: date.toLitterfallDateObject(),
+					weather: {"precipitation": $("#precipitation").val(), "sky": $("#sky").val()},
+					collection_type: $("#type").val(),
+					observers: new_observers,
+					trap_data: trap_data,
+					notes: $("#notes").val()
+				});
+				console.log(new_obs);
+				this.model.url = app.config.cgiDir + 'litterfall.py';
+				this.model.save(new_obs);
+				$('html, body').animate({scrollTop: 0}, 300)
+				success: $(".save-success").show();
+				$(".placeholder").attr("selected", "selected");
+				$("input").val("");
+				$("textarea").val("");
 			}
 		}
 	
