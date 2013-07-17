@@ -1,3 +1,6 @@
+//TODO: date validation
+//TODO: observers type-ahead
+//TODO: sample type validation
 define([ 
 	'jquery',
 	'underscore', 
@@ -13,7 +16,8 @@ define([
 
 		},
 		render: function() {
-			var j;
+			var j;			
+			this.addAutocomplete();
 			$.getJSON('data/tree_species.json', function(data){
 				$.each(data, function(index, value) {
 					if (value.indexOf(".") == -1) {
@@ -42,6 +46,33 @@ define([
 			$(".btn-save").click(self.save);
 			$(".clear").click(this.clear);
 			$(".clearall").click(this.clearAll);
+			$(".close").click(function() {
+				event.preventDefault();
+				$(".save-success").hide();
+			});
+		},
+		addAutocomplete: function() {
+			console.log("adding autocomplete");
+			// get the species list from the text file and populate array
+        	$.getJSON('data/tree_species.json', function(data){
+           	 	
+           	 	// Add autocomplete
+				$("#observers").typeahead({
+					minLength: 0,
+					items: Infinity,
+					source: data,
+					jsonSource: data,
+					type: "observers"
+				});
+				
+				
+   			});
+		},
+		events: {
+			"click .close": function() {
+				event.preventDefault();
+				$(".save-success").hide();
+			}
 		},
 		clearAll: function() {
 			event.preventDefault();
@@ -132,27 +163,33 @@ define([
 				}
 			});
 			if ($(".observers").val() == "") {
-				//$(".observers").css("background-color", "#f2dede");
 				$(".observers").addClass("alert_invalid");
 				$(".warning").show();
 				error = true;
 			} else {
-				//$(".observers").css("background-color", "#FFFFFF");
 				$(".observers").removeClass("alert_invalid");
 			}
-			$(".alert_invalid").on("change", self.validate);
-
+			var date = new Date($("#date").val());
+			if (date == "Invalid Date") {
+				error = true;
+				$(".warning").show();
+				$(".date-picker").addClass("alert_invalid");
+			} else {
+				$(".date-picker").removeClass("alert_invalid");
+			}
 			if (error != true) {
 				console.log("validation passed");
 				$(".warning").hide()
 				return true;
 			}
+			$(".alert_invalid").on("change", self.validate);
 			return false;
 
 		},
 		save: function() {
 			event.preventDefault();
 			if (this.validate() == false) {
+				console.log("validation failed");
 				$('html, body').animate({scrollTop: 0}, 300)
 				return;
 			} else {
@@ -175,8 +212,9 @@ define([
 				new_observer = new_observers_orig[i].trim(" ");
 				if (new_observer != "") new_observers.push(new_observer);
 			}
+			var date = new Date($("#date").val());
 			new_obs = ({
-				//date: $("#date").val(),
+				date: date,
 				weather: {"precipitation": $("#precipitation").val(), "sky": $("#sky").val()},
 				collection_type: $("#type").val(),
 				observers: new_observers,
@@ -188,10 +226,7 @@ define([
 			success: $(".save-success").show();
 			$(".placeholder").attr("selected", "selected");
 			$("input").val("");
-			$(".close-icon").click(function() {
-				event.preventDefault();
-				$(".save-success").hide();
-			});
+
 			//document.location.hash = document.location.hash;
 			}
 		}

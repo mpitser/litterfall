@@ -134,7 +134,7 @@ define([
 			this.$el.html(_.template(this.templateUpdate, {tree: this_tree}));
 			$(".title").text("Updating Tree Data ");
 			$(".back").unbind("click.back").bind("click.back", $.proxy(function() {
-				window.location.hash = "#data/reports/trees/site/" + this.model.get('site') + "/plot/" + this.model.get('plot');
+				document.location.hash = "#data/trees/update/site/" + this.model.get('site') + "/plot/" + this.model.get('plot');
 			}, this));
 			$("#tree-observations").tablesorter({headers: { 0: { sorter: false}}}); 
 			$(".show-obs-info").show();
