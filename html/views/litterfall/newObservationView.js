@@ -73,6 +73,12 @@ define([
 					type: "observers"
 				});
    			});
+   			$("#observers").on('focus', function(){
+   				console.log("focus");
+   				$("#observers").typeahead.bind($("#observers"), 'lookup');
+   				$(this).lookup();
+   			});
+
 		},
 		clearAll: function() {
 			event.preventDefault();
@@ -116,7 +122,7 @@ define([
 				'aria-hidden': 'true'
 			}).html('\
 				<div class="modal-header">\
-					<h3>Do you want to continue?</h3>\
+					<h3>Clear this trap?</h3>\
 				</div>\
 				<div class="modal-body">\
 					<p>Are you sure you want to delete all of the data you entered for this trap? This action cannot be undone.</p>\
@@ -173,8 +179,8 @@ define([
 			var date = new Date($("#date").val());
 			if (date == "Invalid Date") {
 				error = true;
-				$(".warning").show();
 				$(".date-picker").addClass("alert_invalid");
+				$(".warning").show();
 			} else {
 				$(".date-picker").removeClass("alert_invalid");
 			}
@@ -190,12 +196,9 @@ define([
 		save: function() {
 			event.preventDefault();
 			if (this.validate() == false) {
-				console.log("validation failed");
 				$('html, body').animate({scrollTop: 0}, 300)
 				return;
-			} else {
-				console.log("save");
-				trap_data = [];
+			} else {				trap_data = [];
 				$.each($(".data-leaf"), function(index, td){
 					if (td.value != "" && !isNaN(td.value)) {
 						trap_data.push({'material': 'leaf', 'value': parseFloat(td.value), 'species': td.name.substring(0, td.name.length-1), 'trap': parseInt(td.name.substring(td.name.length-1, td.name.length))});
@@ -229,7 +232,7 @@ define([
 				console.log(new_obs);
 				this.model.url = app.config.cgiDir + 'litterfall.py';
 				this.model.save(new_obs);
-				document.location.hash(document.location.hash);
+				document.location.hash = document.location.hash;
 				$('html, body').animate({scrollTop: 0}, 300)
 				$(".save-success").show();
 				$(".placeholder").attr("selected", "selected");

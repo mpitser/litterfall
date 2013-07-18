@@ -20,7 +20,9 @@ define([
 			$('.icon-remove').click(this.removeQueryItem); //DOESN"T WORK BLEAHHHH WHAY NOT?
 			$('#analyze-data').click(this.queryOnSelectedItems);
 			//$('.query-options-typeahead.observers').on('blur', this.validateObservers);
-			
+			$("#litterfall-records").tablesorter({headers: { 0: { sorter: false}}}); 
+
+
 			return this;
 
 		},
@@ -124,6 +126,18 @@ define([
 		queryOnSelectedItems: function() {
 			console.log("abpout to query");
 			console.log($(document).find(".query-item"));
+			var query_string = ""
+			$("#litterfall-records > tr").remove();
+			$("#litterfall-records").show();
+			$.getJSON('data/tree_species.json' + query_string, function(data){
+				$.each(data, function(index, value) {
+					var $row = $("<tr><td class='id'>" + index + "</td><td class='site'>" +value+ "</td><td class=plot>"+ value+"</td></tr>")
+					$("#litterfall-records tbody").append($row);
+				});			
+				$("#litterfall-records").tableNav(); 
+
+			});
+
 		}
 		/*,
 		validateObservers: function() {
