@@ -70,7 +70,7 @@ define([
 					items: Infinity,
 					source: data,
 					jsonSource: data,
-					type: "observer"
+					type: "observers"
 				});
    			});
 		},
@@ -206,6 +206,10 @@ define([
 						trap_data.push({'material': 'non-leaf', 'value': parseFloat(td.value), 'species': td.name.substring(0, td.name.length-1), 'trap': parseInt(td.name.substring(td.name.length-1, td.name.length))});
 					}
 				});
+				if (trap_data.length == 0 && $(".trap-warning").css('display') == 'none') {
+					$(".trap-warning").show();
+					return;
+				}
 				var new_observers_orig = $("#observers").val().split(",");
 				var new_observers = [];
 				var new_observer = "";
@@ -225,9 +229,11 @@ define([
 				console.log(new_obs);
 				this.model.url = app.config.cgiDir + 'litterfall.py';
 				this.model.save(new_obs);
+				document.location.hash(document.location.hash);
 				$('html, body').animate({scrollTop: 0}, 300)
-				success: $(".save-success").show();
+				$(".save-success").show();
 				$(".placeholder").attr("selected", "selected");
+				$(".trap-warning").hide();
 				$("input").val("");
 				$("textarea").val("");
 			}
