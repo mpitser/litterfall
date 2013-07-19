@@ -153,21 +153,32 @@ def main():
 	if method == 'GET':
 		# we want to read data from database (but not change it)
 		
-		print 'Content-Type: application/json\n'
+		"""
+		Mal's comments: 
+		I'm assuming we could do one of a few things: specify that we want a list of _ (observers, species, etc)
+		to populate a dropdown, or else we're querying for data to report
+		"""
+				
 		query = cgi.FieldStorage()
-		print (query.getvalue("observers") == "getList")
+
+		# get the list of observers that have been entered in database 
+		# (note: this may mean that new observers have to be somehow added since they won't show up in typeahead and validation is based on what's already in db)
 		if query.getvalue("observers") == "getList":
 			data = getObserversList(db)
 			print json.dumps(data, default=json_util.default, separators=(',', ':'))
+		
+		# get list of sites
 		if query.getvalue("site") == "getList":
 			data = getSitesList(db)
 			print json.dumps(data, default=json_util.default, separators=(',', ':'))
+		
+		# get data based on a bunch of parameters passed into the url
 		else:
 			# get data associated with specifications entered
 			data = getdata(db, query)
-			print 'Content-Type: application/json\n'
 			if data.count() > 0:
 				for i in range(0,data.count()):
+					print 'Content-Type: application/json\n'
 					print json.dumps(data[i], default=json_util.default, separators=(',', ':'))
 					print ""		
 

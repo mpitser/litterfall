@@ -469,7 +469,7 @@ define([
 			var self = this;
 			
 			$("#tree-observations > tr").removeClass("edit");
-			this.model.url = app.config.cgiDir + 'litterfall.py';
+			this.model.url = app.config.cgiDir + 'tree_data.py';
 			this.model.save({}, {
 				success: function() {
 					self.render();

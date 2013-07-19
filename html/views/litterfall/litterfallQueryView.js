@@ -9,8 +9,12 @@ define([
 	var litterfallQueryView = Backbone.View.extend({
 	
 		
-		// HELPFUL CODE: when writing remove item using the actual x icons.
-		/*var query_type = $to_remove.attr("class").replace("btn-info", "").replace("btn", "").trim();
+		/* HELPFUL CODE: 
+		
+		these are things I wrote, then they either broke or I needed to move on because I got stuck.  if it's helpful read it, otherwise jsut gnore!
+		
+		//remove item using the actual x icons.
+		var query_type = $to_remove.attr("class").replace("btn-info", "").replace("btn", "").trim();
 		var $corresponding_list_item = $('.query-options-dropdown.'+query_type + ' > li > a:contains("'+$to_remove.val()+'")');
 		$corresponding_list_item.removeClass("in-query");
 		$corresponding_list_item.addClass("not-in-query");
@@ -43,11 +47,15 @@ define([
 			this.render();	
 		},
 		render: function() {
-			var dis = this;
 
 			console.log("in the litterfallQueryView");
 
-			this.populateFields();			
+			/* populate fields*/
+			this.populateSiteOptions();
+			this.addObserversAutocomplete();
+			this.populateDataOptions();	
+			
+			var dis = this;		
 			
 			/* initialize bootstrap plugin things */
 			$('.dropdown-toggle').dropdown();
@@ -64,50 +72,42 @@ define([
 			});
 			
 			
-			/* bind events */
+			/* bind events (idk why but i can't get events to bind to fxns in the backbone events delegation function..  */
+			// add/remove a query item when the corresponding list item clicked
 			$('.query-options.dropdown-menu').click({thisPtr: this}, this.queryListItem);
-			$('#analyze-data').click(this.queryOnSelectedItems);
-			/* TODO fix this below that doesn't work. */
-			$('.icon-remove').click(this.removeQueryItem); //DOESN"T WORK BLEAHHHH WHAY NOT?
-
 			// bind typeahead change
 			$('#query-options-observers').on('change', function() {
+				// when observers field changed, validation called
 				if (dis.validateObservers()) {
-					console.log("can add to well");
+					// if validation passes, add the value to the query well
 					var query_value =  $('#query-options-observers').siblings().find('.active').text();
 					var query_type = 'observer';
 					dis.addQueryItem(query_type, query_value);
-				} else {
-					console.log("need to add error message? actually I think it's done in validation already...");
 				}
 			});
+			// show 1 or 2 datepicker input fields depending on radio buttons
 			$('#date-specific').click(function() {
 				$('#date-end').hide();
 			});
 			$('#date-range').click(function() {
 				$('#date-end').show();
 			});
+			// start a query to the mongoDB
+			$('#analyze-data').click(this.queryOnSelectedItems);
 
 			return this;
 		},
-		
-		populateFields: function () {
-			this.populateSiteOptions();
-			this.addObserversAutocomplete();
-			this.populateDataOptions();
-	
-		},
-		
 		populateSiteOptions: function() {
 			/* populates Site dropdown */
 			
 			location_options = new selectionOptions;
 ////////////////////////////////////////////
-//TODO: uncomment the call to the litterfall script and delete call to tree_data script once real data has been enetered.			
+//TODO:  once *real* data has been enteered into litterfall DB
+//       change to comment-ed out version.  right now you only get Beech or something like that because all the sites aren't listed in the DB			
 ////////////////////////////////////////////		
 			//location_options.url = app.config.cgiDir + "litterfall.py?site=getList";						//creates list with all possible locations
 			location_options.url = app.config.cgiDir + "tree_data.py?site=all";
-			console.log(location_options);
+			//console.log(location_options);
 				
 			var location_select = new selectionOptionsView({
 				el: $('#query-options-site'),																//populates new selectionOptionsView with locations (sites)
@@ -115,51 +115,39 @@ define([
 			});
 						
 			location_options.fetch();
-			console.log($('#query-options-site').find("li"));
-			$('#query-options-site > button').addClass('site');
 		},
 		
 		populateDataOptions: function() {
-			/* populates Data Type dropdown */
-			
-			
+			/* populates Data Type dropdown */			
 				
-				data_type_options = new selectionOptions({}, { id: "data-type" } );
+			data_type_options = new selectionOptions({}, { id: "data-type" } );
 				
-				data_type_options.url = 'data/data_type_options.json';
-								console.log(data_type_options);
+			data_type_options.url = 'data/data_type_options.json';
 
-				var data_type_select = new selectionOptionsView({
-					el: $('#query-options-data-type'),																//populates new selectionOptionsView with locations (sites)
-					collection: data_type_options
-				});
-				data_type_options.fetch();
-			
-			
-			
-			/*console.log(data_type_options);
-				
 			var data_type_select = new selectionOptionsView({
-				el: $('.query-options-dropdown.data-type'),																//populates new selectionOptionsView with locations (sites)
+				el: $('#query-options-data-type'),																//populates new selectionOptionsView with locations (sites)
 				collection: data_type_options
 			});
-						
-			location_options.fetch();*/
+			data_type_options.fetch();
+			
 		},
 		
 		addObserversAutocomplete: function() {
 			/* initializes and populates the typeahead for observers */
 
-			// APPARENTLY THIS IS NONFUNCTIONAL BLEAHHH
+			// APPARENTLY THIS IS NONFUNCTIONAL BLEAHHH -- could be in app.js, but I think the issue is that this getJSON call 
+			// isn't going through and even getting any data... I can't get the console log to happen.
 			$.getJSON(app.config.cgiDir + 'litterfall.py?observers=getList', function(data){
-				console.log(" in autoasdf");
+				console.log("haven't gotten to this log lately. if you see this be happy!");
+           	 	
            	 	// add All Observers as an option
            	 	data.splice(0, 0, "All Observers");
+           	 	
            	 	console.log(data);
            	 	
            	 	// initialize the typeahead
 				$("#query-options-observers").typeahead({
-					minLength: 0,
+					minLength: 0,	// should make the typeahead open on focus instead of having to type anything
 					items: Infinity,
 					source: data,
 					jsonSource: data,
@@ -169,61 +157,50 @@ define([
 		},
 		
 		events: {
-			/* NOT WORKING... not sure whyyy no events are bound here*/
-			'click .icon-remove': 'removeQueryItem',
-			//'change .query-options-typeahead.observers': 'validateObservers'
+			/* NOT WORKING... not sure whyyy no events are bound here... that's why they are all bound in render()*/
+			//'click .icon-remove': 'removeQueryItem',
 		},
 		
 		queryListItem: function(event) {
 			/* called when any dropdown list item selected. */
-			
-			//console.log("in queryItem");
-			//console.log(event.target);
 
 			// which list item clicked ?  
-			// (make sure that the icon is not returned as the event target!)
+			// (make sure that the icon is not returned as the event target! We need the Anchor tag.)
 			var $list_item_clicked = ( $(event.target).prop('tagName') == "I") ? $(event.target).parent() :  $(event.target);
 
-			// get value clicked & query type 
+			// get query value & query type 
 			// (i.e. 'Beech', which is a 'site' query)
 			var query_value = $list_item_clicked.attr("name").toString();
 			query_value = query_value.charAt(0).toUpperCase() + query_value.slice(1).replace("_", " ");
-			console.log($list_item_clicked.parent().parent());
 			var query_type = $list_item_clicked.parent().parent().attr('class').replace('query-options', '').replace('dropdown-menu', '').trim();
-			//console.log(query_value, query_type);
 			
 			// check if we are adding or removing a query item
 			if ($list_item_clicked.attr('class').search('not-in-query') !== -1) {
-				// the list item clicked *is not* currently in query (so addit)
+				// the list item clicked *is not* currently in query (so add it)
 				event.data.thisPtr.addQueryItem( query_type, query_value);
-				$list_item_clicked.addClass("in-query");
-				$list_item_clicked.removeClass("not-in-query");
+				$list_item_clicked.removeClass("not-in-query").addClass("in-query");
 			} else {
 				// the list item clicked *is* currently in query (so remove it)
 				event.data.thisPtr.removeQueryItem(event.data.thisPtr, query_type, query_value);
-				$list_item_clicked.removeClass("in-query");
-				$list_item_clicked.addClass("not-in-query");
+				$list_item_clicked.removeClass("in-query").addClass("not-in-query");
 			}
 		},
+		
 		addQueryItem: function(query_type, query_value) {
+		
+			// add "All ___" 
 			if (query_value.search("All") != -1) {
-				// take out all query well items that have same type
+				
+				// take out any query well items that have same type
 				var $btns_to_remove = $('#query-items-selected > button.'+query_type);
-				var vals_to_remove = [];
-				$btns_to_remove.each(function(i, val) {
-					vals_to_remove.push($(val).val());
-				});
-				console.log(vals_to_remove);
-				$btns_to_remove.hide('slow', function() {
+				$btns_to_remove.hide('slow', function() {	// animation that makes them hide cool
 					$btns_to_remove.remove();
 				});
+				// highlight each item in list as in the query
 				$('#query-options-'+query_type+' > li > a.not-in-query').removeClass("not-in-query").addClass("in-query");
-				// add query item for All (done below)
-				// make all other items look clicked
-				console.log($('#query-options-'+query_type+' > li > a'));
-				// change All to Clear all
 			}
 		
+			// template for the button that shows up in query well
 			var query_template = 
 				'<button class="btn btn-info query-item ' + query_type + '" disabled="disabled" value="'+ query_value +'">\
 					' + query_value + '\
@@ -232,54 +209,72 @@ define([
 					</a>\
 				 </button>';
 				   			 
+			// add to the query well with animation
 			var $to_add = $(query_template).hide().fadeTo(500, 0.8);
 			$('#query-items-selected').append($to_add);
+			
 		},
+		
 		removeQueryItem: function(thisPtr, query_type, query_value) {
 			// called when user clicks remove button from an item in the query well (not in dropdown list)
 			console.log("in remove query item");
+			
+			// "All ___" was unselected
 			if (query_value.search("All") != -1){
 				// clear all from search
 				$('#query-options-'+query_type+' > li > a.in-query').removeClass("in-query").addClass("not-in-query");
-			} else if ($('#query-options-'+query_type+' > li > a.all').hasClass("in-query")){
-				console.log("doing sthit)");
-				$('#query-options-'+query_type+' > li > a.all').removeClass("in-query").addClass("not-in-query");
-				var $to_remove = $('#query-items-selected > .btn-info.'+query_type);
-					$to_remove.hide('slow', function() {
-				$to_remove.remove();
 				
+			// if the "all" option is selected, when any other option is removed, the "all" option needs to be unselected!
+			} else if ($('#query-options-'+query_type+' > li > a.all').hasClass("in-query")){
+				$('#query-options-'+query_type+' > li > a.all').removeClass("in-query").addClass("not-in-query");
+			
+				var $to_remove = $('#query-items-selected > .btn-info.'+query_type);
+				$to_remove.hide('slow', function() {
+					$to_remove.remove();
+				});
+				
+				// add all the other items to the query well (since "all" will no longer be listed but other items might still be selected
 				var $to_add = $('#query-options-'+query_type+' > li > a.in-query');
 				
 				$to_add.each(function(i, v) {
-					//console.log(v);
 					thisPtr.addQueryItem(query_type, $(v).attr("name"));
 				});
-			});
-				console.log($('#query-options-'+query_type+' > li > a.in-query'));
-			}
-			// if all is selected, we need to unselect it and change class of all items that aren't in query..  otherwise just remove as usual
+			}			
 			
+			// default remove behavior
 			var $to_remove = $('#query-items-selected > .btn-info:contains('+query_value+')');
 			$to_remove.hide('slow', function() {
 				$to_remove.remove();
 			});
+				
 		},
+		
 		queryOnSelectedItems: function() {
-			console.log("abpout to query");
-			console.log($(document).find(".query-item"));
+			/* get the items that are in the query well.. should have .query-item class
+			   then I guess ask the db? */
+			
+			console.log("analyze button clicked; about to query");
+			console.log($(document).find(".query-item"));	// should be the items in query well
 		},
+		
 		validateObservers: function() {
+			/* validation of observers so that they can't type in an observer that isn't already in the typeahead source */
+			//NOTE we do need to provide a way for new observers to be added...
+			
 			console.log("in observer validation");
+			
 			var obs_entered = $('#query-options-observers').val();
 			var obs_allowed = $('#query-options-observers').data("typeahead").source;
 			//console.log(obs_entered);
 			//console.log(obs_allowed);
 			//console.log(obs_allowed.indexOf(obs_entered));
+			
 			if (obs_allowed.indexOf(obs_entered) == -1) {
 				console.log("observer not in database");
 				$('#query-options-observers').parent().addClass("error");
 				return false;
 			}
+			
 			$('#query-options-observers').parent().removeClass("error");
 			return true;
 		}
