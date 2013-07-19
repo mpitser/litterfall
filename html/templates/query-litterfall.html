@@ -40,46 +40,109 @@
 		<div style="margin:25px 0px;">
 			<div id="query-items-selected" class="well well-small"></div>
 		</div>
-	<div class="span4 form-horizontal">
+	<div>
 		<div>
 			<div class="btn-group">
   				<button class="btn dropdown-toggle" data-toggle="dropdown"> Site <span class="caret"></span></button>
-  				<ul class="dropdown-menu query-options-dropdown site" role="menu" aria-labelledby="dLabel">
+  				<ul id="query-options-site" class="dropdown-menu query-options site" role="menu" aria-labelledby="dLabel">
     				<!-- dropdown menu links -->
+    				<li><a class='not-in-query all' name='all_sites'>All Sites<i class='icon-black icon-ok pull-right'></i></a></li>
+  					<li class="divider"></li>
   				</ul>
 			</div>
+			
 			<div class="btn-group">
   				<button class="btn dropdown-toggle" data-toggle="dropdown"> Plot <span class="caret"></span></button>
-  				<ul class="dropdown-menu query-options-dropdown plot" role="menu" aria-labelledby="dLabel">
+  				<ul id="query-options-plot" class="dropdown-menu query-options plot" role="menu" aria-labelledby="dLabel">
     				<!-- dropdown menu links -->
-    				<li><a name='plot_1' class='not-in-query plot'><i class='icon-black icon-ok'></i>1</a></li>
-    				<li><a name='plot_2' class='not-in-query plot'><i class='icon-black icon-ok'></i>2</a></li>
+    				<li><a class='not-in-query all' name='all_plots'>All Plots<i class='icon-black icon-ok pull-right'></i></a></li>
+  					<li class="divider"></li>
+    				<li><a name='plot_1' class='not-in-query plot'>1<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a name='plot_2' class='not-in-query plot'>2<i class='icon-black icon-ok pull-right'></i></a></li>
   				</ul>
 			</div>
+			
 			<div class="btn-group">
   				<button class="btn dropdown-toggle" data-toggle="dropdown"> Trap <span class="caret"></span></button>
-  				<ul class="dropdown-menu query-options-dropdown trap" role="menu" aria-labelledby="dLabel">
+  				<ul id="query-options-trap" class="dropdown-menu query-options trap" role="menu" aria-labelledby="dLabel">
     				<!-- dropdown menu links -->
-    				<li><a name='trap_1' class='not-in-query trap'><i class='icon-black icon-ok'></i>1</a></li>
-    				<li><a name='trap_2' class='not-in-query trap'><i class='icon-black icon-ok'></i>2</a></li>
-    				<li><a name='trap_3' class='not-in-query trap'><i class='icon-black icon-ok'></i>3</a></li>
-    				<li><a name='trap_4' class='not-in-query trap'><i class='icon-black icon-ok'></i>4</a></li>
-    				<li><a name='trap_5' class='not-in-query trap'><i class='icon-black icon-ok'></i>5</a></li>
+    				<li><a class='not-in-query all' name='all_traps'>All Traps<i class='icon-black icon-ok pull-right'></i></a></li>
+  					<li class="divider"></li>
+    				<li><a name='trap_1' class='not-in-query trap'>1<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a name='trap_2' class='not-in-query trap'>2<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a name='trap_3' class='not-in-query trap'>3<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a name='trap_4' class='not-in-query trap'>4<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a name='trap_5' class='not-in-query trap'>5<i class='icon-black icon-ok pull-right'></i></a></li>
   				</ul>
 			</div>
+			
 			<div class="btn-group">
   				<button class="btn dropdown-toggle" data-toggle="dropdown"> Collection Type <span class="caret"></span></button>
-  				<ul class="dropdown-menu query-options-dropdown collection_type" role="menu" aria-labelledby="dLabel">
+  				<ul id="query-options-collection-type" class="dropdown-menu query-options collection-type" role="menu" aria-labelledby="dLabel">
     				<!-- dropdown menu links -->
-    				<li><a name='seasonal' class='not-in-query collection_type'><i class='icon-black icon-ok'></i>Seasonal</a></li>
-    				<li><a name='standing' class='not-in-query collection_type'><i class='icon-black icon-ok'></i>Standing</a></li>
+    				<li><a class='not-in-query all' name='all_collection_types'>All Collection Types<i class='icon-black icon-ok pull-right'></i></a></li>
+  					<li class="divider"></li>
+    				<li><a name='seasonal' class='not-in-query collection-type'>Seasonal<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a name='standing' class='not-in-query collection-type'>Standing<i class='icon-black icon-ok pull-right'></i></a></li>
   				</ul>
 			</div>
-			<div class="control-group">
-				<input type="text" data-provide="typeahead" class="query-options-typeahead observers" placeholder="Observers" style="font-style: italic"></input>
+			
+			<div class="btn-group">
+  				<button class="btn dropdown-toggle" data-toggle="dropdown"> Sky Conditions <span class="caret"></span></button>
+  				<ul id="query-options-weather-sky" class="dropdown-menu query-options weather-sky" role="menu" aria-labelledby="dLabel">
+    				<!-- dropdown menu links -->
+    				<li><a class='not-in-query all' name='all_sky_conditions'>All Sky Conditions<i class='icon-black icon-ok pull-right'></i></a></li>
+  					<li class="divider"></li>
+    				<li><a name='clear' class='not-in-query weather-sky'>Clear<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a name='light_clouds' class='not-in-query weather-sky'>Light clouds<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a name='partly_cloudy' class='not-in-query weather-sky'>Partly cloudy<i class='icon-black icon-ok pull-right'></i></a></li>
+  				</ul>
 			</div>
+			
+			<div class="btn-group">
+  				<button class="btn dropdown-toggle" data-toggle="dropdown"> Precipitation <span class="caret"></span></button>
+  				<ul id="query-options-weather-precipitation" class="dropdown-menu query-options weather-precipitation" role="menu" aria-labelledby="dLabel">
+    				<!-- dropdown menu links -->
+    				<li><a class='not-in-query all' name='all_precipitation'>All Precipitation<i class='icon-black icon-ok pull-right'></i></a></li>
+  					<li class="divider"></li>
+    				<li><a name='dry' class='not-in-query weather-precipitation'>Dry<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a name='rain' class='not-in-query weather-precipitation'>Rain<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a name='snow' class='not-in-query weather-precipitation'>Snow<i class='icon-black icon-ok pull-right'></i></a></li>    				
+  				</ul>
+			</div>
+			
+			<span class="control-group" id="observers-typeahead">
+				<input id="query-options-observers" type="text" data-provide="typeahead" class="query-options observers" placeholder="Observers" style="font-style: italic"></input>
+			</span>
+			
+			<div>
+				<div class="btn-group" data-toggle="buttons-radio">
+ 					<button type="button" id="date-specific" class="btn btn-primary active">Specific Date</button>
+  					<button type="button" id="date-range" class="btn btn-primary">Date Range</button>
+				</div>
+			
+				<div class="control-group">
+					<span id="date-begin" class='query-options-datepicker'><input></input></span>
+				</div>
+			
+				<div class="control-group">
+					<span id="date-end" class="query-options-datepicker" style="display: none"><input></input></span>
+				</div>
+			</div>
+			
+			<div class="btn-group">
+  				<button class="btn dropdown-toggle" data-toggle="dropdown"> Data Type <span class="caret"></span></button>
+  				<ul id="query-options-data-type" class="dropdown-menu query-options data-type" role="menu" aria-labelledby="dLabel">
+  					<li><a class='not-in-query data-type all' name='all_data_types'>All Data<i class='icon-black icon-ok pull-right'></i></a></li>
+  					<li><a class='not-in-query data-type all' name='all_leaf_data_types'>All Leaf Data<i class='icon-black icon-ok pull-right'></i></a></li>
+  					<li><a class='not-in-query data-type all' name='all_nonleaf_data_types'>All Non-Leaf Data<i class='icon-black icon-ok pull-right'></i></a></li>
+  					<li class="divider"></li>
+    				<!-- dropdown menu links -->
+  				</ul>
+			</div>
+			
 		</div>
-	</div> <!-- span4-->	
+	</div>
 
     </div> <!-- /container -->
 

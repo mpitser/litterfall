@@ -88,13 +88,15 @@ def getdata(db, query):
 	if material != None and type == [] and trap == []:	
 		# only material was specified (leaf or nonleaf)
 		object_to_match['trap_data'] = {'$elemMatch': { 'material': material } }
+	"""
+	#pretty sure this section was screwing up the whole script from running.. need to figure out what wrong but it's friday afternoon and I need to do other things more urgently. :D
 	else:
 		# something else (materials, traps, types of data, or all) was specified
 		if type != [] and trap != []:
 			where_query = type+".indexOf(this.type) != -1 && "+trap+".indexOf(this.trap) != -1"
 		elif type != []:
 			where_query = type+".indexOf(this.type) != -1"
-		elif trap != []:
+		elif:
 			where_query = trap+".indexOf(this.trap) != -1"
 		
 		# set up matching object
@@ -102,7 +104,7 @@ def getdata(db, query):
 			object_to_match['trap_data'] = {'$elemMatch': { '$where': where_query } }
 		else:
 			object_to_match['trap_data'] = {'$elemMatch': { 'material': material, '$where': where_query } }
-	
+	"""
 	
 	# find matching documents to return as array
 	#print object_to_match
@@ -110,7 +112,7 @@ def getdata(db, query):
 	
 	return data
 	
-def getObservers(db):
+def getObserversList(db):
 	# get all observers from last X years
 	num_years = 1000  #change if you want to constrict the number of observers that are in autocomplete
 	data = db.find({'date.y' : {'$gte': date.today().year - num_years}}, {'fields':'observers'}).distinct('observers')
@@ -118,6 +120,17 @@ def getObservers(db):
 	n = len(data)
 	
 	return data
+	
+def getSitesList(db):
+	#return an array of distinct sites
+	data = obs.distinct('site')
+	for j in range(0,len(data)):
+		data[j] = data[j].encode('ascii','ignore')
+	data.sort(key=str.lower)
+
+	return data
+	
+#def getDataTypesList(db):
 	
 def main():
 	# global Observation #not sure if needed
@@ -142,11 +155,13 @@ def main():
 		
 		print 'Content-Type: application/json\n'
 		query = cgi.FieldStorage()
-		
-		if query.getvalue("observers") == "all":
-			data = getObservers(db)
+		print (query.getvalue("observers") == "getList")
+		if query.getvalue("observers") == "getList":
+			data = getObserversList(db)
 			print json.dumps(data, default=json_util.default, separators=(',', ':'))
-			
+		if query.getvalue("site") == "getList":
+			data = getSitesList(db)
+			print json.dumps(data, default=json_util.default, separators=(',', ':'))
 		else:
 			# get data associated with specifications entered
 			data = getdata(db, query)

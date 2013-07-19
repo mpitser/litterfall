@@ -20,7 +20,8 @@ define([
 				<td class="editable">\
 					<span class="display_cell date_select"><%= toFormattedDate(entry.date) %></span>\
 					<span class="edit_cell date_select"><input title="Enter a date in mm/dd/yyyy format. It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
-				</td>\<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers.join(", ") %></span><span class="edit-obs-info edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
+				</td>\
+				<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers.join(", ") %></span><span class="edit-obs-info edit_cell observers"><input title="Observers field may not be empty." type="text" value="<%= entry.observers %>"></span></td>\
 				<td class="editable"><span class="show-obs-info display_cell diameter"><%= entry.value %></span><span class="edit-obs-info edit_cell diameter"><input title="Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
 				<td class="editable"><span class="show-obs-info display_cell status"><%= entry.status %></span><span class="edit-obs-info edit_cell status"><div class="edit-obs-info status btn-group btn-group-vertical" data-toggle="buttons-radio">\
   					<button type="button" class="btn btn-mini btn-info status alive" style="width: 120px" value="alive">Alive</button>\
@@ -134,7 +135,7 @@ define([
 			this.$el.html(_.template(this.templateUpdate, {tree: this_tree}));
 			$(".title").text("Updating Tree Data ");
 			$(".back").unbind("click.back").bind("click.back", $.proxy(function() {
-				document.location.hash = "#data/trees/update/site/" + this.model.get('site') + "/plot/" + this.model.get('plot');
+				window.location.hash = "#data/reports/trees/site/" + this.model.get('site') + "/plot/" + this.model.get('plot');
 			}, this));
 			$("#tree-observations").tablesorter({headers: { 0: { sorter: false}}}); 
 			$(".show-obs-info").show();
@@ -468,7 +469,7 @@ define([
 			var self = this;
 			
 			$("#tree-observations > tr").removeClass("edit");
-			this.model.url = app.config.cgiDir + 'tree_data.py';
+			this.model.url = app.config.cgiDir + 'litterfall.py';
 			this.model.save({}, {
 				success: function() {
 					self.render();
@@ -529,7 +530,7 @@ define([
 				
 				// delete it! HAHAHAHAHA
 				self.model.set('diameter', _.without(entries_array, entries_array[target_index]));
-				self.model.url = app.config.cgiDir + 'tree_data.py';
+				self.model.url = app.config.cgiDir + 'litterfall.py';
 				self.model.save();
 				self.render();
 				
@@ -667,7 +668,7 @@ define([
 			//finds all observers that have been previously entered into the database
 			var observers_array = [];
 			
-			$.getJSON(app.config.cgiDir + 'tree_data.py?site=allObservers', function(data) {
+			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allObservers', function(data) {
 				
 				for (i in data) {
 					observers_array.push(data[i]);

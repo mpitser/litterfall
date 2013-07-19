@@ -7,8 +7,9 @@ define([
 	var selectionOptions = Backbone.Collection.extend({							//creates Collection of singleOption Models (to-be locations, plots, collection type)
 		model: singleOption,
 		url: "data/sites.json",															//populates new selectionOptionsView with locations (sites)
-		initialize: function() {
-    	
+		initialize: function(models, options) {
+			//console.log(options);
+    		//this.type = options.type;
 		},								//calls for server DB's location (plot, etc. information)
     	parse: function(response){												
     		var parsed_options = [];												
@@ -16,7 +17,6 @@ define([
     				parsed_options.push({										//for Backbone's use, stores object from JSON information as key:value pair (object)
     					value: response[element],
     					name: response[element].charAt(0).toUpperCase() + response[element].slice(1),
-    					type: "site"
     				});
 
     		}
