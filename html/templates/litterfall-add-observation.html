@@ -49,18 +49,21 @@
     		<option value="seasonal">Seasonal</option></select>
    		<select id="sky" class="sky select">
    			<option class="placeholder sky">Choose sky conditions...</option>
-    		<option value="clear">Clear</option>
-    		<option value="light-clouds">Light Clouds</option>
-    		<option value="partly-cloudy">Partly Cloudy</option></select>
+    		<option value="Clear">Clear</option>
+    		<option value="Light clouds">Light Clouds</option>
+    		<option value="Partly cloudy">Partly Cloudy</option></select>
    		<select id="precipitation" class="precipitation select">
    		 	<option class="placeholder precipitation">Choose precipitation...</option>
-    		<option value="dry">Dry</option>
-    		<option value="rain">Rain</option>
-    		<option value="snow">Snow</option></select>
+    		<option value="Dry">Dry</option>
+    		<option value="Rain">Rain</option>
+    		<option value="Snow">Snow</option></select>
     	<input type="text" id="observers" class="input observers" placeholder="Observers"></input>
     	<textarea id="notes" class="input notes" rows=1 placeholder="Notes"></textarea><br>
     	<div style='display:none' class='alert alert-danger warning'>Please complete the above information before proceeding. Errors are highlighted in red.</div>
+		<div style='display:none' class='alert alert-warning trap-warning'>You haven't entered any trap data. If this is on purpose, simply hit Save again to finalize.</div>
+
 		<div style='display:none' class='alert alert-success save-success'>Observation saved successfully!<a class="close">&times;</a></div>
+		
 		<button class="btn btn-danger clearall">Clear All</button>
     	<button class="btn btn-success btn-save">Save</button><br><br>
 		<p>Enter weight (in grams) of leaves or other material (click Save to finalize).</p>
@@ -110,7 +113,7 @@
 		<td><input type=text size=1 name='miscellaneous5' class='data-non-leaf input-small'></td>
 		</tr></table>
 		
-		<h5>Leaves: <small>(<a href="../productivity/species.htm">Scientific and Common names of Plants in the Crum Woods</a>)</small></h5>
+		<h5>Leaves: <small>(<a href="data/species.html">Scientific and Common names of Plants in the Crum Woods</a>)</small></h5>
 		<table class='table table-striped' id='leaf-table'>
 		<tr>
 		<th>Sample Type</th>
