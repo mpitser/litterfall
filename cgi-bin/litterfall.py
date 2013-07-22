@@ -150,11 +150,17 @@ def main():
 		else:
 			# get data associated with specifications entered
 			data = getdata(db, query)
-			print 'Content-Type: application/json\n'
-			if data.count() > 0:
-				for i in range(0,data.count()):
-					print json.dumps(data[i], default=json_util.default, separators=(',', ':'))
-					print ""		
+			#print 'Content-Type: application/json\n'
+		
+			json_data = [0]*data.count()
+			for i in range(0,data.count()):
+				json_data[i] = data[i]
+			print json.dumps(json_data, default=json_util.default, separators=(',', ':'))
+
+			#if data.count() > 0:
+				#for i in range(0,data.count()):
+					#print json.dumps(data[i], default=json_util.default, separators=(',', ':'))
+					#print ""		
 
 	elif method == 'POST' or method == 'PUT':
 		# we want to send data to server (without url) 

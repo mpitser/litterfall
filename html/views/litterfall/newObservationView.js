@@ -215,6 +215,8 @@ define([
 				}
 				var date = new Date($("#date").val());
 				new_obs = ({
+					site: $('#site').val(),
+					plot: parseInt($('#plot').val()),
 					date: date.toLitterfallDateObject(),
 					weather: {"precipitation": $("#precipitation").val(), "sky": $("#sky").val()},
 					collection_type: $("#type").val(),
