@@ -13,6 +13,8 @@ import cgitb; cgitb.enable()
 # and returns to js in JSON format. in addition, it can validate the data before saving it  #
 # to the database																			#
 #############################################################################################
+
+
 def getdata(db, query):
 	# get data with all specifications that aren't 'all'
 	
@@ -21,80 +23,70 @@ def getdata(db, query):
 	if query.getvalue('oid') != 'all' and query.getvalue('oid') != None:
 		object_to_match['_id'] = ObjectId(query.getvalue('oid'))
 	
-	if query.getvalue('collection_type') != 'all' and query.getvalue('collection_type') != None:
-		object_to_match['collection_type'] = query.getvalue('collection_type')
-	
-	# get specific date
-	date = {}
-	if query.getvalue('year') != None and query.getvalue('year') != 'all':
-		date['y'] = int(query.getvalue('year'))
-	if query.getvalue('month') != None and query.getvalue('month') != 'all':
-		date['m'] = int(query.getvalue('month'))
-	if query.getvalue('day') != None and query.getvalue('day') != 'all':
-		date['d'] = int(query.getvalue('day'))		
-	if date != {}:		
-		object_to_match['date'] = date
-	
-	# get date in date range
-	date_begin = {}
-	date_end = {}
-	if query.getvalue('year_begin') != None and query.getvalue('year_begin') != 'all':
-		date_begin['y'] = int(query.getvalue('year_begin'))
-	if query.getvalue('month_begin') != None and query.getvalue('month_begin') != 'all':
-		date_begin['m'] = int(query.getvalue('month_begin'))
-	if query.getvalue('day_begin') != None and query.getvalue('day_begin') != 'all':
-		date_begin['d'] = int(query.getvalue('day_begin'))		
-	if query.getvalue('year_end') != None and query.getvalue('year_end') != 'all':
-		date_end['y'] = int(query.getvalue('year_end'))
-	if query.getvalue('month_end') != None and query.getvalue('month_end') != 'all':
-		date_end['m'] = int(query.getvalue('month_end'))
-	if query.getvalue('day_end') != None and query.getvalue('day_end') != 'all':
-		date_end['d'] = int(query.getvalue('day_end'))		
-	if date_begin != {} and date_end != {}:		
-		object_to_match['date'] = {"$gte": date_begin, "$lte": date_end}
+	object_to_match["date.y"] = {"$lte": 3000, "$gte": 2000}
+	object_to_match["date.m"] = {"$lte": 12, "$gte": 1}
+	object_to_match["date.d"] = {"$lte": 31, "$gte": 0}
+	if query.getvalue('date-begin') != None and query.getvalue('date-begin') != []:
+		dcomp = query.getvalue('date-begin').split("/")
+		object_to_match['date.y']["$gte"] = int(dcomp[2])
+		object_to_match['date.m']["$gte"] = int(dcomp[0])
+		object_to_match['date.d']["$gte"] = int(dcomp[1])
+	if query.getvalue('date-end') != None and query.getvalue('date-end') != []:
+		dcomp = query.getvalue('date-end').split("/")
+		object_to_match['date.y']["$lte"] = int(dcomp[2])
+		object_to_match['date.m']["$lte"] = int(dcomp[0])
+		object_to_match['date.d']["$lte"] = int(dcomp[1])
 	
 	if query.getlist('observer') != 'all' and query.getlist('observer') != []:
-		print query.getlist('observer')
+		#print query.getlist('observer')
 		object_to_match['observers'] = {"$all": query.getlist('observer')}
 	
-	if query.getvalue('plot') != 'all' and query.getvalue('plot') != None:
-		try:
-			object_to_match['plot'] = int(query.getvalue('plot'))
-		except ValueError:
-			print "Invalid plot number"
+	options = ['site', 'collection_type']
+	for opt in options: 
+		ls = query.getlist(opt)
+		if ls != ['all'] and ls != None and ls != []:
+			#newls = ls
+			#for s in ls:
+				#newls.append(s.lower());
+			object_to_match[opt] = {"$in": ls}
 	
-	if query.getvalue('site') != 'all' and query.getvalue('site') != None:
-		object_to_match['site'] = query.getvalue('site')
-	
-	if query.getvalue('sky') != 'all' and query.getvalue('sky') != None:
-		object_to_match['weather.sky'] = query.getvalue('sky')
-	
-	if query.getvalue('precipitation') != 'all' and query.getvalue('precipitation') != None:
-		object_to_match['weather.precipitation'] = query.getvalue('precipitation')
+	plots = query.getlist('plot')
+	if plots != None and plots != ['all'] and plots != []:
+		for i in range(len(plots)):
+			plots[i] = int(plots[i])
+		object_to_match['plot'] = {"$in": plots}
+	weather = ['sky', 'precipitation']
+	for opt in weather: 
+		ls = query.getlist(opt)
+		if ls != ['all'] and ls != None and ls != []:			
+			object_to_match['weather.' + opt] = {"$in": ls}
 	
 	# query on data
-	material = None
-	type = []
-	trap = []
-	# get the values requested	
-	if query.getvalue('material') != 'all' and query.getvalue('material') != None:
-		material = query.getvalue('material')
-	if query.getlist('type') != 'all' and query.getlist('type') != []:
-		type = "['" + "', '".join(query.getlist('type')) + "']"
-	if query.getlist('trap') != 'all' and query.getlist('trap') != []:
-		trap = "[" + ", ".join(query.getlist('trap')) + "]"
+	# get the values requested
+	trap_data = ['material', 'trap']
+	traplist = [1,2,3,4,5]
+	if query.getlist('trap') != None and query.getlist('trap') != ['all'] and query.getlist('trap') != []:
+		traplist = []
+		for i in query.getlist('trap'):
+			traplist.append(int(i))
+		
+	types = query.getlist('type')
+	if types != ['all'] and types != None and types != []:	
+		for i in types:
+			i = i.replace("%20"," ");
+		object_to_match['trap_data'] = {"$elemMatch": {'trap': {"$in": traplist}, "$or": [{'type': {"$in": types}}, {'species': {"$in": types}}]}}
+	elif traplist != [1,2,3,4,5]:
+		object_to_match['trap_data'] = {"$elemMatch": {'trap': {"$in": traplist}}}
 	
-	# set up a matching structure for mongo based on values given
-	if material != None and type == [] and trap == []:	
-		# only material was specified (leaf or nonleaf)
-		object_to_match['trap_data'] = {'$elemMatch': { 'material': material } }
+	#pretty sure this section was screwing up the whole script from running.. need to figure out what wrong but it's friday afternoon and I need to do other things more urgently. :D
+	"""
 	else:
 		# something else (materials, traps, types of data, or all) was specified
 		if type != [] and trap != []:
 			where_query = type+".indexOf(this.type) != -1 && "+trap+".indexOf(this.trap) != -1"
 		elif type != []:
 			where_query = type+".indexOf(this.type) != -1"
-		elif trap != []:
+		elif:
 			where_query = trap+".indexOf(this.trap) != -1"
 		
 		# set up matching object
@@ -103,21 +95,34 @@ def getdata(db, query):
 		else:
 			object_to_match['trap_data'] = {'$elemMatch': { 'material': material, '$where': where_query } }
 	
-	
 	# find matching documents to return as array
 	#print object_to_match
+	"""
+	#print object_to_match
 	data = db.find(object_to_match)
-	
+	#data = [str(object_to_match)]
 	return data
-	
-def getObservers(db):
+
+
+def getObserversList(db, x):
 	# get all observers from last X years
-	num_years = 1000  #change if you want to constrict the number of observers that are in autocomplete
+	num_years = x  #change if you want to constrict the number of observers that are in autocomplete
 	data = db.find({'date.y' : {'$gte': date.today().year - num_years}}, {'fields':'observers'}).distinct('observers')
 	data.sort()
 	n = len(data)
 	
 	return data
+	
+def getSitesList(db):
+	#return an array of distinct sites
+	data = obs.distinct('site')
+	for j in range(0,len(data)):
+		data[j] = data[j].encode('ascii','ignore')
+	data.sort(key=str.lower)
+
+	return data
+	
+#def getDataTypesList(db):
 	
 def main():
 	# global Observation #not sure if needed
@@ -140,27 +145,42 @@ def main():
 	if method == 'GET':
 		# we want to read data from database (but not change it)
 		
-		print 'Content-Type: application/json\n'
+		"""
+		Mal's comments: 
+		I'm assuming we could do one of a few things: specify that we want a list of _ (observers, species, etc)
+		to populate a dropdown, or else we're querying for data to report
+		"""
+				
 		query = cgi.FieldStorage()
-		
-		if query.getvalue("observers") == "all":
-			data = getObservers(db)
+
+		# get the list of observers that have been entered in database 
+		# (note: this may mean that new observers have to be somehow added since they won't show up in typeahead and validation is based on what's already in db)
+		if query.getvalue("observers") == "getList":
+			data = getObserversList(db, 10)
+			print 'Content-Type: application/json\n'
 			print json.dumps(data, default=json_util.default, separators=(',', ':'))
-			
+		
+		# get list of sites
+		elif query.getvalue("site") == "getList":
+			data = getSitesList(db)
+			print json.dumps(data, default=json_util.default, separators=(',', ':'))
+		
+		# get data based on a bunch of parameters passed into the url
 		else:
+			
 			# get data associated with specifications entered
 			data = getdata(db, query)
-			#print 'Content-Type: application/json\n'
-		
+			print 'Content-Type: application/json\n'
 			json_data = [0]*data.count()
-			for i in range(0,data.count()):
+			for i in range(0, data.count()):
 				json_data[i] = data[i]
 			print json.dumps(json_data, default=json_util.default, separators=(',', ':'))
-
+			#print json.dumps(data, default=json_util.default, separators=(',', ':'))
 			#if data.count() > 0:
 				#for i in range(0,data.count()):
+					#print 'Content-Type: application/json\n'
 					#print json.dumps(data[i], default=json_util.default, separators=(',', ':'))
-					#print ""		
+					#print ""
 
 	elif method == 'POST' or method == 'PUT':
 		# we want to send data to server (without url) 

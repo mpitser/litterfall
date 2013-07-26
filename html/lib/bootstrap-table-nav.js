@@ -24,7 +24,7 @@
       return startIndexForPage(page + 1) - 1;
     };
     getRows = function() {
-      return $(options.tableSelector).find(options.childSelector);
+      return $(options.tableSelector + " > tbody").find(options.childSelector);
     };
     numPages = function() {
       return Math.ceil(getRows().length / options.itemsPerPage);

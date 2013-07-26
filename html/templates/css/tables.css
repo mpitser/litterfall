@@ -121,12 +121,12 @@ button a, button a:hover {
 .table-scroll tr td:nth-child(3), .table-scroll tr th:nth-child(3){
 	position: absolute;
 	margin-left: 175px;
-	width: 100px;
+	width: 75px;
 }
 .table-scroll tr td:nth-child(4), .table-scroll tr th:nth-child(4){
 	position: absolute;
-	margin-left: 275px;
-	width: 75px;
+	margin-left: 250px;
+	width: 80px;
 }
 .table-scroll tr td:nth-child(5), .table-scroll tr th:nth-child(5){
 	position: absolute;
@@ -154,7 +154,4 @@ button a, button a:hover {
 }
 .table-scroll tr td:nth-child(9), .table-scroll tr th:nth-child(9){
 	border-left: 2px dashed hsl(0, 0%, 87%);
-}
-.table-scroll, .table-scroll tbody, .table-scroll thead {
-	max-width: 100000px;
 }

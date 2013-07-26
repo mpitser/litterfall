@@ -10,6 +10,8 @@
 
     <!-- Le styles -->
     <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/tables.css" rel="stylesheet">
+
     <style>
       body {
         padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
@@ -35,55 +37,146 @@
 
     	<h1>Access Data Records</h1>
 		<div style="margin:25px 0px;">
-			<button id="analyze-data"class="btn btn-large btn-primary" type="button">Analyze data ></button>
+			<button id="analyze-data"class="btn btn-large btn-primary" type="button">Analyze data</button>
 		</div>
 		<div style="margin:25px 0px;">
-			<div id="query-items-selected" class="well well-small"></div>
+			<div id="query-items-selected" class="well well-small"><button id="clear-all" class="btn btn-warning btn-small pull-right" type="button">Clear query</button>
+</div>
 		</div>
-	<div class="span4 form-horizontal">
+	<div>
 		<div>
 			<div class="btn-group">
   				<button class="btn dropdown-toggle" data-toggle="dropdown"> Site <span class="caret"></span></button>
-  				<ul class="dropdown-menu query-options-dropdown site" role="menu" aria-labelledby="dLabel">
+  				<ul id="query-options-site" class="dropdown-menu query-options site" role="menu" aria-labelledby="dLabel">
     				<!-- dropdown menu links -->
+    				<li><a class='not-query all' name='all_sites'>All Sites<i class='icon-black icon-ok pull-right'></i></a></li>
+  					<li class="divider"></li>
   				</ul>
 			</div>
+			
 			<div class="btn-group">
   				<button class="btn dropdown-toggle" data-toggle="dropdown"> Plot <span class="caret"></span></button>
-  				<ul class="dropdown-menu query-options-dropdown plot" role="menu" aria-labelledby="dLabel">
+  				<ul id="query-options-plot" class="dropdown-menu query-options plot" role="menu" aria-labelledby="dLabel">
     				<!-- dropdown menu links -->
-    				<li><a name='plot_1' class='not-in-query plot'><i class='icon-black icon-ok'></i>1</a></li>
-    				<li><a name='plot_2' class='not-in-query plot'><i class='icon-black icon-ok'></i>2</a></li>
+    				<li><a class='not-query all' name='all_plots'>All Plots<i class='icon-black icon-ok pull-right'></i></a></li>
+  					<li class="divider"></li>
+    				<li><a name='plot_1' class='not-query plot'>Plot 1<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a name='plot_2' class='not-query plot'>Plot 2<i class='icon-black icon-ok pull-right'></i></a></li>
   				</ul>
 			</div>
+			
 			<div class="btn-group">
   				<button class="btn dropdown-toggle" data-toggle="dropdown"> Trap <span class="caret"></span></button>
-  				<ul class="dropdown-menu query-options-dropdown trap" role="menu" aria-labelledby="dLabel">
+  				<ul id="query-options-trap" class="dropdown-menu query-options trap" role="menu" aria-labelledby="dLabel">
     				<!-- dropdown menu links -->
-    				<li><a name='trap_1' class='not-in-query trap'><i class='icon-black icon-ok'></i>1</a></li>
-    				<li><a name='trap_2' class='not-in-query trap'><i class='icon-black icon-ok'></i>2</a></li>
-    				<li><a name='trap_3' class='not-in-query trap'><i class='icon-black icon-ok'></i>3</a></li>
-    				<li><a name='trap_4' class='not-in-query trap'><i class='icon-black icon-ok'></i>4</a></li>
-    				<li><a name='trap_5' class='not-in-query trap'><i class='icon-black icon-ok'></i>5</a></li>
+    				<li><a class='not-query all' name='all_traps'>All Traps<i class='icon-black icon-ok pull-right'></i></a></li>
+  					<li class="divider"></li>
+    				<li><a name='trap_1' class='not-query trap'>Trap 1<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a name='trap_2' class='not-query trap'>Trap 2<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a name='trap_3' class='not-query trap'>Trap 3<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a name='trap_4' class='not-query trap'>Trap 4<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a name='trap_5' class='not-query trap'>Trap 5<i class='icon-black icon-ok pull-right'></i></a></li>
   				</ul>
 			</div>
+			
 			<div class="btn-group">
   				<button class="btn dropdown-toggle" data-toggle="dropdown"> Collection Type <span class="caret"></span></button>
-  				<ul class="dropdown-menu query-options-dropdown collection_type" role="menu" aria-labelledby="dLabel">
+  				<ul id="query-options-collection_type" class="dropdown-menu query-options collection_type" role="menu" aria-labelledby="dLabel">
     				<!-- dropdown menu links -->
-    				<li><a name='seasonal' class='not-in-query collection_type'><i class='icon-black icon-ok'></i>Seasonal</a></li>
-    				<li><a name='standing' class='not-in-query collection_type'><i class='icon-black icon-ok'></i>Standing</a></li>
+    				<li><a class='not-query all' name='all_collection_types'>All Collection Types<i class='icon-black icon-ok pull-right'></i></a></li>
+  					<li class="divider"></li>
+    				<li><a name='seasonal' class='not-query collection_type'>Seasonal<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a name='standing' class='not-query collection_type'>Standing<i class='icon-black icon-ok pull-right'></i></a></li>
   				</ul>
 			</div>
-			<div class="control-group">
-				<input type="text" data-provide="typeahead" class="query-options-typeahead observers" placeholder="Observers" style="font-style: italic"></input>
+			
+			<div class="btn-group">
+  				<button class="btn dropdown-toggle" data-toggle="dropdown"> Sky Conditions <span class="caret"></span></button>
+  				<ul id="query-options-sky" class="dropdown-menu query-options sky" role="menu" aria-labelledby="dLabel">
+    				<!-- dropdown menu links -->
+    				<li><a class='not-query all' name='all_sky_conditions'>All Sky Conditions<i class='icon-black icon-ok pull-right'></i></a></li>
+  					<li class="divider"></li>
+    				<li><a name='Clear' class='not-query sky'>Clear<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a name='Light clouds' class='not-query sky'>Light clouds<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a name='Partly cloudy' class='not-query sky'>Partly cloudy<i class='icon-black icon-ok pull-right'></i></a></li>
+  				</ul>
 			</div>
+			
+			<div class="btn-group">
+  				<button class="btn dropdown-toggle" data-toggle="dropdown"> Precipitation <span class="caret"></span></button>
+  				<ul id="query-options-precipitation" class="dropdown-menu query-options precipitation" role="menu" aria-labelledby="dLabel">
+    				<!-- dropdown menu links -->
+    				<li><a class='not-query all' name='all_precipitation'>All Precipitation<i class='icon-black icon-ok pull-right'></i></a></li>
+  					<li class="divider"></li>
+    				<li><a name='Dry' class='not-query precipitation'>Dry<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a name='Rain' class='not-query precipitation'>Rain<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a name='Snow' class='not-query precipitation'>Snow<i class='icon-black icon-ok pull-right'></i></a></li>    				
+  				</ul>
+			</div>
+		
+			<div class="btn-group">
+  				<button class="btn dropdown-toggle" data-toggle="dropdown"> Data Type <span class="caret"></span></button>
+  				<ul id="query-options-data-type" class="dropdown-menu query-options type" role="menu" aria-labelledby="dLabel" style="width:250px">
+  					<li><a class='not-query type all' name='all_data_types'>All Data<i class='icon-black icon-ok pull-right'></i></a></li>
+  					<li><a class='not-query type all' name='all_leaf_data_types'>All Leaf Data<i class='icon-black icon-ok pull-right'></i></a></li>
+  					<li><a class='not-query type all' name='all_nonleaf_data_types'>All Non-Leaf Data<i class='icon-black icon-ok pull-right'></i></a></li>
+  					<li class="divider"></li>
+    				<!-- dropdown menu links -->
+  				</ul>
+			</div>	
+				<input id="query-options-observers" type="text" data-provide="typeahead" class="query-options observers" placeholder="Observers" style="font-style: italic"></input>
+				<input type="text" id="date-begin" class='query-options-datepicker' placeholder="Start date"></input>
+				<input type="text" id="date-end" class="query-options-datepicker" placeholder="End date"></input>
+			
+
+			
 		</div>
-	</div> <!-- span4-->	
-
-    </div> <!-- /container -->
-
-   
-
+	</div>		 
+	<script src="lib/bootstrap-table-nav.js"></script>
+	<div id="none-found" class="alert alert-info" style="display:none">No results found. Try another query.<a class="close none-close">&times;</a></div>
+	</div> <!-- /container -->
+	<span class="pagination" style="margin-left: 30px; float:left"></span>
+	<button class="btn btn-small btn-info" id="hide-empty" style="display:none; float:left">Hide empty columns</button>
+	<button class="btn btn-small btn-info" id="show-empty" style="display:none; float:left">Show empty columns</button>
+	<div class="span 12" style="overflow: auto; min-width: 1200px; max-width: 1500px">
+	<table class="table-striped tablesorter table-scroll" id="litterfall-table" style="display:none">
+	<thead>
+		<tr>
+			<th >
+				Date
+			</th>
+			<th >
+				Site
+			</th>
+			<th>
+				Plot
+			<th>
+				Coll. Type
+			</th>
+			<th>
+				Weather
+			</th>
+			<th>
+				Observers
+			</th>
+			<th>
+				Trap
+			</th>
+			<th>
+			</th>
+			<th> Acorns </th>
+			<th> All reproductive </th>
+			<th> Twigs </th>
+			<th> Bark </th>
+			<th> Misc. </th>
+			<th style="display:none" id="last"></th>
+		</tr>
+	</thead>
+	<tbody></tbody>
+	</table>   
+   	 </div>
+   	 <footer>
+	<div class="pagination" style="margin-top: 20px; margin-left: 30px; float: left; clear: both;"></div>
+  	</footer>
   </body>
 </html>
