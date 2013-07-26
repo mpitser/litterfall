@@ -26,7 +26,9 @@ define([
 				});
 			});			
 			query = "cgi-bin/litterfall.py" + query;
+			$("#spinner").show();
 			$.getJSON(query, function(data){
+				$("#spinner").hide();
 				$.each(data, function(index, value) {
 					var date_formatted = toFormattedDate(value.date);
 					var regex = new RegExp(",","g")
