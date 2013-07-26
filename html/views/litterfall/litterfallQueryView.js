@@ -306,7 +306,6 @@ define([
 			console.log(query_string);
 			var row = new reportsView();
 			row.render(query_string);
-
 		}
 		
 		/* validateObservers: function() {
