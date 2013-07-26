@@ -17,6 +17,7 @@ define([
 			</tr>\
 			',
 		initialize: function() {
+			console.log("initializing");
 		},
 		render: function(query) {
 			var species_list = ["Acorns reproductive", "All reproductive", "Twigs", "Bark", "Miscellaneous"];
@@ -24,9 +25,15 @@ define([
 				$.each(data, function(index, value) {
 					species_list.push(value);
 				});
-			});			
+			});	
+			var dis = this;
+			$(".bar").css("width", "0%");
+			$(".progress").show();
+			
 			query = "cgi-bin/litterfall.py" + query;
+			$("#spinner").show();
 			$.getJSON(query, function(data){
+				$("#spinner").hide();
 				$.each(data, function(index, value) {
 					var date_formatted = toFormattedDate(value.date);
 					var regex = new RegExp(",","g")
