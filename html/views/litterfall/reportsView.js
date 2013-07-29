@@ -1,5 +1,5 @@
 define([ 
-  'jquery',
+	'jquery',
 	'underscore', 
 	'backbone'
 ], function($, _, Backbone){
@@ -17,6 +17,7 @@ define([
 			</tr>\
 			',
 		initialize: function() {
+			console.log("initializing");
 		},
 		render: function(query) {
 			var species_list = ["Acorns reproductive", "All reproductive", "Twigs", "Bark", "Miscellaneous"];
@@ -24,11 +25,14 @@ define([
 				$.each(data, function(index, value) {
 					species_list.push(value);
 				});
-			});			
+			});	
+			var dis = this;
+			$(".bar").css("width", "0%");
+			$(".progress").show();
+			
 			query = "cgi-bin/litterfall.py" + query;
 			$("#spinner").show();
 			$.getJSON(query, function(data){
-				$("#spinner").hide();
 				$.each(data, function(index, value) {
 					var date_formatted = toFormattedDate(value.date);
 					var regex = new RegExp(",","g")
@@ -48,7 +52,8 @@ define([
 									$(".obs"+index+"trap"+i).append("<td></td>");
 							}
 						});
-					}
+					}			
+
 				});
 				var none = true;
 				$.each(species_list, function(index, value){
@@ -65,6 +70,7 @@ define([
 						$("#litterfall-table tr th:nth-child("+n+")").hide();
 					}
 				});
+				$("#spinner").hide();
 				if (data.length > 0) {
 					$("#none-found").hide();
 					$("#litterfall-table").show();
@@ -81,7 +87,9 @@ define([
 				// currently tablesorter messes everything up, which is unfortunate. 
 				//TODO: make a modified version of tablesorter that will not screw everything up.
 				//$("#litterfall-table").tablesorter();
-			});
+				console.log("finished getJSON");
+			});			
+
 			$(".none-close").click(function() {
 				event.preventDefault();
 				$(".none-close").parent().hide('medium');
@@ -97,7 +105,8 @@ define([
 				$("#litterfall-table tr th").show();
 				$("#hide-empty").show();
 				$("#show-empty").hide();
-			});
+			});					
+
 					
 		},
 		hideEmpty: function(species) {

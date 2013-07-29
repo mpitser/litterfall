@@ -163,6 +163,7 @@ def main():
 		# get list of sites
 		elif query.getvalue("site") == "getList":
 			data = getSitesList(db)
+			print 'Content-Type: application/json\n'
 			print json.dumps(data, default=json_util.default, separators=(',', ':'))
 		
 		# get data based on a bunch of parameters passed into the url
@@ -170,7 +171,7 @@ def main():
 			
 			# get data associated with specifications entered
 			data = getdata(db, query)
-			print 'Content-Type: application/json\n'
+			print 'Content-Type: application/json\n\n'
 			json_data = [0]*data.count()
 			for i in range(0, data.count()):
 				json_data[i] = data[i]

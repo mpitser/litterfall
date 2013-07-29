@@ -8,11 +8,10 @@
     current = {};
     tableNav = function() {
       var _ref, _ref1, _ref2, _ref3, _ref4;
-	  console.log(options);
       options.tableSelector = this.selector;
       options.childSelector = 'tr';
       options.paginationSelector = $('.pagination');
-      options.itemsPerPage = 10;
+      options.itemsPerPage = 18;
       options.hideWhenOnePage = true;
       current.page = 0;
       $(options.paginationSelector).on('click', 'li', onPageNav);
@@ -25,7 +24,7 @@
       return startIndexForPage(page + 1) - 1;
     };
     getRows = function() {
-      return $(options.tableSelector).find(options.childSelector);
+      return $(options.tableSelector + " > tbody").find(options.childSelector);
     };
     numPages = function() {
       return Math.ceil(getRows().length / options.itemsPerPage);
@@ -43,8 +42,6 @@
       startRow = startIndexForPage(current.page);
       endRow = endIndexForPage(current.page);
       table = $(options.tableSelector);
-      console.log(startRow, endRow, table);
-      console.log($(options.tableSelector +' > tbody > tr'));
       $("" + options.tableSelector +' > tbody > tr' + ":hidden").show();
       $("" + options.tableSelector +' > tbody > tr' + ":lt(" + startRow + ")").hide();
       return $("" + options.tableSelector +' > tbody > tr' + ":gt(" + endRow + ")").hide();

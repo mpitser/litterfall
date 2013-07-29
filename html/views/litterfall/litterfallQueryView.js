@@ -68,7 +68,6 @@ define([
 				yearRange: '2000:c', // allow years to be edited back to the start of collection, and up to current year
 				//constrainInput: true,
 				onSelect: function(dateText) {
-					console.log(dateText);
 					if ($(this).attr('id') == 'date-begin'){
 						text = "All dates after " + dateText;
 						dis.addQueryItem("date-begin", text);
@@ -85,12 +84,12 @@ define([
 			// bind typeahead change
 			$('#query-options-observers').on('change', function() {
 				// when observers field changed, validation called
-				if (dis.validateObservers()) {
+				//if (dis.validateObservers()) {
 					// if validation passes, add the value to the query well
 					var query_value =  $('#query-options-observers').siblings().find('.active').text();
 					var query_type = 'observer';
 					dis.addQueryItem(query_type, query_value);
-				}
+				//}
 			});
 			// start a query to the mongoDB
 			$('#analyze-data').click(this.queryOnSelectedItems);
@@ -146,23 +145,17 @@ define([
 		addObserversAutocomplete: function() {
 			/* initializes and populates the typeahead for observers */
 
-			// APPARENTLY THIS IS NONFUNCTIONAL BLEAHHH -- could be in app.js, but I think the issue is that this getJSON call 
-			// isn't going through and even getting any data... I can't get the console log to happen.
 			$.getJSON(app.config.cgiDir + 'litterfall.py?observers=getList', function(data){
-				console.log("haven't gotten to this log lately. if you see this be happy!");
            	 	
            	 	// add All Observers as an option
            	 	data.splice(0, 0, "All Observers");
-           	 	
-           	 	console.log(data);
-           	 	
            	 	// initialize the typeahead
 				$("#query-options-observers").typeahead({
 					minLength: 0,	// should make the typeahead open on focus instead of having to type anything
 					items: Infinity,
 					source: data,
 					jsonSource: data,
-					type: "observer"	// this field is used in conditional stuff in app.js (extension of the typeahead prototype) if you edit that!
+					type: "observers"	// this field is used in conditional stuff in app.js (extension of the typeahead prototype) if you edit that!
 				});
    			});
 		},
@@ -313,11 +306,10 @@ define([
 			console.log(query_string);
 			var row = new reportsView();
 			row.render(query_string);
-
-		},
+		}
 		
-		validateObservers: function() {
-			/* validation of observers so that they can't type in an observer that isn't already in the typeahead source */
+		/* validateObservers: function() {
+			//validation of observers so that they can't type in an observer that isn't already in the typeahead source
 			//NOTE we do need to provide a way for new observers to be added...
 			
 			console.log("in observer validation");
@@ -336,8 +328,9 @@ define([
 			
 			$('#query-options-observers').parent().removeClass("error");
 			return true;
-		}
+		}*/
 		
 	});
+	
 	return litterfallQueryView;
 });

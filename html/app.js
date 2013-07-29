@@ -17,6 +17,7 @@ define([
 	$.extend($.fn.typeahead.Constructor.prototype, {
 		matcher: function(item) {
 			if (this.options.type == 'observers') {
+
 				var observers = this.query.split(",");
 				var last_observer = observers[observers.length - 1];
 				var last_observer = last_observer.replace(/^\s+/,"");

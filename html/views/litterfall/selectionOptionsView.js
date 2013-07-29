@@ -5,7 +5,7 @@ define([
   'collections/litterfall/selectionOptions'
 ], function($, _, Backbone, selectionOptions) {
 	var selectionOptionsView = Backbone.View.extend({
-    	template: "<li><a class='not-in-query' name='<%= value %>'><%= name %><i class='icon-black icon-ok pull-right'></i></a></li>",
+    	template: "<li><a class='not-query' name='<%= name %>'><%= name %><i class='icon-black icon-ok pull-right'></i></a></li>",
     	initialize: function(){
     		_.bindAll(this, 'render'); // fixes loss of context for 'this' within methods
     		console.log(this.collection);
