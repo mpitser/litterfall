@@ -156,3 +156,34 @@
 .newobs {
 	overflow-x: scroll;
 }
+
+
+/*Litterfall Query Well Buttons*/
+#query-items-selected > .btn {
+	opacity: 1;
+	display: inline-block;
+}
+#query-items-selected > .collection_type {
+	background-color: #BF496A;
+}
+#query-items-selected > .type {
+	background-color:  #D35400;
+}
+#query-items-selected > .sky {
+	background-color: #F5AA1A;
+}
+#query-items-selected > .precipitation {
+	background-color: #8A9B0F;
+}
+#query-items-selected > .site {
+	background-color: #0B486B;
+}
+#query-items-selected > .plot {
+	background-color: #532F64;
+}
+#query-items-selected > .date-begin {
+	background-color: #1ABC9C;
+}
+#query-items-selected > .date-end {
+	background-color: #1ABC9C;
+}
