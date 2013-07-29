@@ -7,7 +7,7 @@ define([
 		tagName: 'tr',
 		template: '\
 			<td class="btn-column">\
-				<button class="btn-tree btn btn-mini btn-primary btn-analyze" type="button">View More</button>\
+				<button class="btn-tree btn btn-mini btn-primary btn-analyze" type="button">More</button>\
 			</td>\
 			<td class="tree-id">\
 				<%= tree.full_tree_id %>\
