@@ -4,8 +4,9 @@ define([
 	'backbone',
 	'models/litterfall/litterfallQuery',
 	'collections/litterfall/selectionOptions',
-	'views/litterfall/selectionOptionsView'
-], function($, _, Backbone, litterfallQuery, selectionOptions, selectionOptionsView){
+	'views/litterfall/selectionOptionsView',
+	'views/litterfall/reportsView'
+], function($, _, Backbone, litterfallQuery, selectionOptions, selectionOptionsView, reportsView){
 	var litterfallQueryView = Backbone.View.extend({
 	
 		
@@ -17,7 +18,7 @@ define([
 		var query_type = $to_remove.attr("class").replace("btn-info", "").replace("btn", "").trim();
 		var $corresponding_list_item = $('.query-options-dropdown.'+query_type + ' > li > a:contains("'+$to_remove.val()+'")');
 		$corresponding_list_item.removeClass("in-query");
-		$corresponding_list_item.addClass("not-in-query");
+		$corresponding_list_item.addClass("not-query");
 		
 		$('#date-begin :input').on('change', function() {
 			console.log("in fxn");
@@ -54,12 +55,12 @@ define([
 			this.populateSiteOptions();
 			this.addObserversAutocomplete();
 			this.populateDataOptions();	
-			
+			this.populateTable();
 			var dis = this;		
 			
 			/* initialize bootstrap plugin things */
 			$('.dropdown-toggle').dropdown();
-			$('.query-options-datepicker :input').datepicker({
+			$('.query-options-datepicker').datepicker({
 				dateFormat: "mm/dd/yy", 
 				maxDate: 0, 
 				changeYear: true, 
@@ -67,10 +68,16 @@ define([
 				yearRange: '2000:c', // allow years to be edited back to the start of collection, and up to current year
 				//constrainInput: true,
 				onSelect: function(dateText) {
-					dis.addQueryItem("date", dateText)
+					console.log(dateText);
+					if ($(this).attr('id') == 'date-begin'){
+						text = "All dates after " + dateText;
+						dis.addQueryItem("date-begin", text);
+					} else if ($(this).attr('id') == 'date-end'){
+						text = "All dates before " + dateText;
+						dis.addQueryItem("date-end", text);
+					}
 				}
 			});
-			
 			
 			/* bind events (idk why but i can't get events to bind to fxns in the backbone events delegation function..  */
 			// add/remove a query item when the corresponding list item clicked
@@ -85,15 +92,11 @@ define([
 					dis.addQueryItem(query_type, query_value);
 				}
 			});
-			// show 1 or 2 datepicker input fields depending on radio buttons
-			$('#date-specific').click(function() {
-				$('#date-end').hide();
-			});
-			$('#date-range').click(function() {
-				$('#date-end').show();
-			});
 			// start a query to the mongoDB
 			$('#analyze-data').click(this.queryOnSelectedItems);
+			$('#clear-all').click(function() {
+				dis.clearAll(dis)
+			});
 
 			return this;
 		},
@@ -120,7 +123,7 @@ define([
 		populateDataOptions: function() {
 			/* populates Data Type dropdown */			
 				
-			data_type_options = new selectionOptions({}, { id: "data-type" } );
+			data_type_options = new selectionOptions({}, { id: "type" } );
 				
 			data_type_options.url = 'data/data_type_options.json';
 
@@ -131,7 +134,15 @@ define([
 			data_type_options.fetch();
 			
 		},
-		
+		populateTable: function() {
+			var species = ["Acorns reproductive", "All reproductive", "Twigs", "Bark", "Miscellaneous"];
+			$.getJSON("data/tree_species.json", function(data){
+				$.each(data, function(index, value) {
+					$("#last").before("<th>"+value+"</th>")
+					species.push(value);
+				});
+			});
+		},
 		addObserversAutocomplete: function() {
 			/* initializes and populates the typeahead for observers */
 
@@ -175,19 +186,24 @@ define([
 			var query_type = $list_item_clicked.parent().parent().attr('class').replace('query-options', '').replace('dropdown-menu', '').trim();
 			
 			// check if we are adding or removing a query item
-			if ($list_item_clicked.attr('class').search('not-in-query') !== -1) {
+			if ($list_item_clicked.attr('class').search('not-query') !== -1) {
 				// the list item clicked *is not* currently in query (so add it)
 				event.data.thisPtr.addQueryItem( query_type, query_value);
-				$list_item_clicked.removeClass("not-in-query").addClass("in-query");
+				$list_item_clicked.removeClass("not-query").addClass("in-query");
 			} else {
 				// the list item clicked *is* currently in query (so remove it)
 				event.data.thisPtr.removeQueryItem(event.data.thisPtr, query_type, query_value);
-				$list_item_clicked.removeClass("in-query").addClass("not-in-query");
+				$list_item_clicked.removeClass("in-query").addClass("not-query");
 			}
 		},
-		
+		clearAll: function(dis) {
+			$.each($('.query-item'), function(index, value) {
+				var query_type = value.className.split(/\s+/)[3];
+				dis.removeQueryItem(dis, query_type, $(value).val());
+			});
+		},
 		addQueryItem: function(query_type, query_value) {
-		
+			var dis = this;
 			// add "All ___" 
 			if (query_value.search("All") != -1) {
 				
@@ -195,9 +211,9 @@ define([
 				var $btns_to_remove = $('#query-items-selected > button.'+query_type);
 				$btns_to_remove.hide('slow', function() {	// animation that makes them hide cool
 					$btns_to_remove.remove();
-				});
+				}); 
 				// highlight each item in list as in the query
-				$('#query-options-'+query_type+' > li > a.not-in-query').removeClass("not-in-query").addClass("in-query");
+				$('#query-options-'+query_type+' > li > a.not-query').removeClass("not-query").addClass("in-query");
 			}
 		
 			// template for the button that shows up in query well
@@ -208,44 +224,54 @@ define([
 						<i class="icon-black icon-remove"></i>\
 					</a>\
 				 </button>';
-				   			 
+			console.log(typeof(query_value));
+			if (query_type.indexOf("date") != -1){
+				query_template = '<button class="btn btn-info query-item ' + query_type + '" disabled="disabled" value="'+ query_value.substring(query_value.length-10, query_value.length) +'">\
+					' + query_value + '\
+					<a href="#data/litterfall/reports">\
+						<i class="icon-black icon-remove"></i>\
+					</a>\
+				 </button>';
+			}
 			// add to the query well with animation
 			var $to_add = $(query_template).hide().fadeTo(500, 0.8);
 			$('#query-items-selected').append($to_add);
-			
+			$('.icon-remove').click(function() {
+				event.preventDefault();
+				//console.log("remove clicked");
+				dis.removeQueryItem(dis, query_type, $(this).parent().parent().val());
+			});
 		},
 		
 		removeQueryItem: function(thisPtr, query_type, query_value) {
 			// called when user clicks remove button from an item in the query well (not in dropdown list)
-			console.log("in remove query item");
-			
 			// "All ___" was unselected
+			var $to_remove = $('#query-items-selected > .btn-info:contains('+query_value+')');
+			$('#query-options-'+query_type+' > li > a:contains('+query_value+')').removeClass("in-query").addClass("not-query");
+			$to_remove.hide('slow', function() {
+				$to_remove.remove();
+			});
 			if (query_value.search("All") != -1){
 				// clear all from search
-				$('#query-options-'+query_type+' > li > a.in-query').removeClass("in-query").addClass("not-in-query");
-				
+				$('#query-options-'+query_type+' > li > a.in-query').removeClass("in-query").addClass("not-query");
 			// if the "all" option is selected, when any other option is removed, the "all" option needs to be unselected!
-			} else if ($('#query-options-'+query_type+' > li > a.all').hasClass("in-query")){
-				$('#query-options-'+query_type+' > li > a.all').removeClass("in-query").addClass("not-in-query");
+			}else if ($('#query-options-'+query_type+' > li > a.all').hasClass("in-query")){
+				$('#query-options-'+query_type+' > li > a.all').removeClass("in-query").addClass("not-query");
 			
 				var $to_remove = $('#query-items-selected > .btn-info.'+query_type);
 				$to_remove.hide('slow', function() {
 					$to_remove.remove();
 				});
-				
+				console.log("in query");
+				console.log($('#query-options-'+query_type+' > li > a.in-query'));
 				// add all the other items to the query well (since "all" will no longer be listed but other items might still be selected
 				var $to_add = $('#query-options-'+query_type+' > li > a.in-query');
 				
 				$to_add.each(function(i, v) {
-					thisPtr.addQueryItem(query_type, $(v).attr("name"));
+					thisPtr.addQueryItem(query_type, $(v).attr("name").charAt(0).toUpperCase() + $(v).attr("name").slice(1).replace("_", " "));
 				});
 			}			
 			
-			// default remove behavior
-			var $to_remove = $('#query-items-selected > .btn-info:contains('+query_value+')');
-			$to_remove.hide('slow', function() {
-				$to_remove.remove();
-			});
 				
 		},
 		
@@ -270,9 +296,42 @@ define([
 =======
 			/* get the items that are in the query well.. should have .query-item class
 			   then I guess ask the db? */
-			
-			console.log("analyze button clicked; about to query");
-			console.log($(document).find(".query-item"));	// should be the items in query well
+			$("#litterfall-table > tbody > tr").remove();
+			$("#litterfall-table > thead > tr > th").show();
+			$("#not-found").hide();
+
+			var query_string = "";
+			if ($(document).find(".query-item.plot") != [] && !($(document).find(".query-item.plot").hasClass('all'))) {
+				var eachh = $(document).find(".query-item.plot");
+				$.each(eachh, function(index, value) {
+					query_string += "&plot=" + ($(value).val().replace("Plot ", ""));
+				});	
+			}
+			if ($(document).find(".query-item.trap") != [] && !($(document).find(".query-item.trap").hasClass('all'))) {
+				var eachh = $(document).find(".query-item.trap");
+				$.each(eachh, function(index, value) {
+					query_string += "&trap=" + ($(value).val().replace("Trap ", ""));
+				});	
+			}			
+			var types = ["site", "date-begin", "date-end", "date", "observers", "type", "collection_type"];
+			for (var i = 0; i < 9; i++) {
+				var type = types[i];
+				if ($(document).find(".query-item." + type) != []) {
+					var eachh = $(document).find(".query-item." + type);
+					$.each(eachh, function(index, val) {
+						var value = $(val).val()
+						if (value.indexOf("All") == -1 || value == "All reproductive") {
+							query_string += "&" + type + "=" + value;
+						}
+					});
+				}
+			}
+				
+			query_string = query_string.replace("&", "?");				
+			console.log(query_string);
+			var row = new reportsView();
+			row.render(query_string);
+
 		},
 		
 >>>>>>> 8bee6aca0e3bd95df2dbe8ade87d9ec18776dd20
