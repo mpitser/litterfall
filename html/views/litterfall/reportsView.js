@@ -2,7 +2,7 @@ define([
 	'jquery',
 	'underscore', 
 	'backbone'
-], function($, _, Backbone){
+], function($, _, Backbone) {
 	var reportsRow = Backbone.View.extend({
 		template: '\
 			<tr class="obs<%= index %>">\
@@ -16,10 +16,14 @@ define([
 			<td></td>\
 			</tr>\
 			',
-		initialize: function() {
-			console.log("initializing");
+		initialize: function() {			
 		},
+		
 		render: function(query) {
+			$("#analyze-data").text("Loading...");	
+			$("#analyze-data").prop("disabled", "disabled");
+
+			console.log("first")
 			var species_list = ["Acorns reproductive", "All reproductive", "Twigs", "Bark", "Miscellaneous"];
 			$.getJSON("data/tree_species.json", function(data){
 				$.each(data, function(index, value) {
@@ -27,36 +31,34 @@ define([
 				});
 			});	
 			var dis = this;
-			$(".bar").css("width", "0%");
-			$(".progress").show();
-			
+		
 			query = "cgi-bin/litterfall.py" + query;
-			$("#spinner").show();
 			$.getJSON(query, function(data){
+				var time = 100;
 				$.each(data, function(index, value) {
 					var date_formatted = toFormattedDate(value.date);
 					var regex = new RegExp(",","g")
 					var observers = value.observers.toString().replace(regex, ", ");
-					$("#litterfall-table").append("<tr id='obs"+index+"'><td>"+date_formatted+"</td><td>"+value.site+"</td><td>"+value.plot+"</td><td>"+value.collection_type+"</td><td></td><td>"+observers+"</td><td></td><td></td></tr>");
+					$("#litterfall-table").append("<tr class='obs"+index+"'><td>"+date_formatted+"</td><td>"+value.site+"</td><td>"+value.plot+"</td><td>"+value.collection_type+"</td><td></td><td>"+observers+"</td><td></td><td></td></tr>");
 					for (var i = 5; i > 0; i--) {
-						$("#obs"+index).after("<tr id='obs"+index+"trap"+i+"'><td></td><td></td><td></td><td></td><td></td><td></td><td>"+i+"</td><td></td></tr>");
+						$(".obs"+index).after("<tr class='obs"+index+"trap"+i+"'><td></td><td></td><td></td><td></td><td></td><td></td><td>"+i+"</td><td></td></tr>");
 						$.each(species_list, function(indexx, species){
 							var matched = false;
 							$.each(value.trap_data, function(ind, sample) {
 								if (sample.type == species && sample.trap == i) {
 									matched = true;
-									$("#obs"+index+"trap"+sample.trap).append("<td>"+sample.value+"</td>");
+									$(".obs"+index+"trap"+sample.trap).append("<td>"+sample.value+"</td>");
 								}
 							});			
 							if (!matched) {
-									$("#obs"+index+"trap"+i).append("<td></td>");
+									$(".obs"+index+"trap"+i).append("<td></td>");
 							}
 						});
-					}			
-
+					}
 				});
 				var none = true;
 				$.each(species_list, function(index, value){
+					console.log("finding blanks");
 					var blank = true;
 					var n = index+9;
 					$.each($("#litterfall-table tbody tr td:nth-child("+n+")"), function(i, td){
@@ -70,7 +72,6 @@ define([
 						$("#litterfall-table tr th:nth-child("+n+")").hide();
 					}
 				});
-				$("#spinner").hide();
 				if (data.length > 0) {
 					$("#none-found").hide();
 					$("#litterfall-table").show();
@@ -88,6 +89,9 @@ define([
 				//TODO: make a modified version of tablesorter that will not screw everything up.
 				//$("#litterfall-table").tablesorter();
 				console.log("finished getJSON");
+				$("#analyze-data").prop("disabled", false);
+				$("#analyze-data").text("Analyze data");		
+
 			});			
 
 			$(".none-close").click(function() {
@@ -106,9 +110,9 @@ define([
 				$("#hide-empty").show();
 				$("#show-empty").hide();
 			});					
-
-					
+			
 		},
+
 		hideEmpty: function(species) {
 			$.each(species, function(index, value){
 					var blank = true;
@@ -124,6 +128,29 @@ define([
 					}
 				});
 		
+		},
+		makeSpinner: function() {
+			var opts = {
+				lines: 11, // The number of lines to draw
+				length: 0, // The length of each line
+				width: 11, // The line thickness
+				radius: 20, // The radius of the inner circle
+				corners: 1, // Corner roundness (0..1)
+				rotate: 0, // The rotation offset
+				direction: 1, // 1: clockwise, -1: counterclockwise
+				color: '#000', // #rgb or #rrggbb
+				speed: 1, // Rounds per second
+				trail: 60, // Afterglow percentage
+				shadow: false, // Whether to render a shadow
+				hwaccel: false, // Whether to use hardware acceleration
+				className: 'spinner', // The CSS class to assign to the spinner
+				zIndex: 2e9, // The z-index (defaults to 2000000000)
+				 top: 'auto', // Top position relative to parent in px
+				left: 'auto' // Left position relative to parent in px
+			};
+			var target = $('#spinner');
+			var spinner = new Spinner(opts).spin(target);
+			return spinner;
 		}
 
 	});		
