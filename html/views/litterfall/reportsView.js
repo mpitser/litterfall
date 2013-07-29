@@ -37,19 +37,19 @@ define([
 					var date_formatted = toFormattedDate(value.date);
 					var regex = new RegExp(",","g")
 					var observers = value.observers.toString().replace(regex, ", ");
-					$("#litterfall-table").append("<tr class='obs"+index+"'><td>"+date_formatted+"</td><td>"+value.site+"</td><td>"+value.plot+"</td><td>"+value.collection_type+"</td><td></td><td>"+observers+"</td><td></td><td></td></tr>");
+					$("#litterfall-table").append("<tr id='obs"+index+"'><td>"+date_formatted+"</td><td>"+value.site+"</td><td>"+value.plot+"</td><td>"+value.collection_type+"</td><td></td><td>"+observers+"</td><td></td><td></td></tr>");
 					for (var i = 5; i > 0; i--) {
-						$(".obs"+index).after("<tr class='obs"+index+"trap"+i+"'><td></td><td></td><td></td><td></td><td></td><td></td><td>"+i+"</td><td></td></tr>");
+						$("#obs"+index).after("<tr id='obs"+index+"trap"+i+"'><td></td><td></td><td></td><td></td><td></td><td></td><td>"+i+"</td><td></td></tr>");
 						$.each(species_list, function(indexx, species){
 							var matched = false;
 							$.each(value.trap_data, function(ind, sample) {
 								if (sample.type == species && sample.trap == i) {
 									matched = true;
-									$(".obs"+index+"trap"+sample.trap).append("<td>"+sample.value+"</td>");
+									$("#obs"+index+"trap"+sample.trap).append("<td>"+sample.value+"</td>");
 								}
 							});			
 							if (!matched) {
-									$(".obs"+index+"trap"+i).append("<td></td>");
+									$("#obs"+index+"trap"+i).append("<td></td>");
 							}
 						});
 					}			
