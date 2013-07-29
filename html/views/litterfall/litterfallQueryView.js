@@ -276,24 +276,6 @@ define([
 		},
 		
 		queryOnSelectedItems: function() {
-<<<<<<< HEAD
-			console.log("abpout to query");
-			console.log($(document).find(".query-item"));
-			var query_string = ""
-			$("#litterfall-records > tr").remove();
-			$("#litterfall-records").show();
-			$.getJSON('data/tree_species.json' + query_string, function(data){
-				$.each(data, function(index, value) {
-					var $row = $("<tr><td class='id'>" + index + "</td><td class='site'>" +value+ "</td><td class=plot>"+ value+"</td></tr>")
-					$("#litterfall-records tbody").append($row);
-				});			
-				$("#litterfall-records").tableNav(); 
-
-			});
-
-		}
-		/*,
-=======
 			/* get the items that are in the query well.. should have .query-item class
 			   then I guess ask the db? */
 			$("#litterfall-table > tbody > tr").remove();
@@ -334,7 +316,6 @@ define([
 
 		},
 		
->>>>>>> 8bee6aca0e3bd95df2dbe8ade87d9ec18776dd20
 		validateObservers: function() {
 			/* validation of observers so that they can't type in an observer that isn't already in the typeahead source */
 			//NOTE we do need to provide a way for new observers to be added...
