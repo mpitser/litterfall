@@ -1,0 +1,158 @@
+#main {
+	position: relative;
+}
+
+/*Access Tree Data Records*/
+.span4 {
+	margin-left: 0px;
+}
+
+.span4:nth-child(4) div:first-child {
+	margin-top: 53px;
+}
+
+.span4:nth-child(4) div:nth-child(2) {
+	margin-top: 56px;
+}
+
+@media (max-width: 979px) and (min-width: 768px){ .span4:nth-child(4) { margin-left: 40px; } }
+
+@media (max-width: 767px) { .span4:nth-child(4) div:first-child, .span4:nth-child(4) div:nth-child(2) { margin-top: 20px; } }
+
+
+
+/*Access Litterfall Data Records*/
+.span4:nth-child(2) {
+	width: 100%;
+}
+
+.span4:nth-child(2) div button {
+	margin-top: 20px;
+}
+
+/*Misc. Table Stuff*/
+.button-row .btn {
+	margin: 5px 10px 20px 0px;
+}
+
+.button-row .btn.pull-right {
+	margin: 5px 0px 20px;
+}
+
+
+
+/*Tables!*/
+@media (max-width: 767px) {
+/*Preventing three lines of heading from hitting the button row*/
+.updatetree > h1, .treerecords > h1 {
+	height: 80px;
+	overflow: hidden;
+}
+
+.updatetree {
+	width: 100%;
+	overflow-x: auto;
+	padding-bottom: 38px;
+}
+
+.updatetree .button-row, .updatetree h1 {
+	position: absolute;
+}
+
+.updatetree .button-row:nth-child(4) {
+	top: 90px;
+}
+
+.updatetree table {
+	margin: 125px 0px 7px;
+}
+}
+
+.treerecords h3 select {
+	width: auto;
+}
+
+
+.treerecords {
+	overflow-x: auto;
+	padding-bottom: 38px;
+}
+
+.treerecords h1, .treerecords h3, .treerecords .button-row {
+	position: absolute;
+}
+
+.treerecords .button-row:nth-child(4) {
+	top: 67px;
+	margin: 0px auto;
+}
+@media (min-width: 1200px) {
+.treerecords .button-row {
+	width: 1170px;
+}
+}
+@media (min-width: 980px) and (max-width: 1199px) {
+.treerecords .button-row {
+	width: 940px;
+}
+}
+@media (min-width: 767px) and (max-width: 979px) {
+.treerecords .button-row {
+	width: 724px;
+}
+}
+@media (max-width: 767px) {
+.treerecords .button-row {
+	margin: 0px;
+	right: 0px;
+}
+}
+
+.treerecords h3 {
+	top: 50px;
+}
+
+.treerecords h3 select {
+	margin-bottom: 3px;
+}
+
+.treerecords table {
+	margin: 115px 0px 7px;
+}
+
+@media (max-width: 767px) {
+.treerecords h3 {
+	top: 83px;
+}
+.treerecords .button-row:nth-child(4){
+	top: 100px;
+}
+.treerecords table {
+	margin-top: 145px;
+}
+}
+@media (min-width: 481px) {
+.treerecords h3:before {
+	content: "From: ";
+}
+}
+
+
+
+
+/*Add Litterfall Observation*/
+.newobs .go-to {
+	padding: 4px 12px;
+}
+
+.newobs .go-top {
+	bottom: 35px;
+}
+
+.newobs footer {
+	height: 20px;
+}
+
+.newobs {
+	overflow-x: scroll;
+}
