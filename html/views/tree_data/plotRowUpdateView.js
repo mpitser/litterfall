@@ -79,7 +79,7 @@ define([
 			//$el --> gets the jQuery object for this view's element 
 			//*.attr('id', this_tree._id.$oid) --> sets 'id' to MongoDB value for tree's ID
 			//takes the tree's data, assigns it to this.template, inserts the HTML into the jQuery object for this view's element
-			this.$el.attr('id', this_tree._id.$oid).html(_.template(this.template, {tree: this_tree}));
+			this.$el.attr('id', 'tree'+this_tree._id.$oid).html(_.template(this.template, {tree: this_tree}));
 			this.$el.addClass("tree-cluster-" + this_tree.tree_id);
 			this.$el.children().eq(2).css("font-style","italic");
 			this.options.targetEl.append(this.el);	
