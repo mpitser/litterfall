@@ -53,7 +53,7 @@ define([
 
 			/* populate fields*/
 			this.populateSiteOptions();
-			this.addObserversAutocomplete();
+			this.addObserversTypeahead();
 			this.populateDataOptions();	
 			this.populateTable();
 			var dis = this;		
@@ -147,7 +147,7 @@ define([
 				});
 			});
 		},
-		addObserversAutocomplete: function() {
+		addObserversTypeahead: function() {
 			/* initializes and populates the typeahead for observers */
 
 			$.getJSON(app.config.cgiDir + 'litterfall.py?observers=getList', function(data){
