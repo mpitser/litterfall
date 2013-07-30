@@ -496,14 +496,14 @@ define([
 				'aria-hidden': 'true'
 			}).html('\
 				<div class="modal-header">\
-					<h3>Are you sure...</h3>\
+					<h3><i class="icon-large icon-warning-sign"> </i> Are you sure you want to proceed?</h3>\
 				</div>\
 				<div class="modal-body">\
-					<p>...you want to delete this observation entry? </p>\
+					<p>This observation will be permanently removed from the database.</p>\
 				</div>\
 				<div class="modal-footer">\
-					<button class="btn btn-info" data-dismiss="modal" aria-hidden="true">Nah, just kidding</button>\
-					<button class="btn btn-danger" id="no-remorse">Yes, I won\'t feel remorse</button>\
+					<button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Cancel</button>\
+					<button class="btn btn-danger" id="no-remorse">Yes, delete this observation</button>\
 				</div>\
 			');
 			
@@ -527,11 +527,14 @@ define([
 				// get the target index
 				var target_index = parseInt(($row_to_delete.attr("id")).split("-")[1]);
 				var entries_array = self.model.get('diameter');
+			    console.log(_.without(entries_array, entries_array[target_index]));
 				
-				// delete it! HAHAHAHAHA
+				// delete it!
 				self.model.set('diameter', _.without(entries_array, entries_array[target_index]));
-				self.model.url = app.config.cgiDir + 'litterfall.py';
+				self.model.url = app.config.cgiDir + 'tree_data.py';
+				console.log(self.model);
 				self.model.save();
+				$row_to_delete.hide(500);
 				self.render();
 				
 			});
@@ -668,7 +671,7 @@ define([
 			//finds all observers that have been previously entered into the database
 			var observers_array = [];
 			
-			$.getJSON(app.config.cgiDir + 'litterfall.py?site=allObservers', function(data) {
+			$.getJSON(app.config.cgiDir + 'tree_data.py?site=allObservers', function(data) {
 				
 				for (i in data) {
 					observers_array.push(data[i]);
