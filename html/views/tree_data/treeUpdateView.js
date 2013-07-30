@@ -130,7 +130,7 @@ define([
 		
 			var this_tree = this.model.toJSON();
 			//get the dates in descending order
-			var dates = this_tree.diameter.sort(function(a,b){return (b.year-a.year)});
+			var dates = this_tree.diameter.sort(function(a,b){return (b.date.y-a.date.y)});
 			this_tree.dates_desc = dates;
 			this.$el.html(_.template(this.templateUpdate, {tree: this_tree}));
 			$(".title").text("Updating Tree Data ");
