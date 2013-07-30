@@ -348,7 +348,7 @@ def getdatafromoid(obs, oid):
 	ser_data = json.dumps(json_data, default=json_util.default, separators=(',', ':'))
 	print ser_data
 
-def getdata(obs, site, plot, treeid, subtreeid):
+def getdata(obs, site, observers, plot, treeid, subtreeid):
 	if site == 'all':
 		# then return an array of distinct sites
 		data = obs.find({'collection_type':'tree'}).distinct('site')
@@ -363,7 +363,7 @@ def getdata(obs, site, plot, treeid, subtreeid):
 		data = obs.find({'collection_type':'tree'}, {'fields':'diameter'}).distinct('diameter')
 		data.sort()
 		n = 0 # n is not important, just helps up in decigin which data to assign to json_data
-	elif site == 'allObservers':
+	elif observers == 'getList':
 		# how many years back?
 		num_years = 4
 		data = obs.find({'collection_type':'tree', 'diameter.date.y' : {'$gte': date.today().year - num_years}}, {'fields':'diameter.observers'}).distinct('diameter.observers')
@@ -548,11 +548,12 @@ def main():
 			site = query.getvalue('site')
 			treeid = query.getvalue('treeid')
 			subtreeid = query.getvalue('subtreeid')
+			observers = query.getvalue('observers')
 			
 			if oid != None:
 				getdatafromoid(obs, oid)
 			else:
-				getdata(obs, site, plot, treeid, subtreeid)
+				getdata(obs, site, observers, plot, treeid, subtreeid)
 			
 	elif method == 'POST' or method == 'PUT':
 		form = cgi.FieldStorage()
