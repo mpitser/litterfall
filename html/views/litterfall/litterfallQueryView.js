@@ -53,7 +53,7 @@ define([
 
 			/* populate fields*/
 			this.populateSiteOptions();
-			this.addObserversAutocomplete();
+			this.addObserversTypeahead();
 			this.populateDataOptions();	
 			this.populateTable();
 			var dis = this;		
@@ -84,15 +84,20 @@ define([
 			// bind typeahead change
 			$('#query-options-observers').on('change', function() {
 				// when observers field changed, validation called
-				//if (dis.validateObservers()) {
-					// if validation passes, add the value to the query well
-					var query_value =  $('#query-options-observers').siblings().find('.active').text();
-					var query_type = 'observer';
-					dis.addQueryItem(query_type, query_value);
-				//}
+				var obs_to_add = dis.validateObservers();
+				// if validation passes, add the value to the query well
+				if (obs_to_add) {
+					dis.addQueryItem('observer', obs_to_add);
+					console.log($('#query-options-observers').data('typeahead'));
+					$('#query-options-observers').val('');	 // clear the field to the placeholder
+				}
+				
 			});
+			
 			// start a query to the mongoDB
 			$('#analyze-data').click(this.queryOnSelectedItems);
+			
+			// clear the query well of query items
 			$('#clear-all').click(function() {
 				dis.clearAll(dis)
 			});
@@ -142,7 +147,7 @@ define([
 				});
 			});
 		},
-		addObserversAutocomplete: function() {
+		addObserversTypeahead: function() {
 			/* initializes and populates the typeahead for observers */
 
 			$.getJSON(app.config.cgiDir + 'litterfall.py?observers=getList', function(data){
@@ -155,7 +160,7 @@ define([
 					items: Infinity,
 					source: data,
 					jsonSource: data,
-					type: "observers"	// this field is used in conditional stuff in app.js (extension of the typeahead prototype) if you edit that!
+					type: "observer"	// this field is used in conditional stuff in app.js (extension of the typeahead prototype) if you edit that!
 				});
    			});
 		},
@@ -306,20 +311,25 @@ define([
 			console.log(query_string);
 			var row = new reportsView();
 			row.render(query_string);
-		}
+		},
 		
-		/* validateObservers: function() {
-			//validation of observers so that they can't type in an observer that isn't already in the typeahead source
-			//NOTE we do need to provide a way for new observers to be added...
-			
+		validateObservers: function() {
+		
+			//validation of observers so that they can't type in an observer that isn't already in the typeahead source			
 			console.log("in observer validation");
 			
+			// get the array of observers in input box and extract most recently added observer
 			var obs_entered = $('#query-options-observers').val();
-			var obs_allowed = $('#query-options-observers').data("typeahead").source;
 			//console.log(obs_entered);
-			//console.log(obs_allowed);
+
+			// check observer entered against list of observers already existing in database
+			var obs_allowed = $('#query-options-observers').data("typeahead").source;
+			
+			//console.log(obs_entered_array);
+			//console.log(obs_entered);
 			//console.log(obs_allowed.indexOf(obs_entered));
 			
+			// add error flag to input box if observer not allowed
 			if (obs_allowed.indexOf(obs_entered) == -1) {
 				console.log("observer not in database");
 				$('#query-options-observers').parent().addClass("error");
@@ -327,8 +337,8 @@ define([
 			}
 			
 			$('#query-options-observers').parent().removeClass("error");
-			return true;
-		}*/
+			return obs_entered; 	// return the observer that needs to be added to the query well
+		}
 		
 	});
 	

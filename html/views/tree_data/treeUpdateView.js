@@ -107,7 +107,7 @@ define([
 					<td class="editable">\
 						<span class="display_cell date_select"><%= toFormattedDate(entry.date) %></span>\
 						<span class="edit_cell date_select"><input data-original-title="Enter a date in mm/dd/yyyy format. It may not already have an associated diameter entry or be in the future." type="text" value="<%= toFormattedDate(entry.date) %>"/>\
-					</td>\<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers %></span><span class="edit-obs-info edit_cell observers"><input title="Who collected this data" type="text" value="<%= entry.observers %>"></span></td>\
+					</td>\<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers %></span><span class="edit-obs-info edit_cell observers"><input id="observers-typeahead" title="Who collected this data" type="text" value="<%= entry.observers %>"></span></td>\
 					<td class="editable"><span class="show-obs-info display_cell diameter"><%= entry.value %></span><span class="edit-obs-info edit_cell diameter"><input title="Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
 					<td class="editable"><span class="show-obs-info display_cell status"><%= entry.status %></span><span class="edit-obs-info edit_cell status"><div class="edit-obs-info status btn-group btn-group-vertical" data-toggle="buttons-radio">\
   					<button type="button" class="btn btn-mini btn-info status alive" style="width: 120px" value="alive">Alive</button>\
@@ -146,6 +146,7 @@ define([
 		postRender: function(){
 			//add any methods/functions that need to be call after redendering the Tree edit view
 			this.populateSpecies();
+			this.addObserversTypeahead();
 		},
 		populateSpecies: function(){
 			var tree_species = this.model.get('species');
@@ -160,6 +161,21 @@ define([
 					}
 				});
 			});
+		},
+		addObserversTypeahead: function() {
+			/* initializes and populates the typeahead for observers */
+			console.log("hey there");
+			$.getJSON(app.config.cgiDir + 'tree_data.py?observers=getList', function(data){
+           	 	console.log(data);
+           	 	// initialize the typeahead
+				$("#observers-typeahead").typeahead({
+					minLength: 0,	// should make the typeahead open on focus instead of having to type anything
+					items: Infinity,
+					source: data,
+					jsonSource: data,
+					type: "observersList"	// this field is used in conditional stuff in app.js (extension of the typeahead prototype) if you edit that!
+				});
+   			});
 		},
 		events: {
 			'click .btn-new-observation': 'newObservation',	

@@ -50,7 +50,8 @@ define([
 			$("input").blur(this.check);
 		},
 		check: function() {
-			if($(this).hasClass("data-leaf") || $(this).hasClass("data-non-leaf")){
+			console.log("in check fxn");
+			if ($(this).hasClass("data-leaf") || $(this).hasClass("data-non-leaf")){
 				if (isNaN(this.value)){
 					$(this).addClass("alert_invalid");
 					$(this).attr("data-original-title", "Please enter a valid number");	
@@ -62,7 +63,7 @@ define([
 					$(this).tooltip("destroy");
 				}	
 			}
-		},		
+		},
 		addAutocomplete: function() {
 			$.getJSON(app.config.cgiDir + '/litterfall.py?observers=getList', function(data){
 				$("#observers").typeahead({
@@ -70,13 +71,8 @@ define([
 					items: Infinity,
 					source: data,
 					jsonSource: data,
-					type: "observers"
+					type: "observersList"
 				});
-   			});
-   			$("#observers").on('focus', function(){
-   				console.log("focus");
-   				$("#observers").typeahead.bind($("#observers"), 'lookup');
-   				$(this).lookup();
    			});
 
 		},
@@ -154,6 +150,7 @@ define([
 			});
 		},
 		validate: function() {
+			console.log("validate called")
 			event.preventDefault();
 			var self = this;
 			var error = false;
