@@ -49,11 +49,11 @@ define([
 		},
 		render: function() {
 
-			console.log("in the litterfallQueryView");
+			console.log("rendering the litterfallQueryView");
 
 			/* populate fields*/
 			this.populateSiteOptions();
-			this.addObserversTypeahead();
+			this.addObserversAutocomplete();
 			this.populateDataOptions();	
 			this.populateTable();
 			var dis = this;		
@@ -84,22 +84,25 @@ define([
 			// bind typeahead change
 			$('#query-options-observers').on('change', function() {
 				// when observers field changed, validation called
-				var obs_to_add = dis.validateObservers();
-				// if validation passes, add the value to the query well
-				if (obs_to_add) {
-					dis.addQueryItem('observer', obs_to_add);
-					console.log($('#query-options-observers').data('typeahead'));
-					$('#query-options-observers').val('');	 // clear the field to the placeholder
-				}
-				
+				//if (dis.validateObservers()) {
+					// if validation passes, add the value to the query well
+					var query_value =  $('#query-options-observers').siblings().find('.active').text();
+					var query_type = 'observer';
+					dis.addQueryItem(query_type, query_value);
+				//}
 			});
-			
 			// start a query to the mongoDB
 			$('#analyze-data').click(this.queryOnSelectedItems);
-			
-			// clear the query well of query items
 			$('#clear-all').click(function() {
 				dis.clearAll(dis)
+			});
+			$('#hide-form').click(function() {
+				if ($("#hide-form").text() == "Hide form"){
+					$("#hide-form").text("Show form");
+				} else {
+					$("#hide-form").text("Hide form");
+				}
+				$(".conditions").toggle();
 			});
 
 			return this;
@@ -132,7 +135,7 @@ define([
 			data_type_options.url = 'data/data_type_options.json';
 
 			var data_type_select = new selectionOptionsView({
-				el: $('#query-options-data-type'),																//populates new selectionOptionsView with locations (sites)
+				el: $('#query-options-type'),																//populates new selectionOptionsView with locations (sites)
 				collection: data_type_options
 			});
 			data_type_options.fetch();
@@ -147,7 +150,7 @@ define([
 				});
 			});
 		},
-		addObserversTypeahead: function() {
+		addObserversAutocomplete: function() {
 			/* initializes and populates the typeahead for observers */
 
 			$.getJSON(app.config.cgiDir + 'litterfall.py?observers=getList', function(data){
@@ -160,7 +163,7 @@ define([
 					items: Infinity,
 					source: data,
 					jsonSource: data,
-					type: "observer"	// this field is used in conditional stuff in app.js (extension of the typeahead prototype) if you edit that!
+					type: "observers"	// this field is used in conditional stuff in app.js (extension of the typeahead prototype) if you edit that!
 				});
    			});
 		},
@@ -182,7 +185,7 @@ define([
 			var query_value = $list_item_clicked.attr("name").toString();
 			query_value = query_value.charAt(0).toUpperCase() + query_value.slice(1).replace("_", " ");
 			var query_type = $list_item_clicked.parent().parent().attr('class').replace('query-options', '').replace('dropdown-menu', '').trim();
-			
+			console.log(query_type);
 			// check if we are adding or removing a query item
 			if ($list_item_clicked.attr('class').search('not-query') !== -1) {
 				// the list item clicked *is not* currently in query (so add it)
@@ -203,7 +206,7 @@ define([
 		addQueryItem: function(query_type, query_value) {
 			var dis = this;
 			// add "All ___" 
-			if (query_value.search("All") != -1) {
+			if (query_value.search("All") != -1 && query_value.search('eproductive') == -1) {
 				
 				// take out any query well items that have same type
 				var $btns_to_remove = $('#query-items-selected > button.'+query_type);
@@ -245,6 +248,7 @@ define([
 			// called when user clicks remove button from an item in the query well (not in dropdown list)
 			// "All ___" was unselected
 			var $to_remove = $('#query-items-selected > .btn-info:contains('+query_value+')');
+			console.log($to_remove);
 			$('#query-options-'+query_type+' > li > a:contains('+query_value+')').removeClass("in-query").addClass("not-query");
 			$to_remove.hide('slow', function() {
 				$to_remove.remove();
@@ -311,25 +315,20 @@ define([
 			console.log(query_string);
 			var row = new reportsView();
 			row.render(query_string);
-		},
+		}
 		
-		validateObservers: function() {
-		
-			//validation of observers so that they can't type in an observer that isn't already in the typeahead source			
+		/* validateObservers: function() {
+			//validation of observers so that they can't type in an observer that isn't already in the typeahead source
+			//NOTE we do need to provide a way for new observers to be added...
+			
 			console.log("in observer validation");
 			
-			// get the array of observers in input box and extract most recently added observer
 			var obs_entered = $('#query-options-observers').val();
-			//console.log(obs_entered);
-
-			// check observer entered against list of observers already existing in database
 			var obs_allowed = $('#query-options-observers').data("typeahead").source;
-			
-			//console.log(obs_entered_array);
 			//console.log(obs_entered);
+			//console.log(obs_allowed);
 			//console.log(obs_allowed.indexOf(obs_entered));
 			
-			// add error flag to input box if observer not allowed
 			if (obs_allowed.indexOf(obs_entered) == -1) {
 				console.log("observer not in database");
 				$('#query-options-observers').parent().addClass("error");
@@ -337,8 +336,8 @@ define([
 			}
 			
 			$('#query-options-observers').parent().removeClass("error");
-			return obs_entered; 	// return the observer that needs to be added to the query well
-		}
+			return true;
+		}*/
 		
 	});
 	

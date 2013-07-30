@@ -137,21 +137,7 @@
 }
 }
 
-#glyphicons-text {
-	background-color: #FFF;
-	position: fixed;
-	bottom: 0;
-	display: none; 
-	margin-bottom: 1px; 
-	margin-left: 25px;
-}
 
-#glyphicons-icon {
-	position: fixed;
-	bottom: 0;
-	margin: 5px;
-	cursor: pointer;
-}
 
 
 /*Add Litterfall Observation*/
@@ -172,11 +158,7 @@
 }
 
 
-
 /*Access Litterfall Data Records*/
-.accesslitter a {
-	cursor: pointer;
-}
 .accesslitter .dropdown-menu, .accesslitter .dropdown-menu.open {
 	display: block;
 	float: none;
@@ -309,12 +291,44 @@
 #query-items-selected > .plot {
 	background-color: #532F64;
 }
-#query-items-selected > .date-begin {
-	background-color: #1ABC9C;
-}
-#query-items-selected > .date-end {
-	background-color: #1ABC9C;
+#query-items-selected > .date-begin, #query-items-selected > .date-end {
+	background-color: #54B48E;
 }
 #query-items-selected > .observer {
 	background-color: #541F14;
+}
+
+.query-options > li > a:hover {
+	background-image: none;
+	cursor: pointer;
+}
+
+#query-options-trap > li > a:hover {
+	background-color: rgb(47, 150, 180);
+}
+#query-options-sky > li > a:hover {
+	background-color: #F5AA1A;
+}
+#query-options-collection_type > li > a:hover {
+	background-color: #BF496A;
+}
+#query-options-precipitation > li > a:hover {
+	background-color: #8A9B0F;
+}
+#query-options-data-type > li > a:hover {
+	background-color: #D35400;
+}
+#query-options-site > li > a:hover {
+	background-color: #0B486B;
+}
+#query-options-plot > li > a:hover {
+	background-color: #532F64;
+}
+#query-options-observers {
+	color: #541F14;
+	border-color: #541F14;
+}
+#date-begin, #date-end {
+	color: #54B48E;
+	border-color: #54B48E;
 }
