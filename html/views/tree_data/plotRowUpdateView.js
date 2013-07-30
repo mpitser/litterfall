@@ -113,7 +113,7 @@ define([
 				'aria-hidden': 'true'
 			}).html('\
 				<div class="modal-header">\
-					<h3>Do you want to continue?</h3>\
+					<h3><i class="icon-large icon-warning-sign"></i> Do you want to continue?</h3>\
 				</div>\
 				<div class="modal-body">\
 					<p>Are you sure you want to delete this tree and all of its data? This action cannot be undone.</p>\

@@ -89,7 +89,7 @@ define([
 				'aria-hidden': 'true'
 			}).html('\
 				<div class="modal-header">\
-					<h3>Clear all data?</h3>\
+					<h3><i class="icon-large icon-warning-sign"></i> Clear all data?</h3>\
 				</div>\
 				<div class="modal-body">\
 					<p>Are you sure you want to clear all of the data you entered for this observation? This action cannot be undone.</p>\
@@ -122,7 +122,7 @@ define([
 				'aria-hidden': 'true'
 			}).html('\
 				<div class="modal-header">\
-					<h3>Clear this trap?</h3>\
+					<h3><i class="icon-large icon-warning-sign"></i> Clear this trap?</h3>\
 				</div>\
 				<div class="modal-body">\
 					<p>Are you sure you want to delete all of the data you entered for this trap? This action cannot be undone.</p>\

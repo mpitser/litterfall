@@ -137,7 +137,21 @@
 }
 }
 
+#glyphicons-text {
+	background-color: #FFF;
+	position: fixed;
+	bottom: 0;
+	display: none; 
+	margin-bottom: 1px; 
+	margin-left: 25px;
+}
 
+#glyphicons-icon {
+	position: fixed;
+	bottom: 0;
+	margin: 5px;
+	cursor: pointer;
+}
 
 
 /*Add Litterfall Observation*/
@@ -186,4 +200,7 @@
 }
 #query-items-selected > .date-end {
 	background-color: #1ABC9C;
+}
+#query-items-selected > .observer {
+	background-color: #541F14;
 }
