@@ -50,7 +50,8 @@
 			<h4>Site</h4>
   				<ul id="query-options-site" class="dropdown-menu query-options site" role="menu" aria-labelledby="dLabel">
     				<!-- dropdown menu links -->
-    				<li><a class='not-query all' name='all_sites'>All Sites<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a class='check-all' name='check-all'>Check All<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a class='clear-all' name='clear-all' style="display:none">Clear All<i class='icon-black icon-remove pull-right'></i></a></li>
   					<li class="divider"></li>
   				</ul>
 			</div>
@@ -59,8 +60,6 @@
   				<h4>Plot</h4>
   				<ul id="query-options-plot" class="dropdown-menu query-options plot" role="menu" aria-labelledby="dLabel">
     				<!-- dropdown menu links -->
-    				<li><a class='not-query all' name='all_plots'>All Plots<i class='icon-black icon-ok pull-right'></i></a></li>
-  					<li class="divider"></li>
     				<li><a name='plot_1' class='not-query plot'>Plot 1<i class='icon-black icon-ok pull-right'></i></a></li>
     				<li><a name='plot_2' class='not-query plot'>Plot 2<i class='icon-black icon-ok pull-right'></i></a></li>
   				</ul>
@@ -72,8 +71,6 @@
   				<h4>Trap</h4>
   				<ul id="query-options-trap" class="dropdown-menu query-options trap" role="menu" aria-labelledby="dLabel">
     				<!-- dropdown menu links -->
-    				<li><a class='not-query all' name='all_traps'>All Traps<i class='icon-black icon-ok pull-right'></i></a></li>
-  					<li class="divider"></li>
     				<li><a name='trap_1' class='not-query trap'>Trap 1<i class='icon-black icon-ok pull-right'></i></a></li>
     				<li><a name='trap_2' class='not-query trap'>Trap 2<i class='icon-black icon-ok pull-right'></i></a></li>
     				<li><a name='trap_3' class='not-query trap'>Trap 3<i class='icon-black icon-ok pull-right'></i></a></li>
@@ -86,8 +83,6 @@
 				<h4>Collection Type</h4>
   				<ul id="query-options-collection_type" class="dropdown-menu query-options collection_type" role="menu" aria-labelledby="dLabel">
     				<!-- dropdown menu links -->
-    				<li><a class='not-query all' name='all_collection_types'>All Collection Types<i class='icon-black icon-ok pull-right'></i></a></li>
-  					<li class="divider"></li>
     				<li><a name='seasonal' class='not-query collection_type'>Seasonal<i class='icon-black icon-ok pull-right'></i></a></li>
     				<li><a name='standing' class='not-query collection_type'>Standing<i class='icon-black icon-ok pull-right'></i></a></li>
   				</ul>
@@ -97,10 +92,12 @@
 			<div class="btn-group-vertical span3">
 				<h4>Data Type</h4>
  				<ul id="query-options-data-type" class="dropdown-menu query-options type" role="menu" aria-labelledby="dLabel">
-  					<li><a class='not-query type all' name='all_data_types'>All Data<i class='icon-black icon-ok pull-right'></i></a></li>
-  					<li><a class='not-query type all' name='all_leaf_data_types'>All Leaf Data<i class='icon-black icon-ok pull-right'></i></a></li>
-  					<li><a class='not-query type all' name='all_nonleaf_data_types'>All Non-Leaf Data<i class='icon-black icon-ok pull-right'></i></a></li>
-  					<li class="divider"></li>
+  					<li><a class='check-all non-leaf' name='check-all-non-leaf'>Check All Non-Leaf Data<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a class='clear-all non-leaf' name='clear-all-non-leaf' style="display:none">Clear All Non-Leaf Data<i class='icon-black icon-remove pull-right'></i></a></li>
+  					<li><a class='check-all leaf' name='check-all-leaf'>Check All Leaf Data<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a class='clear-all leaf' name='clear-all-leaf' style="display:none">Clear All Leaf Data<i class='icon-black icon-remove pull-right'></i></a></li>
+    				<li class="divider"></li>
+  				
     				<!-- dropdown menu links -->
   				</ul>
 			</div>	
@@ -110,8 +107,7 @@
   				<h4>Sky Conditions</h4>
   				<ul id="query-options-sky" class="dropdown-menu query-options sky" role="menu" aria-labelledby="dLabel">
     				<!-- dropdown menu links -->
-    				<li><a class='not-query all' name='all_sky_conditions'>All Sky Conditions<i class='icon-black icon-ok pull-right'></i></a></li>
-  					<li class="divider"></li>
+    				
     				<li><a name='Clear' class='not-query sky'>Clear<i class='icon-black icon-ok pull-right'></i></a></li>
     				<li><a name='Light clouds' class='not-query sky'>Light clouds<i class='icon-black icon-ok pull-right'></i></a></li>
     				<li><a name='Partly cloudy' class='not-query sky'>Partly cloudy<i class='icon-black icon-ok pull-right'></i></a></li>
@@ -122,8 +118,7 @@
   				<h4>Precipitation</h4>
   				<ul id="query-options-precipitation" class="dropdown-menu query-options precipitation" role="menu" aria-labelledby="dLabel">
     				<!-- dropdown menu links -->
-    				<li><a class='not-query all' name='all_precipitation'>All Precipitation<i class='icon-black icon-ok pull-right'></i></a></li>
-  					<li class="divider"></li>
+    				
     				<li><a name='Dry' class='not-query precipitation'>Dry<i class='icon-black icon-ok pull-right'></i></a></li>
     				<li><a name='Rain' class='not-query precipitation'>Rain<i class='icon-black icon-ok pull-right'></i></a></li>
     				<li><a name='Snow' class='not-query precipitation'>Snow<i class='icon-black icon-ok pull-right'></i></a></li>    				
