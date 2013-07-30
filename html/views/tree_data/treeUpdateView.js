@@ -32,7 +32,7 @@ define([
 		',
 		templateUpdate: '\
 		<div id="tree-info">\
-			<button class="btn btn-success btn-mini edit-tree-info-btn">Edit Tree Info</button>\
+			<button class="btn btn-success btn-mini edit-tree-info-btn"><i class="icon-white icon-leaf"></i> Edit Tree Info</button>\
 			<div class="edit-tree-info btn-group">\
 				<button class="btn-save-tree-info btn btn-mini btn-success" type="button">Submit</button>\
 				<button class="btn-cancel-tree-info btn btn-mini btn-danger" type="button">Cancel</button>\
@@ -72,7 +72,7 @@ define([
 			<div class="display-tree-info">Angle: <span class="angle"><%= tree.angle %></span></div>\
 			<div class="display-tree-info">Distance: <span class="distance"><%= tree.distance %></span></div>\
 		<div class="button-row">\
-			<button class="btn-new-observation btn btn-mini btn-success pull-left" type="button">+ New Entry</button>\
+			<button class="btn-new-observation btn btn-mini btn-success pull-left" type="button"><i class="icon-white icon-plus-sign"></i> New Entry</button>\
 		</div>\
 		<table id="tree-observations" class="table-striped tablesorter">\
 			<thead>\
@@ -96,8 +96,8 @@ define([
 				<tr id="entry-<%= index %>">\
 					<td class="btn-column">\
 						<div class="show-obs-info display_cell btn-group">\
-							<button class="btn btn-mini btn-primary edit-existing" type="button">Edit</button>\
-							<button class="btn-delete-observation btn btn-mini btn-warning" type="button">Delete</button>\
+							<button class="btn btn-mini btn-primary edit-existing" type="button"><i class="icon-white icon-edit"></i> Edit</button>\
+							<button class="btn-delete-observation btn btn-mini btn-warning" type="button"><i class="icon-white icon-trash"></i> Delete</button>\
 						</div>\
 						<div class="edit-obs-info edit_cell btn-group">\
 							<button class="btn-save-observation btn btn-mini btn-success" type="button">Submit</button>\
@@ -120,7 +120,7 @@ define([
 			</tbody>\
 			</table>\
 			<div class="button-row">\
-				<button class="btn-new-observation btn btn-mini btn-success pull-left" type="button">+ New Entry</button>\
+				<button class="btn-new-observation btn btn-mini btn-success pull-left" type="button"><i class="icon-white icon-plus-sign"></i> New Entry</button>\
 			</div>\
 		',
 		initialize: function(){
@@ -130,7 +130,7 @@ define([
 		
 			var this_tree = this.model.toJSON();
 			//get the dates in descending order
-			var dates = this_tree.diameter.sort(function(a,b){return (b.year-a.year)});
+			var dates = this_tree.diameter.sort(function(a,b){return (b.date.y-a.date.y)});
 			this_tree.dates_desc = dates;
 			this.$el.html(_.template(this.templateUpdate, {tree: this_tree}));
 			$(".title").text("Updating Tree Data ");

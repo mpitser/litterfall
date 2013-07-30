@@ -32,15 +32,15 @@
   </head>
 
   <body>
-     <div class="container">
+     <div class="container treerecords">
       
   	<div class="site-name"><%= site %></div><div class="plot-number"><%= plot %></div>
       	<h1>Analyzing Data Records <small><%= site %>, Plot <%= plot %></small></h1>
 			<div class="button-row">
-      			<input type="button" class="btn btn-mini btn-primary export pull-right" value="Export Data" rel="tooltip" data-toggle="tooltip" data-placement="top" data-original-title="Export data as a .CSV file">
+			<button class="btn btn-mini btn-primary export pull-right" value="Export Data" rel="tooltip" data-toggle="tooltip" data-placement="top" data-original-title="Export data as a .CSV file"><i class="icon-white icon-download"></i> Export Data </button>
  			</div>
  	     
-    <h3>View data from:
+    <h3>
 		<select id="start-year" class="dropdown"></select>
   		to
   		<select id="end-year" class="dropdown"></select>
@@ -50,7 +50,7 @@
  	<table class="table-striped tablesorter" id="plot-table">
 	<thead>
 		<tr>
-			<th class="{sorter:false} btn-column" rowspan="2"></th>
+			<th class="{sorter:false} btn-column" rowspan="2" style="width: 60px"></th>
 			<th rowspan="2">
 				Tree ID
 			</th>
@@ -78,7 +78,7 @@
 	</table>
 	
 	<div class="button-row">
-	<input type="button" class="btn btn-mini btn-primary export pull-right" value="Export Data" rel="tooltip" data-toggle="tooltip" data-placement="bottom" data-original-title="Export data as a .CSV file">
+			<button class="btn btn-mini btn-primary export pull-right" value="Export Data" rel="tooltip" data-toggle="tooltip" data-placement="top" data-original-title="Export data as a .CSV file"><i class="icon-white icon-download"></i> Export Data </button>
     </div>
     </div> <!-- /container -->
    
