@@ -6,8 +6,8 @@ define([
 	var plotRowReportsView = Backbone.View.extend({
 		tagName: 'tr',
 		template: '\
-			<td class="btn-column">\
-				<button class="btn-tree btn btn-mini btn-primary btn-analyze" type="button">More</button>\
+			<td class="btn-column" style="min-width: 60px">\
+				<button class="btn-tree btn btn-mini btn-primary btn-analyze" type="button"><i class="icon-white icon-eye-open"></i> More</button>\
 			</td>\
 			<td class="tree-id">\
 				<%= tree.full_tree_id %>\

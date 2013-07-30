@@ -9,13 +9,13 @@ define([
 		template:	'\
 			<td>\
 				<div class="btn-group">\
-					<button class="btn-tree btn btn-mini btn-primary btn-update" type="button">Update</button>\
+					<button class="btn-tree btn btn-mini btn-primary btn-update" type="button"><i class="icon-white icon-edit"></i> Update</button>\
 					<button class="btn btn-mini dropdown-toggle btn-primary" data-toggle="dropdown">\
 						<span class="caret"></span>\
 					</button>\
 					<ul class="dropdown-menu">\
-						<li><a style="cursor:pointer;" class="delete-row">Delete</a></li>\
-						<li><a style="cursor:pointer;" class="add-new-sub-tree-from-row">Add a sub-tree</a></li>\
+						<li><a style="cursor:pointer;" class="delete-row"><i class="icon-trash"></i>   Delete</a></li>\
+						<li><a style="cursor:pointer;" class="add-new-sub-tree-from-row"><i class="icon-plus-sign"></i>   Add a sub-tree</a></li>\
 					</ul>\
 				</div>\
 			</td>\
@@ -113,7 +113,7 @@ define([
 				'aria-hidden': 'true'
 			}).html('\
 				<div class="modal-header">\
-					<h3>Do you want to continue?</h3>\
+					<h3><i class="icon-large icon-warning-sign"></i> Do you want to continue?</h3>\
 				</div>\
 				<div class="modal-body">\
 					<p>Are you sure you want to delete this tree and all of its data? This action cannot be undone.</p>\
