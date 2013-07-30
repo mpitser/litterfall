@@ -267,6 +267,22 @@
 }
 }
 
+#glyphicons-text {
+  background-color: #FFF;
+  position: fixed;
+  bottom: 0;
+  display: none; 
+  margin-bottom: 1px; 
+  margin-left: 25px;
+}
+ 
+#glyphicons-icon {
+  position: fixed;
+  bottom: 0;
+  margin: 5px;
+  cursor: pointer;
+}
+ 
 
 /*Litterfall Query Well Buttons*/
 #query-items-selected > .btn {
@@ -332,3 +348,4 @@
 	color: #54B48E;
 	border-color: #54B48E;
 }
+
