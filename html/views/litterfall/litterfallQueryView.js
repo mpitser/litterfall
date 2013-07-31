@@ -272,7 +272,12 @@ define([
 					<a href="#data/litterfall/reports">\
 						<i class="icon-black icon-remove"></i>\
 					</a>\
-				 </button>';
+				</button>';
+				$to_remove = $("#query-items-selected > ." + query_type)
+				$to_remove.hide('slow', function() {
+					$to_remove.remove();
+				});
+				
 			}
 			// add to the query well with animation
 			var $to_add = $(query_template).hide().fadeTo(500, 0.8);
