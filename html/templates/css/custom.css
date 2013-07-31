@@ -434,7 +434,7 @@ input.alert_invalid:focus{
 #query-options-precipitation > li > a:hover {
 	background-color: #8A9B0F;
 }
-#query-options-data-type > li > a:hover {
+#query-options-type > li > a:hover {
 	background-color: #D35400;
 }
 #query-options-site > li > a:hover {
