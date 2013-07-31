@@ -102,14 +102,15 @@ define([
 				dis.clearAll(dis, "all");
 			});
 			$('#hide-form').click(function() {
-				if ($("#hide-form").text() == "Hide form"){
-					$("#hide-form").text("Show form");
-				} else {
-					$("#hide-form").text("Hide form");
-				}
+				$("#hide-form").hide();
+				$("#show-form").show();
 				$(".conditions").toggle();
 			});
-
+			$('#show-form').click(function() {
+				$("#show-form").hide();
+				$("#hide-form").show();
+				$(".conditions").toggle();
+			});
 			return this;
 		},
 		populateSiteOptions: function() {
