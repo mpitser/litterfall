@@ -426,3 +426,7 @@ input.alert_invalid:focus{
 	border-color: #54B48E;
 }
 
+
+.btn-icon {
+	padding-left: 14px;
+}
