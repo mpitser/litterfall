@@ -285,12 +285,10 @@
 }
 }
 
-<<<<<<< HEAD
 .accesslitter .span12 {
 	overflow-x: scroll;
 }
 
-=======
 #glyphicons-text {
   background-color: #FFF;
   position: fixed;
@@ -306,8 +304,6 @@
   margin: 5px;
   cursor: pointer;
 }
- 
->>>>>>> 9ac5a310ac2d19df93b897a3bdfc5f7136f96866
 
 /*Litterfall Query Well Buttons*/
 #query-items-selected > .btn {
