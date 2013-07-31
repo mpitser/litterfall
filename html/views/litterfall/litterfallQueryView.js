@@ -130,11 +130,11 @@ define([
 		
 		populateDataOptions: function() {
 			/* populates Data Type dropdown */			
-				
+			console.log("hello");
 			data_type_options = new selectionOptions({}, { id: "type" } );
 				
 			data_type_options.url = 'data/data_type_options.json';
-
+			console.log(data_type_options);
 			var data_type_select = new selectionOptionsView({
 				el: $('#query-options-type'),																//populates new selectionOptionsView with locations (sites)
 				collection: data_type_options
