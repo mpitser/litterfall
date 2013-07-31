@@ -141,7 +141,7 @@ define([
 			data_type_options.url = 'data/data_type_options.json';
 			console.log(data_type_options);
 			var data_type_select = new selectionOptionsView({
-				el: $('#query-options-data-type'),																//populates new selectionOptionsView with locations (sites)
+				el: $('#query-options-type'),																//populates new selectionOptionsView with locations (sites)
 				collection: data_type_options
 			});
 			data_type_options.fetch();

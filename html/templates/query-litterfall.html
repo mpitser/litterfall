@@ -93,7 +93,7 @@
 		
 			<div class="btn-group-vertical span3">
 				<h4 style="color: #D35400">Data Type</h4>
- 				<ul id="query-options-data-type" class="dropdown-menu query-options type" role="menu" aria-labelledby="dLabel">
+ 				<ul id="query-options-type" class="dropdown-menu query-options type" role="menu" aria-labelledby="dLabel">
   					<li><a class='check-all non-leaf' name='check-all-non-leaf'>Check All Non-Leaf Data<i class='icon-black icon-ok pull-right'></i></a></li>
     				<li><a class='clear-all non-leaf' name='clear-all-non-leaf' style="display:none">Clear All Non-Leaf Data<i class='icon-black icon-remove pull-right'></i></a></li>
   					<li><a class='check-all leaf' name='check-all-leaf'>Check All Leaf Data<i class='icon-black icon-ok pull-right'></i></a></li>
@@ -139,13 +139,11 @@
 		</div>
 	</div>		 
 	<script src="lib/bootstrap-table-nav.js"></script>
-	<div id="none-found" class="alert alert-info" style="display:none">No results found. Try another query.<a class="close none-close">&times;</a></div>
-	<span class="pagination" style="float:left"></span>
+	<br><br><div id="none-found" class="alert alert-info" style="display:none">No results found. Try another query.<a class="close none-close">&times;</a></div>
+	<div>
 	<button class="btn btn-small btn-info" id="hide-empty" style="display:none; float:left">Hide empty columns</button>
-	<button class="btn btn-small btn-info" id="show-empty" style="display:none; float:left">Show empty columns</button>
-	<div id="wrapper" style="width:100%; text-align:center">
-		<img src="icons/waiting.gif" style="display:none" id="spinner"/>
-	</div>
+	<button class="btn btn-small btn-info" id="show-empty" style="display:none; float:left">Show empty columns</button></div><br>
+	<div class="pagination" style="float:left"></div>
 	<div class="span 12" style="overflow: auto; min-width: 1200px; max-width: 1500px">
 	<table class="table-striped tablesorter table-scroll" id="litterfall-table" style="display:none">
 	<thead>
