@@ -84,15 +84,20 @@ define([
 			// bind typeahead change
 			$('#query-options-observers').on('change', function() {
 				// when observers field changed, validation called
-				//if (dis.validateObservers()) {
-					// if validation passes, add the value to the query well
-					var query_value =  $('#query-options-observers').siblings().find('.active').text();
-					var query_type = 'observer';
-					dis.addQueryItem(query_type, query_value);
-				//}
+				var obs_to_add = dis.validateObservers();
+				// if validation passes, add the value to the query well
+				if (obs_to_add) {
+					dis.addQueryItem('observer', obs_to_add);
+					console.log($('#query-options-observers').data('typeahead'));
+					$('#query-options-observers').val('');	 // clear the field to the placeholder
+				}
+				
 			});
+			
 			// start a query to the mongoDB
 			$('#analyze-data').click(this.queryOnSelectedItems);
+			
+			// clear the query well of query items
 			$('#clear-all').click(function() {
 				dis.clearAll(dis, "all");
 			});
@@ -136,7 +141,7 @@ define([
 			data_type_options.url = 'data/data_type_options.json';
 			console.log(data_type_options);
 			var data_type_select = new selectionOptionsView({
-				el: $('#query-options-type'),																//populates new selectionOptionsView with locations (sites)
+				el: $('#query-options-data-type'),																//populates new selectionOptionsView with locations (sites)
 				collection: data_type_options
 			});
 			data_type_options.fetch();
@@ -187,21 +192,40 @@ define([
 						
 			// check for checkall/clearall button click
 			if ($list_item_clicked.hasClass("check-all")) {
-				//toggle from check to clear all
+				
+				/* toggle list item from check all to clear all */
 				$list_item_clicked.hide();
-				$("."+query_type+" > li > a.clear-all").show();
+				if ($list_item_clicked.hasClass("leaf")) {
+					$("."+query_type+" > li > a.clear-all.leaf").show();
+				} else if ($list_item_clicked.hasClass("non-leaf")) {
+					$("."+query_type+" > li > a.clear-all.non-leaf").show();
+				} else {
+					$("."+query_type+" > li > a.clear-all").show();
+				}
 
+				/* add each item to query well and check in the dropdown */
 				$("ul." + query_type + " > li > a.not-query").each(function(index, li) {
-					// add each item to query well and check in the dropdown
 					event.data.thisPtr.addQueryItem(query_type, li.name);
 					$(li).addClass("query").removeClass("not-query");
 				});
+				
 				return;
+				
 			} else if ($list_item_clicked.hasClass("clear-all")) {
-				//toggle from clear to check all
+				
+				/* toggle list item from check all to clear all */
 				$list_item_clicked.hide();
-				$("."+query_type+" > li > a.check-all").show();
+				if ($list_item_clicked.hasClass("leaf")) {
+					$("."+query_type+" > li > a.check-all.leaf").show();
+				} else if ($list_item_clicked.hasClass("non-leaf")) {
+					$("."+query_type+" > li > a.check-all.non-leaf").show();
+				} else {
+					$("."+query_type+" > li > a.check-all").show();
+				}
+				
+				/* clear all items from query well and unclick in dropdowns */
 				event.data.thisPtr.clearAll(event.data.thisPtr, query_type);				
+				
 				return;
 			}
 
@@ -327,29 +351,35 @@ define([
 			console.log(query_string);
 			var row = new reportsView();
 			row.render(query_string);
-		}
+		},
 		
-		/* validateObservers: function() {
-			//validation of observers so that they can't type in an observer that isn't already in the typeahead source
-			//NOTE we do need to provide a way for new observers to be added...
-			
+		validateObservers: function() {
+		
+			//validation of observers so that they can't type in an observer that isn't already in the typeahead source			
 			console.log("in observer validation");
 			
+			// get the array of observers in input box and extract most recently added observer
 			var obs_entered = $('#query-options-observers').val();
-			var obs_allowed = $('#query-options-observers').data("typeahead").source;
 			//console.log(obs_entered);
-			//console.log(obs_allowed);
+
+			// check observer entered against list of observers already existing in database
+			var obs_allowed = $('#query-options-observers').data("typeahead").source;
+			
+			//console.log(obs_entered_array);
+			//console.log(obs_entered);
 			//console.log(obs_allowed.indexOf(obs_entered));
 			
+			// add error flag to input box if observer not allowed
 			if (obs_allowed.indexOf(obs_entered) == -1) {
 				console.log("observer not in database");
+				//TODO fix this so it actually shows some sort of error
 				$('#query-options-observers').parent().addClass("error");
 				return false;
 			}
 			
 			$('#query-options-observers').parent().removeClass("error");
-			return true;
-		}*/
+			return obs_entered; 	// return the observer that needs to be added to the query well
+		}
 		
 	});
 	
