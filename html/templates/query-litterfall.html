@@ -40,8 +40,9 @@
 			<div id="query-items-selected" class="well well-small"><button id="clear-all" class="btn btn-inverse pull-right" type="button">Clear query</button>
 </div>
 		<div style="margin:25px 0px;">
-			<button id="analyze-data"class="btn btn-inverse" type="button"><i class="icon-white icon-search"></i> Analyze data</button>
-			<button id="hide-form" class="btn btn-inverse" type="button">Hide form</button>
+			<button id="analyze-data"class="btn btn-inverse btn-icon" type="button"><i class="icon-white icon-search"></i> Analyze data</button>
+			<button id="hide-form" class="btn btn-inverse" type="button"><i class='icon-white icon-arrow-up'></i> Hide form</button>
+			<button id="show-form" class="btn btn-inverse" type="button" style="display:none"><i class='icon-white icon-arrow-down'></i> Show form</button>
 		</div>
 		</div>
 	<div>
@@ -51,7 +52,8 @@
 			<h4 style="color: #0B486B">Site</h4>
   				<ul id="query-options-site" class="dropdown-menu query-options site" role="menu" aria-labelledby="dLabel">
     				<!-- dropdown menu links -->
-    				<li><a class='not-query all' name='all_sites'>All Sites<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a class='check-all' name='check-all'>Check All<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a class='clear-all' name='clear-all' style="display:none">Clear All<i class='icon-black icon-remove pull-right'></i></a></li>
   					<li class="divider"></li>
   				</ul>
 			</div>
@@ -60,8 +62,6 @@
   				<h4 style="color: #532F64">Plot</h4>
   				<ul id="query-options-plot" class="dropdown-menu query-options plot" role="menu" aria-labelledby="dLabel">
     				<!-- dropdown menu links -->
-    				<li><a class='not-query all' name='all_plots'>All Plots<i class='icon-black icon-ok pull-right'></i></a></li>
-  					<li class="divider"></li>
     				<li><a name='plot_1' class='not-query plot'>Plot 1<i class='icon-black icon-ok pull-right'></i></a></li>
     				<li><a name='plot_2' class='not-query plot'>Plot 2<i class='icon-black icon-ok pull-right'></i></a></li>
   				</ul>
@@ -73,8 +73,6 @@
   				<h4 style="color: rgb(47, 150, 180)">Trap</h4>
   				<ul id="query-options-trap" class="dropdown-menu query-options trap" role="menu" aria-labelledby="dLabel">
     				<!-- dropdown menu links -->
-    				<li><a class='not-query all' name='all_traps'>All Traps<i class='icon-black icon-ok pull-right'></i></a></li>
-  					<li class="divider"></li>
     				<li><a name='trap_1' class='not-query trap'>Trap 1<i class='icon-black icon-ok pull-right'></i></a></li>
     				<li><a name='trap_2' class='not-query trap'>Trap 2<i class='icon-black icon-ok pull-right'></i></a></li>
     				<li><a name='trap_3' class='not-query trap'>Trap 3<i class='icon-black icon-ok pull-right'></i></a></li>
@@ -87,8 +85,6 @@
 				<h4 style="color: #BF496A">Collection Type</h4>
   				<ul id="query-options-collection_type" class="dropdown-menu query-options collection_type" role="menu" aria-labelledby="dLabel">
     				<!-- dropdown menu links -->
-    				<li><a class='not-query all' name='all_collection_types'>All Collection Types<i class='icon-black icon-ok pull-right'></i></a></li>
-  					<li class="divider"></li>
     				<li><a name='seasonal' class='not-query collection_type'>Seasonal<i class='icon-black icon-ok pull-right'></i></a></li>
     				<li><a name='standing' class='not-query collection_type'>Standing<i class='icon-black icon-ok pull-right'></i></a></li>
   				</ul>
@@ -97,11 +93,13 @@
 		
 			<div class="btn-group-vertical span3">
 				<h4 style="color: #D35400">Data Type</h4>
- 				<ul id="query-options-data-type" class="dropdown-menu query-options type" role="menu" aria-labelledby="dLabel">
-  					<li><a class='not-query type all' name='all_data_types'>All Data<i class='icon-black icon-ok pull-right'></i></a></li>
-  					<li><a class='not-query type all' name='all_leaf_data_types'>All Leaf Data<i class='icon-black icon-ok pull-right'></i></a></li>
-  					<li><a class='not-query type all' name='all_nonleaf_data_types'>All Non-Leaf Data<i class='icon-black icon-ok pull-right'></i></a></li>
-  					<li class="divider"></li>
+ 				<ul id="query-options-type" class="dropdown-menu query-options type" role="menu" aria-labelledby="dLabel">
+  					<li><a class='check-all non-leaf' name='check-all-non-leaf'>Check All Non-Leaf Data<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a class='clear-all non-leaf' name='clear-all-non-leaf' style="display:none">Clear All Non-Leaf Data<i class='icon-black icon-remove pull-right'></i></a></li>
+  					<li><a class='check-all leaf' name='check-all-leaf'>Check All Leaf Data<i class='icon-black icon-ok pull-right'></i></a></li>
+    				<li><a class='clear-all leaf' name='clear-all-leaf' style="display:none">Clear All Leaf Data<i class='icon-black icon-remove pull-right'></i></a></li>
+    				<li class="divider"></li>
+  				
     				<!-- dropdown menu links -->
   				</ul>
 			</div>	
@@ -111,8 +109,7 @@
   				<h4 style="color: #F5AA1A">Sky Conditions</h4>
   				<ul id="query-options-sky" class="dropdown-menu query-options sky" role="menu" aria-labelledby="dLabel">
     				<!-- dropdown menu links -->
-    				<li><a class='not-query all' name='all_sky_conditions'>All Sky Conditions<i class='icon-black icon-ok pull-right'></i></a></li>
-  					<li class="divider"></li>
+    				
     				<li><a name='Clear' class='not-query sky'>Clear<i class='icon-black icon-ok pull-right'></i></a></li>
     				<li><a name='Light clouds' class='not-query sky'>Light clouds<i class='icon-black icon-ok pull-right'></i></a></li>
     				<li><a name='Partly cloudy' class='not-query sky'>Partly cloudy<i class='icon-black icon-ok pull-right'></i></a></li>
@@ -123,8 +120,7 @@
   				<h4 style="color: #8A9B0F">Precipitation</h4>
   				<ul id="query-options-precipitation" class="dropdown-menu query-options precipitation" role="menu" aria-labelledby="dLabel">
     				<!-- dropdown menu links -->
-    				<li><a class='not-query all' name='all_precipitation'>All Precipitation<i class='icon-black icon-ok pull-right'></i></a></li>
-  					<li class="divider"></li>
+    				
     				<li><a name='Dry' class='not-query precipitation'>Dry<i class='icon-black icon-ok pull-right'></i></a></li>
     				<li><a name='Rain' class='not-query precipitation'>Rain<i class='icon-black icon-ok pull-right'></i></a></li>
     				<li><a name='Snow' class='not-query precipitation'>Snow<i class='icon-black icon-ok pull-right'></i></a></li>    				
