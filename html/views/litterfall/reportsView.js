@@ -22,11 +22,9 @@ define([
 		render: function(query) {
 			$("#analyze-data").hide();	
 			$("#loading").show();
-			$("#csv").text("Date,Site,Plot,Collection Type,Observer 1,Observer 2,Observer 3,Trap,Acorns reproductive,All reproductive,Twigs,Bark,Miscellaneous");
-			console.log("first")
-			var species_list = ["Acorns reproductive", "All reproductive", "Twigs", "Bark", "Miscellaneous"];
-			$.getJSON("data/tree_species.json", function(data){
-				console.log(data);
+			$("#csv").text("Date,Site,Plot,Collection Type,Observer 1,Observer 2,Observer 3,Trap,");
+			var species_list = [];
+			$.getJSON("data/data_type_options.json", function(data){
 				$.each(data, function(index, value) {
 					species_list.push(value);
 					var prev_csv = $("#csv").text()
