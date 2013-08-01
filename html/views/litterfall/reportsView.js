@@ -24,7 +24,15 @@ define([
 			$("#loading").show();
 			$("#csv").text("Date,Site,Plot,Collection Type,Observer 1,Observer 2,Observer 3,Trap,");
 			var species_list = [];
-			$.getJSON("data/data_type_options.json", function(data){
+			$.getJSON("data/non_leaf_type_options.json", function(data){
+				$.each(data, function(index, value) {
+					species_list.push(value);
+					var prev_csv = $("#csv").text()
+					$("#csv").text(prev_csv + value + ",")
+				});			
+				$("#csv").text($("#csv").text() + "\n");
+			});	
+			$.getJSON("data/leaf_type_options.json", function(data){
 				$.each(data, function(index, value) {
 					species_list.push(value);
 					var prev_csv = $("#csv").text()
