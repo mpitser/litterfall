@@ -36,12 +36,15 @@
 	<div class="container accesslitter">
 
     	<h1>Access Data Records</h1>
+    	<div style="display: none" id="csv">Date,Site,Plot,Collection Type, Observer 1, Observer 2, Observer 3, Trap,</div>
 		<div style="margin:25px 0px;">
 			<div id="query-items-selected" class="well well-small"><button id="clear-all" class="btn btn-inverse pull-right" type="button">Clear query</button>
 </div>
 		<div style="margin:25px 0px;">
 			<button id="analyze-data"class="btn btn-inverse btn-icon" type="button"><i class="icon-white icon-search"></i> Analyze data</button>
+			<button id="loading"class="btn btn-inverse" disabled="disabled" style="display: none;">Loading...</button>
 			<button id="hide-form" class="btn btn-inverse" type="button"><i class='icon-white icon-arrow-up'></i> Hide form</button>
+			<button id="export-data"class="btn btn-inverse btn-icon" type="button" style="display:none"><i class="icon-white icon-download"></i> Export data</button>
 			<button id="show-form" class="btn btn-inverse" type="button" style="display:none"><i class='icon-white icon-arrow-down'></i> Show form</button>
 		</div>
 		</div>

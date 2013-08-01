@@ -453,6 +453,10 @@ input.alert_invalid:focus{
 }
 
 
-.btn-icon {
+.btn-large.btn-icon {
 	padding-left: 14px;
+}
+
+.btn-icon {
+	padding-left: 9px;
 }
