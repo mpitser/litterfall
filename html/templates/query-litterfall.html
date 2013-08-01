@@ -40,7 +40,7 @@
 			<div id="query-items-selected" class="well well-small"><button id="clear-all" class="btn btn-inverse pull-right" type="button">Clear query</button>
 </div>
 		<div style="margin:25px 0px;">
-			<button id="analyze-data"class="btn btn-inverse btn-icon" type="button"><i class="icon-white icon-search"></i> Analyze data</button>
+			<button id="analyze-data"class="btn btn-large btn-inverse btn-icon" type="button"><i class="icon-white icon-search"></i> Analyze data</button>
 			<button id="hide-form" class="btn btn-inverse" type="button"><i class='icon-white icon-arrow-up'></i> Hide form</button>
 			<button id="show-form" class="btn btn-inverse" type="button" style="display:none"><i class='icon-white icon-arrow-down'></i> Show form</button>
 		</div>
@@ -96,12 +96,10 @@
  				<ul id="query-options-type" class="dropdown-menu query-options type" role="menu" aria-labelledby="dLabel">
   					<li><a class='check-all non-leaf' name='check-all-non-leaf'>Check All Non-Leaf Data<i class='icon-black icon-ok pull-right'></i></a></li>
     				<li><a class='clear-all non-leaf' name='clear-all-non-leaf' style="display:none">Clear All Non-Leaf Data<i class='icon-black icon-remove pull-right'></i></a></li>
-  					<li><a class='check-all leaf' name='check-all-leaf'>Check All Leaf Data<i class='icon-black icon-ok pull-right'></i></a></li>
+					<li><a class='check-all leaf' name='check-all-leaf'>Check All Leaf Data<i class='icon-black icon-ok pull-right'></i></a></li>
     				<li><a class='clear-all leaf' name='clear-all-leaf' style="display:none">Clear All Leaf Data<i class='icon-black icon-remove pull-right'></i></a></li>
     				<li class="divider"></li>
-  				
-    				<!-- dropdown menu links -->
-  				</ul>
+    			</ul>
 			</div>	
 			
 		<div class="span2">
@@ -140,13 +138,13 @@
 	</div>		 
 	<script src="lib/bootstrap-table-nav.js"></script>
 	<div id="none-found" class="alert alert-info" style="display:none">No results found. Try another query.<a class="close none-close">&times;</a></div>
-	<span class="pagination"></span>
-	<button class="btn btn-small btn-info" id="hide-empty" style="display:none;">Hide empty columns</button>
-	<button class="btn btn-small btn-info" id="show-empty" style="display:none;">Show empty columns</button>
+	<span class="pagination" style="float:left"></span>
+	<button class="btn btn-small btn-info" id="hide-empty" style="display:none; float:left">Hide empty columns</button>
+	<button class="btn btn-small btn-info" id="show-empty" style="display:none; float:left">Show empty columns</button>
 	<div id="wrapper" style="width:100%; text-align:center">
 		<img src="icons/waiting.gif" style="display:none" id="spinner"/>
 	</div>
-	<div class="span12">
+	<div class="span 12" style="overflow: auto; min-width: 1200px; max-width: 1500px">
 	<table class="table-striped tablesorter table-scroll" id="litterfall-table" style="display:none">
 	<thead>
 		<tr>
@@ -170,6 +168,8 @@
 			<th>
 				Trap
 			</th>
+			<th>
+			</th>
 			<th> Acorns </th>
 			<th> All reproductive </th>
 			<th> Twigs </th>
@@ -182,7 +182,7 @@
 	</table>   
    	 </div>
    	 <footer>
-	<div class="pagination"></div>
+	<div class="pagination" style="margin-top: 20px; margin-left: 30px; float: left; clear: both;"></div>
   	</footer>
   </div> <!-- /container -->
   </body>

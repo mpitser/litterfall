@@ -102,15 +102,14 @@ define([
 				dis.clearAll(dis, "all");
 			});
 			$('#hide-form').click(function() {
-				$("#hide-form").hide();
-				$("#show-form").show();
+				if ($("#hide-form").text() == "Hide form"){
+					$("#hide-form").text("Show form");
+				} else {
+					$("#hide-form").text("Hide form");
+				}
 				$(".conditions").toggle();
 			});
-			$('#show-form').click(function() {
-				$("#show-form").hide();
-				$("#hide-form").show();
-				$(".conditions").toggle();
-			});
+
 			return this;
 		},
 		populateSiteOptions: function() {
@@ -135,17 +134,32 @@ define([
 		
 		populateDataOptions: function() {
 			/* populates Data Type dropdown */			
-			console.log("hello");
-			data_type_options = new selectionOptions({}, { id: "type" } );
+
+			non_leaf_type_options = new selectionOptions({}, { id: "type" } );
 				
-			data_type_options.url = 'data/data_type_options.json';
-			console.log(data_type_options);
-			var data_type_select = new selectionOptionsView({
+			non_leaf_type_options.url = 'data/non_leaf_type_options.json';
+
+			var non_leaf_type_select = new selectionOptionsView({
 				el: $('#query-options-type'),																//populates new selectionOptionsView with locations (sites)
-				collection: data_type_options
+				collection: non_leaf_type_options
 			});
-			data_type_options.fetch();
-			
+			non_leaf_type_options.fetch({success: function(){
+				$('#query-options-type').find(".not-query").addClass("non-leaf");
+				$('#query-options-type').append('<li class="divider"></li>');
+				
+				leaf_type_options = new selectionOptions({}, { id: "type" } );
+				
+				leaf_type_options.url = 'data/leaf_type_options.json';
+
+				var data_type_select = new selectionOptionsView({
+					el: $('#query-options-type'),																//populates new selectionOptionsView with locations (sites)
+					collection: leaf_type_options
+				});
+				leaf_type_options.fetch({success: function(){
+					console.log($('#query-options-type').find(".not-query").not(".non-leaf").addClass("leaf"));
+				}});
+			}});
+
 		},
 		populateTable: function() {
 			var species = ["Acorns reproductive", "All reproductive", "Twigs", "Bark", "Miscellaneous"];
@@ -195,18 +209,21 @@ define([
 				
 				/* toggle list item from check all to clear all */
 				$list_item_clicked.hide();
+				var data_type = "";
 				if ($list_item_clicked.hasClass("leaf")) {
 					$("."+query_type+" > li > a.clear-all.leaf").show();
+					data_type = ".leaf";
 				} else if ($list_item_clicked.hasClass("non-leaf")) {
 					$("."+query_type+" > li > a.clear-all.non-leaf").show();
+					data_type = ".non-leaf";
 				} else {
 					$("."+query_type+" > li > a.clear-all").show();
 				}
 
 				/* add each item to query well and check in the dropdown */
-				$("ul." + query_type + " > li > a.not-query").each(function(index, li) {
+				$("ul." + query_type + " > li > a.not-query" + data_type).each(function(index, li) {
 					event.data.thisPtr.addQueryItem(query_type, li.name);
-					$(li).addClass("query").removeClass("not-query");
+					$(li).addClass("in-query").removeClass("not-query");
 				});
 				
 				return;
@@ -217,6 +234,8 @@ define([
 				$list_item_clicked.hide();
 				if ($list_item_clicked.hasClass("leaf")) {
 					$("."+query_type+" > li > a.check-all.leaf").show();
+					$(".leaf.in-query").removeClass("in-query").addClass("not-query");
+
 				} else if ($list_item_clicked.hasClass("non-leaf")) {
 					$("."+query_type+" > li > a.check-all.non-leaf").show();
 				} else {
