@@ -15,11 +15,11 @@ define([
     		var parsed_options = [];												
     		for (element in response){											//for objects within JSON return object
     				parsed_options.push({										//for Backbone's use, stores object from JSON information as key:value pair (object)
-    					value: response[element],
+    					value: response[element].charAt(0).toUpperCase() + response[element].slice(1),
     					name: response[element].charAt(0).toUpperCase() + response[element].slice(1),
     				});
-
     		}
+    		console.log("selectionoptions");
     		console.log(parsed_options);
     		return parsed_options;
     	}

@@ -4,6 +4,7 @@
 	'backbone',
 	'models/tree_data/singleOption',
 	'collections/tree_data/selectionOptions',
+	'collections/litterfall/selectionOptions',
 	'views/tree_data/selectionOptionsView',
 	'views/litterfall/litterfallQueryView',
 	'collections/tree_data/Plot',
@@ -11,7 +12,7 @@
 	'models/litterfall/newObservation.js',
 	'views/litterfall/newObservationView.js',
 	'models/litterfall/litterfallQuery'
-], function($, _, Backbone, singleOption, selectionOptions, selectionOptionsView, litterfallQueryView, Plot, Tree, newObservation, newObservationView, litterfallQuery) {
+], function($, _, Backbone, singleOption, selectionOptions, selectionOptionsLitterfall, selectionOptionsView, litterfallQueryView, Plot, Tree, newObservation, newObservationView, litterfallQuery) {
 
 	var AppRouter = Backbone.Router.extend({
 			routes: {
@@ -100,12 +101,13 @@
 					model: new_obs,
 					el: this
 				});
-				location_options = new selectionOptions;
+				location_options = new selectionOptionsLitterfall;
 				location_options.url = app.config.cgiDir + "tree_data.py?site=all";						//creates list with all possible locations
 				location_select = new selectionOptionsView({
 					el: $('#site'),																//populates new selectionOptionsView with locations (sites)
 					collection: location_options
 				});
+				console.log(location_options);
 				location_options.fetch();
 			});
 		});
@@ -121,7 +123,7 @@
 					model: new_obs,
 					el: this
 				});
-				location_options = new selectionOptions;
+				location_options = new selectionOptionsLitterfall;
 				location_options.url = app.config.cgiDir + "tree_data.py?site=all";						//creates list with all possible locations
 				location_select = new selectionOptionsView({
 					el: $('#site'),																//populates new selectionOptionsView with locations (sites)

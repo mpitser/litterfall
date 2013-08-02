@@ -44,14 +44,11 @@ define([
 				$(".save-success").hide();
 			});	
 			this.addAutocomplete();
-			console.log(this.model.get("_id").$oid);
 			if (this.model.get("_id").$oid != undefined) {
-				console.log("editing not adding");
 				this.renderEdit();
 			}
 		},
 		renderEdit: function() {
-			console.log("hi");
 			$("h2").text("Edit Observation in the Litterfall Database");
 			$(".btn-save").text("Update");
 			$.getJSON('cgi-bin/litterfall.py?oid='+ this.model.get("_id").$oid, function(data){
@@ -60,13 +57,14 @@ define([
 				$('.' + value.site).attr("selected", "selected");
 				$('.observers').val(value.observers);
 				$('.notes').val(value.notes);
-				$("#site").val(value.site.substr(0,1).toLowerCase() + value.site.substr(1));
+				$("#site").val(value.site);
 				$("#plot").val(value.plot);
-				$("#precipitation").val(value.weather.precipitation);
-				$("#sky").val(value.weather.sky);
+				if (value.weather != undefined) {
+					$("#precipitation").val(value.weather.precipitation);
+					$("#sky").val(value.weather.sky);
+				}
 				$("#type").val(value.collection_type);
 				$.each(value.trap_data, function(index, val) {
-					console.log($('#'+val.type.replace(" ", "_") + val.trap));
 					$('#'+val.type.replace(" ", "_") + val.trap).val(val.value);
 				});
 			});	
