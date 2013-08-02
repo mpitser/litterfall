@@ -47,8 +47,7 @@ define([
 		initialize: function(){	
 			this.render();	
 		},
-		render: function() {
-
+		render: function() {			
 			console.log("rendering the litterfallQueryView");
 
 			/* populate fields*/
@@ -131,7 +130,12 @@ define([
 				collection: location_options
 			});
 						
-			location_options.fetch();
+			location_options.fetch({success: function(){
+				if (navigator.userAgent.indexOf("fox") != -1) {
+					console.log("You should use a better browser.");
+					$(".icon-ok").removeClass("pull-right");
+				}
+			}});
 		},
 		
 		populateDataOptions: function() {
@@ -158,10 +162,13 @@ define([
 					collection: leaf_type_options
 				});
 				leaf_type_options.fetch({success: function(){
-					console.log($('#query-options-type').find(".not-query").not(".non-leaf").addClass("leaf"));
+					console.log($('#query-options-type').find(".not-query").not(".non-leaf").addClass("leaf"));			
+					if (navigator.userAgent.indexOf("fox") != -1) {
+						console.log("You should use a better browser.");
+						$(".icon-ok").removeClass("pull-right");
+					}
 				}});
 			}});
-
 		},
 		populateTable: function() {
 			var species = ["Acorns reproductive", "All reproductive", "Twigs", "Bark", "Miscellaneous"];
