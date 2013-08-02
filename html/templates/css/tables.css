@@ -115,49 +115,49 @@ button a, button a:hover {
 .table-scroll tr td:first-child, .table-scroll tr th:first-child{
 	position: absolute;
 	margin-left: -1px;
-	width: 75px;
+	width: 60px;
 }
 .table-scroll tr td:nth-child(2), .table-scroll tr th:nth-child(2){
 	position: absolute;
-	margin-left: 85px;
+	margin-left: 70px;
 	width: 80px;
 }
 .table-scroll tr td:nth-child(3), .table-scroll tr th:nth-child(3){
 	position: absolute;
-	margin-left: 175px;
+	margin-left: 160px;
 	width: 80px;
 }
 .table-scroll tr td:nth-child(4), .table-scroll tr th:nth-child(4){
 	position: absolute;
-	margin-left: 265px;
+	margin-left: 250px;
 	width: 45px;
 }
 .table-scroll tr td:nth-child(5), .table-scroll tr th:nth-child(5){
 	position: absolute;
-	margin-left: 320px;
+	margin-left: 305px;
 	width: 75px;
 }
 .table-scroll tr td:nth-child(6), .table-scroll tr th:nth-child(6){
 	position: absolute;
-	margin-left: 405px;
+	margin-left: 390px;
 	width: 120px;
 }
 .table-scroll tr td:nth-child(7), .table-scroll tr th:nth-child(7){
 	position: absolute;
-	margin-left: 535px;
+	margin-left: 520px;
 	width: 190px;
 	border-right: 2px dashed hsl(0, 0%, 87%);
 }
 .table-scroll tr td:nth-child(8), .table-scroll tr th:nth-child(8){
 	position: absolute;
-	margin-left: 735px;
+	margin-left: 720px;
 	width: 45px;
 	border-right: 2px dashed hsl(0, 0%, 87%);
 }
 .table-scroll tr td:nth-child(9), .table-scroll tr th:nth-child(9){
 	position: static;
-	max-width: 775px;
-	min-width: 775px;
+	max-width: 760px;
+	min-width: 760px;
 	z-index: -1;
 	border-right: 2px dashed hsl(0, 0%, 87%);
 	border-left: 0px;

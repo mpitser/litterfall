@@ -36,6 +36,7 @@ define([
 					$(".ui-datepicker a").removeAttr("href");
 				}
 			});
+			$(".date-picker").
 			$(".btn-save").click(self.save);
 			$(".clear").click(this.clear);
 			$(".clearall").click(this.clearAll);
@@ -57,7 +58,6 @@ define([
 				$('.' + value.site).attr("selected", "selected");
 				$('.observers').val(value.observers);
 				$('.notes').val(value.notes);
-				$("#site").val(value.site);
 				$("#plot").val(value.plot);
 				if (value.weather != undefined) {
 					$("#precipitation").val(value.weather.precipitation);
@@ -66,7 +66,9 @@ define([
 				$("#type").val(value.collection_type);
 				$.each(value.trap_data, function(index, val) {
 					$('#'+val.type.replace(" ", "_") + val.trap).val(val.value);
-				});
+				});				
+				$("#site").val(value.site);
+
 			});	
 		},
 		addValidate: function() {
@@ -261,6 +263,7 @@ define([
 				console.log(this.model.attributes);
 				$('html, body').animate({scrollTop: 0}, 300);
 				$(".btn-save").text("Update");
+				$("h2").text("Edit Observation in the Litterfall Database");
 				$("#obs-info").append("<div class='alert alert-success save-success'>Observation saved successfully!<a class='close'>&times;</a></div>");
 			}
 		}

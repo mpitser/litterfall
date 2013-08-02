@@ -45,10 +45,11 @@ define([
 			$.getJSON(query, function(data){
 				var time = 100;
 				$.each(data, function(index, value) {
+					console.log(value.observers);
 					var date_formatted = toFormattedDate(value.date);
 					var regex = new RegExp(",","g")
 					var observers = value.observers.toString().replace(regex, ", ");
-					$("#litterfall-table").append("<tr class='obs"+index+"'><td><button class='btn btn-mini btn-primary edit-obs' id='obs" + value["_id"]["$oid"] + "'><i class='icon-white icon-edit'></i> Update</button></td><td>"+date_formatted+"</td><td>"+value.site+"</td><td>"+value.plot+"</td><td>"+value.collection_type+"</td><td></td><td>"+observers+"</td><td></td><td>" + value["_id"]["$oid"] + "</td></tr>");
+					$("#litterfall-table").append("<tr class='obs"+index+"'><td><button class='btn btn-mini btn-primary edit-obs' id='obs" + value["_id"]["$oid"] + "'><i class='icon-white icon-edit'></i> Edit</button></td><td>"+date_formatted+"</td><td>"+value.site+"</td><td>"+value.plot+"</td><td>"+value.collection_type+"</td><td></td><td>"+observers+"</td><td></td><td>" + value["_id"]["$oid"] + "</td></tr>");
 					for (var i = 5; i > 0; i--) {
 						$(".obs"+index).after("<tr class='obs"+index+"trap"+i+"'><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>"+i+"</td><td></td></tr>");
 						var prev_csv = $("#csv").text()

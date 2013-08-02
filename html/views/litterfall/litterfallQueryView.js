@@ -286,7 +286,6 @@ define([
 						<i class="icon-black icon-remove"></i>\
 					</a>\
 				 </button>';
-			console.log(typeof(query_value));
 			if (query_type.indexOf("date") != -1){
 				query_template = '<button class="btn btn-info query-item ' + query_type + '" disabled="disabled" value="'+ query_value.substring(query_value.length-10, query_value.length) +'">\
 					' + query_value + '\
@@ -359,7 +358,7 @@ define([
 					query_string += "&trap=" + ($(value).val().replace("Trap ", ""));
 				});	
 			}			
-			var types = ["site", "date-begin", "date-end", "date", "observers", "type", "collection_type"];
+			var types = ["site", "date-begin", "date-end", "date", "observer", "type", "collection_type"];
 			for (var i = 0; i < 9; i++) {
 				var type = types[i];
 				if ($(document).find(".query-item." + type) != []) {
