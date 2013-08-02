@@ -30,6 +30,16 @@
 
     
     <div class="jumbotron masthead">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script>
+  	  	$(document).ready(function() {
+    		$(".jumbotron").css("height", $(window).height() - 150);
+    		$(window).resize(function() {
+    			$(".jumbotron").css("height", $(window).height() - 150);
+    		});
+    	});
+    	
+    </script>
 		<div class="container">
 			<h1>Crum Woods</h1>
 <h2>Above and Belowground Productivity Database</h2>
