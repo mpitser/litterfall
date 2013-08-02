@@ -95,6 +95,10 @@ button a, button a:hover {
 	display: none;
 }
 
+.table-frame {
+	margin-left: 100px;
+}
+
 .table-scroll tr td, .table-scroll tr th {
 	border: 1px solid hsl(0, 0%, 87%);
 	width: 100px;
@@ -115,43 +119,49 @@ button a, button a:hover {
 }
 .table-scroll tr td:nth-child(2), .table-scroll tr th:nth-child(2){
 	position: absolute;
-	margin-left: 75px;
-	width: 100px;
+	margin-left: 85px;
+	width: 80px;
 }
 .table-scroll tr td:nth-child(3), .table-scroll tr th:nth-child(3){
 	position: absolute;
 	margin-left: 175px;
-	width: 75px;
+	width: 80px;
 }
 .table-scroll tr td:nth-child(4), .table-scroll tr th:nth-child(4){
 	position: absolute;
-	margin-left: 250px;
-	width: 80px;
+	margin-left: 265px;
+	width: 45px;
 }
 .table-scroll tr td:nth-child(5), .table-scroll tr th:nth-child(5){
 	position: absolute;
-	margin-left: 350px;
-	width: 100px;
+	margin-left: 320px;
+	width: 75px;
 }
 .table-scroll tr td:nth-child(6), .table-scroll tr th:nth-child(6){
 	position: absolute;
-	margin-left: 450px;
-	width: 200px;
+	margin-left: 405px;
+	width: 120px;
 }
 .table-scroll tr td:nth-child(7), .table-scroll tr th:nth-child(7){
 	position: absolute;
-	margin-left: 670px;
-	width: 70px;
+	margin-left: 535px;
+	width: 190px;
 	border-right: 2px dashed hsl(0, 0%, 87%);
 }
 .table-scroll tr td:nth-child(8), .table-scroll tr th:nth-child(8){
+	position: absolute;
+	margin-left: 735px;
+	width: 45px;
+	border-right: 2px dashed hsl(0, 0%, 87%);
+}
+.table-scroll tr td:nth-child(9), .table-scroll tr th:nth-child(9){
 	position: static;
-	max-width: 739px;
-	min-width: 739px;
+	max-width: 775px;
+	min-width: 775px;
 	z-index: -1;
 	border-right: 2px dashed hsl(0, 0%, 87%);
 	border-left: 0px;
 }
-.table-scroll tr td:nth-child(9), .table-scroll tr th:nth-child(9){
+.table-scroll tr td:nth-child(10), .table-scroll tr th:nth-child(9){
 	border-left: 2px dashed hsl(0, 0%, 87%);
 }
