@@ -338,6 +338,21 @@ define([
 				$new_entry_row.find(".edit_cell.diameter :input").addClass("to_validate");
 				dis.validateField();
 			});
+			$row_to_edit.find(".status.alive").on("click", function() {
+				console.log("click allive");
+				$row_to_edit.find(".status.alive").addClass("to_validate");
+				dis.validateField();
+			});
+			$row_to_edit.find(".status.dead_standing").on("click", function() {
+				console.log("click dead standing");			
+				$row_to_edit.find(".status.dead_standing").addClass("to_validate");
+				dis.validateField();
+			});
+			$row_to_edit.find(".status.dead_fallen").on("click", function() {
+				console.log("click dead fallen");
+				$row_to_edit.find(".status.dead_fallen").parent().addClass("to_validate");
+				dis.validateField();
+			});
 			
 		},
 
@@ -393,6 +408,21 @@ define([
 				$row_to_edit.find(".edit_cell.diameter :input").addClass("to_validate");
 				dis.validateField();
 			});
+			$row_to_edit.find(".status.alive").on("click", function() {
+				console.log("click allive");
+				$row_to_edit.find(".status.alive").addClass("to_validate");
+				dis.validateField();
+			});
+			$row_to_edit.find(".status.dead_standing").on("click", function() {
+				console.log("click dead standing");			
+				$row_to_edit.find(".status.dead_standing").addClass("to_validate");
+				dis.validateField();
+			});
+			$row_to_edit.find(".status.dead_fallen").on("click", function() {
+				console.log("click dead fallen");
+				$row_to_edit.find(".status.dead_fallen").parent().addClass("to_validate");
+				dis.validateField();
+			});
 			
 		},
 
@@ -422,6 +452,11 @@ define([
 			}
 			$row_to_save.find(".edit_cell.diameter :input").addClass("to_validate");
 			if (! this.validateField()) {
+				return;
+			}
+			$row_to_save.find(".status.active").addClass("to_validate");
+			if (! this.validateField()) {
+				console.log("lame");
 				return;
 			}
 			
@@ -562,6 +597,7 @@ define([
 			var field_to_validate = current_row.find(".to_validate").parent().attr("class").replace("to_validate", "").replace("display_cell", "").replace("edit_cell", "").replace("show-obs-info", "").replace("edit-obs-info", "").trim();
 
 			var error_message = false;	// on a validation error this is populated with string to display
+			var status_error_message = false;
 			var field_to_highlight;		
 			
 			//if date field lost focus 
@@ -576,6 +612,8 @@ define([
 			} else if (field_to_validate == "diameter"){
 				error_message = this.validateDiameter(current_row);
 				if (error_message) {field_to_highlight="diameter"; console.log("didnt pass");}
+			} else if (field_to_validate.search("status") !== -1) {
+				status_error_message = this.validateStatus(current_row);
 			} else {
 				// field left was comments, which don't need to be validated (and should be allowed to be empty!)
 				return true;
@@ -589,6 +627,11 @@ define([
 				$(".edit_cell."+field_to_highlight+" :input" ).tooltip("show");
 				$(".edit_cell."+field_to_highlight+" :input" ).addClass("alert_invalid");	// highlight invalid field
 				
+				current_row.find(".to_validate").removeClass("to_validate");
+				return false;
+			} else if (status_error_message) {	// if there is an error in validation of the status buttons
+				console.log(status_error_message);
+				current_row.find(".btn-group.status").tooltip('destroy').tooltip({title: status_error_message}).tooltip('show');
 				current_row.find(".to_validate").removeClass("to_validate");
 				return false;
 			} else {
@@ -681,6 +724,26 @@ define([
 			
 			return false;
 			
+		},
+		
+		validateStatus: function($current_row) {
+			console.log("in validate status");
+			//TODO: get the most recent status.
+
+			var last_known_status = (this.model.get("diameter")[0] !== undefined) ? this.model.get("diameter")[0].status : "alive";
+			console.log(last_known_status);
+
+			var entered_status = $current_row.find(".status.to_validate").val();
+			console.log(entered_status);
+
+			if (entered_status == "alive" && (last_known_status == "dead_standing" || last_known_status == "dead_fallen")) {
+				return "A dead tree doesn't usually come back to life... are you sure it is alive now???";
+			} else if (entered_status == "dead_standing" && last_known_status == "dead_fallen") {
+				return "A fallen tree doesn't usually stand itself back up... are you sure you are recording it correctly?";
+			} else {
+				return false;
+			}
+
 		},
 
 		getAllObservers: function() {
