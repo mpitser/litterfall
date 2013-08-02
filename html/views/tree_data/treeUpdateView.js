@@ -737,9 +737,9 @@ define([
 			console.log(entered_status);
 
 			if (entered_status == "alive" && (last_known_status == "dead_standing" || last_known_status == "dead_fallen")) {
-				return "A dead tree doesn't usually come back to life... are you sure it is alive now???";
+				return "A dead tree doesn't usually come back to life... are you sure it is alive now???  If you are sure, go back and edit the previous data entries in error as well.";
 			} else if (entered_status == "dead_standing" && last_known_status == "dead_fallen") {
-				return "A fallen tree doesn't usually stand itself back up... are you sure you are recording it correctly?";
+				return "A fallen tree doesn't usually stand itself back up... are you sure you are recording it correctly?  If so, go back and edit the previous data entries in error as well.";
 			} else {
 				return false;
 			}
