@@ -36,7 +36,11 @@ define([
 					$(".ui-datepicker a").removeAttr("href");
 				}
 			});
-			$(".date-picker").
+			var today = new Date();
+			today = (today.getMonth() + 1) + "/" + today.getDate() +  "/" + today.getFullYear();
+			//console.log(today);
+			
+			$("#date").val(today);
 			$(".btn-save").click(self.save);
 			$(".clear").click(this.clear);
 			$(".clearall").click(this.clearAll);
@@ -45,7 +49,7 @@ define([
 				$(".save-success").hide();
 			});	
 			this.addAutocomplete();
-			if (this.model.get("_id").$oid != undefined) {
+			if (this.model.get("_id") != undefined) {
 				this.renderEdit();
 			}
 		},
