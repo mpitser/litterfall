@@ -320,7 +320,7 @@ define([
 			var all_observers = this.getAllObservers();
 			$new_entry_row.find(".edit_cell.observers :input").typeahead({
 				source: all_observers,
-				type: 'observers'
+				type: 'observersList'
 			});
 			
 			
@@ -373,7 +373,7 @@ define([
 			var all_observers = this.getAllObservers();
 			$row_to_edit.find(".edit_cell.observers :input").typeahead({
 				source: all_observers,
-				type: 'observers'
+				type: 'observersList'
 			});
 			$(".already").remove();
 			
@@ -687,7 +687,7 @@ define([
 			//finds all observers that have been previously entered into the database
 			var observers_array = [];
 			
-			$.getJSON(app.config.cgiDir + 'tree_data.py?site=allObservers', function(data) {
+			$.getJSON(app.config.cgiDir + 'tree_data.py?observers=getList', function(data) {
 				
 				for (i in data) {
 					observers_array.push(data[i]);
