@@ -20,7 +20,7 @@ define([
 				$.each(data, function(index, val) {
 					new_row = "<tr><td class='sample-type' id='" + val + "'>"+ val + " leaves</td>";
 					for (var i = 1; i < 6; i++)  {
-						new_row += "<td class='data-entry'><input type='text' size=1 name='" + val + i + "'class='data-leaf input-small'></td>";
+						new_row += "<td class='data-entry'><input type='text' size=1 id='" + val.replace(" ", "_") + i + "'class='data-leaf input-small'></td>";
 					}
 					$("#leaf-table").append(new_row);
 				});
@@ -44,7 +44,32 @@ define([
 				$(".save-success").hide();
 			});	
 			this.addAutocomplete();
-
+			console.log(this.model.get("_id").$oid);
+			if (this.model.get("_id").$oid != undefined) {
+				console.log("editing not adding");
+				this.renderEdit();
+			}
+		},
+		renderEdit: function() {
+			console.log("hi");
+			$("h2").text("Edit Observation in the Litterfall Database");
+			$(".btn-save").text("Update");
+			$.getJSON('cgi-bin/litterfall.py?oid='+ this.model.get("_id").$oid, function(data){
+				var value = data[0];
+				$('.date-picker').val(toFormattedDate(value.date));
+				$('.' + value.site).attr("selected", "selected");
+				$('.observers').val(value.observers);
+				$('.notes').val(value.notes);
+				$("#site").val(value.site.substr(0,1).toLowerCase() + value.site.substr(1));
+				$("#plot").val(value.plot);
+				$("#precipitation").val(value.weather.precipitation);
+				$("#sky").val(value.weather.sky);
+				$("#type").val(value.collection_type);
+				$.each(value.trap_data, function(index, val) {
+					console.log($('#'+val.type.replace(" ", "_") + val.trap));
+					$('#'+val.type.replace(" ", "_") + val.trap).val(val.value);
+				});
+			});	
 		},
 		addValidate: function() {
 			$("input").blur(this.check);
@@ -200,12 +225,12 @@ define([
 				trap_data = [];
 				$.each($(".data-leaf"), function(index, td){
 					if (td.value != "" && !isNaN(td.value)) {
-						trap_data.push({'material': 'leaf', 'value': parseFloat(td.value), 'type': td.name.substring(0, td.name.length-1), 'trap': parseInt(td.name.substring(td.name.length-1, td.name.length))});
+						trap_data.push({'material': 'leaf', 'value': parseFloat(td.value), 'type': td.id.substring(0, td.id.length-1).replace("_", " "), 'trap': parseInt(td.id.substring(td.id.length-1, td.id.length))});
 					}
 				});
 				$.each($(".data-non-leaf"), function(index, td){
 					if (td.value != "" && !isNaN(td.value)) {
-						trap_data.push({'material': 'non-leaf', 'value': parseFloat(td.value), 'type': td.name.substring(0, td.name.length-1), 'trap': parseInt(td.name.substring(td.name.length-1, td.name.length))});
+						trap_data.push({'material': 'non-leaf', 'value': parseFloat(td.value), 'type': td.id.substring(0, td.id.length-1).replace("_", " "), 'trap': parseInt(td.id.substring(td.id.length-1, td.id.length))});
 					}
 				});
 				if (trap_data.length == 0 && $(".trap-warning").css('display') == 'none') {
@@ -222,6 +247,7 @@ define([
 				var site = $('#site').val()
 				site = site.charAt(0).toUpperCase() + site.slice(1);
 				var date = new Date($("#date").val());
+			
 				new_obs = ({
 					site: site,
 					plot: parseInt($('#plot').val()),
@@ -232,16 +258,12 @@ define([
 					trap_data: trap_data,
 					notes: $("#notes").val()
 				});
-				console.log(new_obs);
 				this.model.url = app.config.cgiDir + 'litterfall.py';
 				this.model.save(new_obs);
-				location.reload();
-				$('html, body').animate({scrollTop: 0}, 300)
-				$(".save-success").show();
-				$(".placeholder").attr("selected", "selected");
-				$(".trap-warning").hide();
-				$("input").val("");
-				$("textarea").val("");
+				console.log(this.model.attributes);
+				$('html, body').animate({scrollTop: 0}, 300);
+				$(".btn-save").text("Update");
+				$("#obs-info").append("<div class='alert alert-success save-success'>Observation saved successfully!<a class='close'>&times;</a></div>");
 			}
 		}
 	

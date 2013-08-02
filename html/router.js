@@ -20,6 +20,7 @@
 				"data/litterfall/query": "litterfallQuery",
 				"data/litterfall/add": "litterfallAddObservation",
 				"data/litterfall/reports":"accessLitterfallReports",
+				"data/litterfall/edit/:id": "litterfallEditObservation",
 				"data/trees/reports/site/:location/plot/:plot": "goToReportsPlot",
 				"data/trees/update/site/:location/plot/:plot": "goToUpdatePlot",
 				"data/trees/:mode/site/:location/plot/:plot/treeid/:tree_id(/subtreeid/:sub_tree_id)": "goToTree",
@@ -95,6 +96,27 @@
 			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){
 				$('#main').html(templateHTML);
 				new_obs = new newObservation;
+				new_obs_view = new newObservationView({
+					model: new_obs,
+					el: this
+				});
+				location_options = new selectionOptions;
+				location_options.url = app.config.cgiDir + "tree_data.py?site=all";						//creates list with all possible locations
+				location_select = new selectionOptionsView({
+					el: $('#site'),																//populates new selectionOptionsView with locations (sites)
+					collection: location_options
+				});
+				location_options.fetch();
+			});
+		});
+		
+		app_router.on('route:litterfallEditObservation', function(id) {
+			$(".litterfall").addClass("active");
+			$(".litterfall").siblings().removeClass("active");
+			var template_file = 'litterfall-add-observation.html';
+			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){
+				$('#main').html(templateHTML);
+				new_obs = new newObservation({"_id": {"$oid": id}});
 				new_obs_view = new newObservationView({
 					model: new_obs,
 					el: this

@@ -48,9 +48,9 @@ define([
 					var date_formatted = toFormattedDate(value.date);
 					var regex = new RegExp(",","g")
 					var observers = value.observers.toString().replace(regex, ", ");
-					$("#litterfall-table").append("<tr class='obs"+index+"'><td>"+date_formatted+"</td><td>"+value.site+"</td><td>"+value.plot+"</td><td>"+value.collection_type+"</td><td></td><td>"+observers+"</td><td></td><td></td></tr>");
+					$("#litterfall-table").append("<tr class='obs"+index+"'><td><button class='btn btn-mini btn-primary edit-obs' id='obs" + value["_id"]["$oid"] + "'><i class='icon-white icon-edit'></i> Update</button></td><td>"+date_formatted+"</td><td>"+value.site+"</td><td>"+value.plot+"</td><td>"+value.collection_type+"</td><td></td><td>"+observers+"</td><td></td><td>" + value["_id"]["$oid"] + "</td></tr>");
 					for (var i = 5; i > 0; i--) {
-						$(".obs"+index).after("<tr class='obs"+index+"trap"+i+"'><td></td><td></td><td></td><td></td><td></td><td></td><td>"+i+"</td><td></td></tr>");
+						$(".obs"+index).after("<tr class='obs"+index+"trap"+i+"'><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>"+i+"</td><td></td></tr>");
 						var prev_csv = $("#csv").text()
 						var csv_line = date_formatted + "," + value.site + "," + value.plot + "," + value.collection_type + "," + value.observers + "," 
 						for (j = 0; j < 3 - value.observers.length; j++){
@@ -110,8 +110,11 @@ define([
 				//$("#litterfall-table").tablesorter();
 				console.log("finished getJSON");
 				$("#analyze-data").show();
-				$("#loading").hide();
-
+				$("#loading").hide();			
+				$(".edit-obs").click(function() {
+					console.log("edit obs?");
+					dis.editObservation(this);
+				});
 			});			
 
 			$(".none-close").click(function() {
@@ -133,6 +136,7 @@ define([
 			$("#export-data").click(function() {
 				dis.exportData();
 			});
+
 			
 		},
 
@@ -207,7 +211,11 @@ define([
 	
 				form.submit();
 			}, 50);
-			
+    	},
+    	editObservation: function(btn) {
+    		console.log(btn);
+    		console.log($(btn).attr("id"));
+    		document.location.hash = "data/litterfall/edit/" + $(btn).attr("id").replace("obs", "");
     	}
 
 	});		

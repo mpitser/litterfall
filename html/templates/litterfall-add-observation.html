@@ -35,7 +35,9 @@
     <div class="container newobs">
       <h2>Add New Observation to Litterfall Database</h2>
     <div class="record-details">
+    <p id="id" style="display: none;"></p>
     <form class="record-details">
+    	<div id="obs-info">
     	<input id="date" type="text" class="input date-picker input-medium" placeholder="Enter date..."></input>
     	<select id="site" class="site select">
     		<option class="placeholder">Choose site...</option></select>
@@ -61,9 +63,9 @@
     	<textarea id="notes" class="input notes" rows=1 placeholder="Notes"></textarea><br>
     	<div style='display:none' class='alert alert-danger warning'>Please complete the above information before proceeding. Errors are highlighted in red.</div>
 		<div style='display:none' class='alert alert-warning trap-warning'>You haven't entered any trap data. If this is on purpose, simply hit Save again to finalize.</div>
-		<div style='display:none' class='alert alert-success save-success'>Observation saved successfully!<a class="close">&times;</a></div>
 		<button class="btn btn-danger clearall">Clear All</button>
     	<button class="btn btn-success btn-save">Save</button><br><br>
+    	</div>
 		<p>Enter weight (in grams) of leaves or other material (click Save to finalize).</p>
 		<h5>Non-leaf material:</h5><table class='table table-striped data_table' id='non-leaf-table'>
 		<tr>
@@ -76,42 +78,42 @@
 
 		</tr>
 		<tr><td class='sample_type'>Acorns reproductive</td>
-		<td><input type=text size=7 name='Acorns reproductive1' class='data-non-leaf input-small'></td>
-		<td><input type=text size=7 name='Acorns reproductive2' class='data-non-leaf input-small'></td>
-		<td><input type=text size=7 name='Acorns reproductive3' class='data-non-leaf input-small'></td>
-		<td><input type=text size=7 name='Acorns reproductive4' class='data-non-leaf input-small'></td>
-		<td><input type=text size=7 name='Acorns reproductive5' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 id='Acorns_reproductive1' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 id='Acorns_reproductive2' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 id='Acorns_reproductive3' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 id='Acorns_reproductive4' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 id='Acorns_reproductive5' class='data-non-leaf input-small'></td>
 		</tr>
 		<tr><td class='sample_type'>All reproductive</td>
-		<td><input type=text size=7 name='All reproductive1' class='data-non-leaf input-small'></td>
-		<td><input type=text size=7 name='All reproductive2' class='data-non-leaf input-small'></td>
-		<td><input type=text size=7 name='All reproductive3' class='data-non-leaf input-small'></td>
-		<td><input type=text size=7 name='All reproductive4' class='data-non-leaf input-small'></td>
-		<td><input type=text size=7 name='All reproductive5' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 id='All_reproductive1' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 id='All_reproductive2' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 id='All_reproductive3' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 id='All_reproductive4' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 id='All_reproductive5' class='data-non-leaf input-small'></td>
 		</tr>
 		<tr><td class='sample_type'>Twigs</td>
-		<td><input type=text size=7 name='Twigs1' class='data-non-leaf input-small'></td>
-		<td><input type=text size=7 name='Twigs2' class='data-non-leaf input-small'></td>
-		<td><input type=text size=7 name='Twigs3' class='data-non-leaf input-small'></td>
-		<td><input type=text size=7 name='Twigs4' class='data-non-leaf input-small'></td>
-		<td><input type=text size=7 name='Twigs5' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 id='Twigs1' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 id='Twigs2' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 id='Twigs3' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 id='Twigs4' class='data-non-leaf input-small'></td>
+		<td><input type=text size=7 id='Twigs5' class='data-non-leaf input-small'></td>
 		</tr>
 		<tr><td class='sample_type'>Bark</td>
-		<td><input type=text size=1 name='Bark1' class='data-non-leaf input-small'></td>
-		<td><input type=text size=1 name='Bark2' class='data-non-leaf input-small'></td>
-		<td><input type=text size=1 name='Bark3' class='data-non-leaf input-small'></td>
-		<td><input type=text size=1 name='Bark4' class='data-non-leaf input-small'></td>
-		<td><input type=text size=1 name='Bark5' class='data-non-leaf input-small'></td>
+		<td><input type=text size=1 id='Bark1' class='data-non-leaf input-small'></td>
+		<td><input type=text size=1 id='Bark2' class='data-non-leaf input-small'></td>
+		<td><input type=text size=1 id='Bark3' class='data-non-leaf input-small'></td>
+		<td><input type=text size=1 id='Bark4' class='data-non-leaf input-small'></td>
+		<td><input type=text size=1 id='Bark5' class='data-non-leaf input-small'></td>
 		</tr>
 		<tr><td class='sample_type'>Miscellaneous</td>
-		<td><input type=text size=1 name='Miscellaneous1' class='data-non-leaf input-small'></td>
-		<td><input type=text size=1 name='Miscellaneous2' class='data-non-leaf input-small'></td>
-		<td><input type=text size=1 name='Miscellaneous3' class='data-non-leaf input-small'></td>
-		<td><input type=text size=1 name='Miscellaneous4' class='data-non-leaf input-small'></td>
-		<td><input type=text size=1 name='Miscellaneous5' class='data-non-leaf input-small'></td>
+		<td><input type=text size=1 id='Miscellaneous1' class='data-non-leaf input-small'></td>
+		<td><input type=text size=1 id='Miscellaneous2' class='data-non-leaf input-small'></td>
+		<td><input type=text size=1 id='Miscellaneous3' class='data-non-leaf input-small'></td>
+		<td><input type=text size=1 id='Miscellaneous4' class='data-non-leaf input-small'></td>
+		<td><input type=text size=1 id='Miscellaneous5' class='data-non-leaf input-small'></td>
 		</tr></table>
 		
-		<h5>Leaves: <small>(<a href="data/species.html" target="_blank">Scientific and Common names of Plants in the Crum Woods</a>)</small></h5>
+		<h5>Leaves: <small>(<a href="data/species.html" target="_blank">Scientific and Common ids of Plants in the Crum Woods</a>)</small></h5>
 		<table class='table table-striped' id='leaf-table'>
 		<tr>
 		<th>Sample Type</th>
