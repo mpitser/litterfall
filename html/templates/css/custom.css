@@ -391,6 +391,12 @@ input.alert_invalid:focus{
 #query-items-selected > .btn {
 	opacity: 1;
 	display: inline-block;
+	vertical-align: top;
+	float: left;
+	padding-right: 8px;
+}
+#query-items-selected > .btn-inverse{
+	float: right;
 }
 #query-items-selected > .collection_type {
 	background-color: #BF496A;

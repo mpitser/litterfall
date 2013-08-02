@@ -280,19 +280,9 @@ define([
 
 			// template for the button that shows up in query well
 			var query_template = 
-				'<button class="btn btn-info query-item ' + query_type + '" disabled="disabled" value="'+ query_value +'">\
-					' + query_value + '\
-					<a href="#data/litterfall/reports">\
-						<i class="icon-black icon-remove"></i>\
-					</a>\
-				 </button>';
+				'<button class="btn btn-info query-item ' + query_type + '" disabled="disabled" value="'+ query_value +'">' + query_value + ' <a href="#data/litterfall/reports"> <i class="icon-black icon-remove"></i></a></button>';
 			if (query_type.indexOf("date") != -1){
-				query_template = '<button class="btn btn-info query-item ' + query_type + '" disabled="disabled" value="'+ query_value.substring(query_value.length-10, query_value.length) +'">\
-					' + query_value + '\
-					<a href="#data/litterfall/reports">\
-						<i class="icon-black icon-remove"></i>\
-					</a>\
-				</button>';
+				query_template = '<button class="btn btn-info query-item ' + query_type + '" disabled="disabled" value="'+ query_value.substring(query_value.length-10, query_value.length) +'">' + query_value + ' <a href="#data/litterfall/reports"> <i class="icon-black icon-remove"></i></a></button>';
 				$to_remove = $("#query-items-selected > ." + query_type)
 				$to_remove.hide('slow', function() {
 					$to_remove.remove();
