@@ -392,9 +392,17 @@ input.alert_invalid:focus{
 	opacity: 1;
 	display: inline-block;
 	vertical-align: top;
-	float: left;
+	float: none;
 	padding-right: 8px;
 }
+
+@-moz-document url-prefix() {
+#query-items-selected > .btn {
+	float: left;
+	position: relative;
+}
+}
+
 #query-items-selected > .btn-inverse{
 	float: right;
 	padding-right: 12px;

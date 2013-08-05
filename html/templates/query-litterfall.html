@@ -10,7 +10,6 @@
 
     <!-- Le styles -->
     <link href="css/bootstrap.css" rel="stylesheet">
-    <link href="css/tables.css" rel="stylesheet">
 
     <style>
       body {
@@ -18,6 +17,7 @@
       }
     </style>
     <link href="css/bootstrap-responsive.css" rel="stylesheet">
+
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -40,9 +40,9 @@
 
     	<h1>Access Data Records</h1>
     	<div style="display: none" id="csv">Date,Site,Plot,Collection Type, Observer 1, Observer 2, Observer 3, Trap,</div>
-		<div style="margin:25px 0px;">
-			<div id="query-items-selected" class="well well-small"><button id="clear-all" class="btn btn-inverse pull-right" type="button">Clear query</button>
-		</div>
+		<div class="container" style="margin:25px 0px;"> <!-- query well -->
+			<div id="query-items-selected" class="well well-small"><button id="clear-all" class="btn btn-inverse pull-right" type="button">Clear query</button></div>
+		</div> <!-- /query well -->
 		<div style="margin:25px 0px;">
 
 			<button id="analyze-data" class="btn btn-inverse btn-icon" type="button"><i class="icon-white icon-search"></i> Analyze data</button>
@@ -52,7 +52,6 @@
 			
 			<button id="export-data"class="btn btn-inverse btn-icon" type="button" style="display:none"><i class="icon-white icon-download"></i> Export data</button>
 			<button id="show-form" class="btn btn-inverse" type="button" style="display:none"><i class='icon-white icon-arrow-down'></i> Show form</button>
-		</div>
 		</div>
 	<div>
 		<div class="row conditions">
