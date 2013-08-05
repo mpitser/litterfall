@@ -332,8 +332,12 @@
 	});
 		
 	// Start Backbone history a necessary step for bookmarkable URL's; enables user to click BACK without navigating to entirely different domain
-	//
-	Backbone.history.start();
+	try {
+    	Backbone.history.start()
+  	} catch(err) {
+  		// keeps the Backbone history from being started twice.
+    	Backbone.history.loadUrl()
+  	}
 	
 	};
 	return { initialize: initialize }; });
