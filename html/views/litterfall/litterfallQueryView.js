@@ -152,6 +152,7 @@ define([
 			non_leaf_type_options.fetch({success: function(){
 				$('#query-options-type').find(".not-query").addClass("non-leaf");
 				$('#query-options-type').append('<li class="divider"></li>');
+				console.log("whay?");
 				
 				leaf_type_options = new selectionOptions({}, { id: "type" } );
 				
@@ -305,7 +306,7 @@ define([
 			
 			if (navigator.userAgent.indexOf("fox") != -1) {
 				console.log("You should use a better browser.");
-				$(".query-item > a").remove();
+				$(".query-item > a").remove(); // get rid of x icons within query well.
 				
 			} else {
 			
