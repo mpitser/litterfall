@@ -83,11 +83,11 @@ for r in cur.fetchall():
 	# Get each datapoint for this observation
 	# There are two tables -- if we can't find observations in one, try the second
 	d = mysql_db.cursor(pymysql.cursors.DictCursor)
-	d.execute("SELECT d.trap, d.colltype as type, d.value from jlm_litterfall_data as d where d.sample_id = %d" % r["row_id"])
+	d.execute("SELECT d.trap, d.sample_type as type, d.value from jlm_litterfall_data as d where d.sample_id = %d" % r["row_id"])
 	
 	if d.rowcount==0:
 		# Try alternate table
-		d.execute("SELECT d.trap, d.colltype as type, d.value from jlm_litterfall_data3 as d where d.sample_id = '%s'" % r["sample_id"])
+		d.execute("SELECT d.trap, d.sample_type as type, d.value from jlm_litterfall_data3 as d where d.sample_id = '%s'" % r["sample_id"])
 		
 	if d.rowcount!=0:
 		data = []
