@@ -118,18 +118,21 @@
 			var template_file = 'litterfall-add-observation.html';
 			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){
 				$('#main').html(templateHTML);
-				new_obs = new newObservation({"_id": {"$oid": id}});
-				new_obs_view = new newObservationView({
-					model: new_obs,
-					el: this
-				});
+				
 				location_options = new selectionOptionsLitterfall;
 				location_options.url = app.config.cgiDir + "tree_data.py?site=all";						//creates list with all possible locations
 				location_select = new selectionOptionsView({
 					el: $('#site'),																//populates new selectionOptionsView with locations (sites)
 					collection: location_options
 				});
-				location_options.fetch();
+				location_options.fetch({success: function() {
+					new_obs = new newObservation({"_id": {"$oid": id}});
+					new_obs_view = new newObservationView({
+						model: new_obs,
+						el: this
+					});				
+				}});
+
 			});
 		});
 		
