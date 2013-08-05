@@ -4,7 +4,6 @@ import pymysql
 import ConfigParser
 from pymongo import MongoClient
 
-
 # Need to start with SSH tunnel to Moodle host
 # e.g. ssh -n -N -f -L 3306:localhost:3306 aruethe2@acadweb.swarthmore.edu
 
@@ -43,7 +42,7 @@ for r in cur.fetchall():
 observations_missing_data = []
 
 # Use MongoDB observation collection
-observations = mongo_db.observations
+observations = mongo_db.litterfall_observations2
 
 cur.execute("SELECT sample_id, row_id, location, plot, colltype, observerA, observerB, observerC, notes, collection_date, sky_condition, precipitation_condition from jlm_litterfall_observation")
 
@@ -53,21 +52,24 @@ for r in cur.fetchall():
 	
 	# Create a new record to push data into.  Start with the data from the observations
 	# We'll add the actual leaf data later
+	
 	document = {
 		"sample_id": r["sample_id"],
 		"row_id": r["row_id"],
-		"site": r["location"],
-		"plot": r["plot"],
+		"site": r["location"].capitalize(),
+		"plot": int(r["plot"]),
 		"observers":[],
 		"collection_type": r["colltype"],
 		"notes": r["notes"],
-		"sky_condition": r["sky_condition"],
-		"precipitation_condition": r["precipitation_condition"]
+		"weather": {"sky": r["sky_condition"],
+					"precipitation": r["precipitation_condition"]}
 	}
 	
 	# Check to make sure the collection_date is present. If so, format it and add it to the document
 	if r["collection_date"]:
-		document["collection_date"] = r["collection_date"].strftime("%Y-%m-%d")
+		document["date"] = {"y": r["collection_date"].strftime("%Y"),
+		"m": r["collection_date"].strftime("%m"),
+		"d": r["collection_date"].strftime("%d")}
 	
 	# Add all non-empty observers
 	if len(r["observerA"])>0:
@@ -81,18 +83,18 @@ for r in cur.fetchall():
 	# Get each datapoint for this observation
 	# There are two tables -- if we can't find observations in one, try the second
 	d = mysql_db.cursor(pymysql.cursors.DictCursor)
-	d.execute("SELECT d.trap, d.sample_type, d.value as mass from jlm_litterfall_data as d where d.sample_id = %d" % r["row_id"])
+	d.execute("SELECT d.trap, d.sample_type as type, d.value from jlm_litterfall_data as d where d.sample_id = %d" % r["row_id"])
 	
 	if d.rowcount==0:
 		# Try alternate table
-		d.execute("SELECT d.trap, d.sample_type, d.value as mass from jlm_litterfall_data3 as d where d.sample_id = '%s'" % r["sample_id"])
+		d.execute("SELECT d.trap, d.sample_type as type, d.value from jlm_litterfall_data3 as d where d.sample_id = '%s'" % r["sample_id"])
 		
 	if d.rowcount!=0:
 		data = []
 		print "\tNumber of observations: %d" % d.rowcount
 		for datapoint in d.fetchall():
 			data.append(datapoint)
-		document["data"] = data
+		document["trap_data"] = data
 		print document
 		observation_id = observations.save(document)
 			
