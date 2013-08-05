@@ -391,7 +391,23 @@ input.alert_invalid:focus{
 #query-items-selected > .btn {
 	opacity: 1;
 	display: inline-block;
+	vertical-align: top;
+	float: none;
+	padding-right: 8px;
 }
+
+@-moz-document url-prefix() {
+#query-items-selected > .btn {
+	float: left;
+	position: relative;
+}
+}
+#query-items-selected > .btn-inverse{
+	float: right;
+	padding-right: 12px;
+
+}
+
 #query-items-selected > .collection_type {
 	background-color: #BF496A;
 }
