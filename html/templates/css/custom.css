@@ -396,11 +396,12 @@ input.alert_invalid:focus{
 	padding-right: 8px;
 }
 
+/*query well support for firefox */
 @-moz-document url-prefix() {
-#query-items-selected > .btn {
-	float: left;
-	position: relative;
-}
+	#query-items-selected > .btn {
+		float: left;
+		position: relative;
+	}
 }
 
 #query-items-selected > .btn-inverse{
