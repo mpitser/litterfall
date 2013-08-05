@@ -10,6 +10,7 @@
 
     <!-- Le styles -->
     <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/tables.css" rel="stylesheet">
 
     <style>
       body {
@@ -17,7 +18,6 @@
       }
     </style>
     <link href="css/bootstrap-responsive.css" rel="stylesheet">
-
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -30,9 +30,12 @@
       <link rel="apple-touch-icon-precomposed" sizes="72x72" href="ico/apple-touch-icon-72-precomposed.png">
                     <link rel="apple-touch-icon-precomposed" href="ico/apple-touch-icon-57-precomposed.png">
                                    <link rel="shortcut icon" href="ico/favicon.png">
+
   </head>
 
-  <body>
+	<body>
+  	<script src="lib/bootstrap-table-nav.js"></script>
+
 	<div class="container accesslitter">
 
     	<h1>Access Data Records</h1>
@@ -140,12 +143,12 @@
 		</div>
 
 			
-		</div>
+		</div>	
 	</div><br><br>
 	<div id="none-found" class="alert alert-info" style="display:none">No results found. Try another query.<a class="close none-close">&times;</a></div>
 	<span class="pagination" style="float:left"></span>
-	<button class="btn btn-small btn-info" id="hide-empty" style="display:none; float:left">Hide empty columns</button>
-	<button class="btn btn-small btn-info" id="show-empty" style="display:none; float:left">Show empty columns</button>
+	<button class="btn btn-small btn-info" id="hide-empty" style="display:none;">Hide empty columns</button>
+	<button class="btn btn-small btn-info" id="show-empty" style="display:none;">Show empty columns</button>
 	</div> <!-- /container -->
 	<div class="table-frame" style="overflow: auto; min-width: 1200px; max-width: 1500px">
 	<table class="table-striped tablesorter table-scroll" id="litterfall-table" style="display:none">
@@ -177,8 +180,8 @@
 			</th>
 			<th> Acorns </th>
 			<th> All reproductive </th>
-			<th> Twigs </th>
 			<th> Bark </th>
+			<th> Twigs </th>
 			<th> Misc. </th>
 			<th style="display:none" id="last"></th>
 		</tr>
