@@ -1,9 +1,8 @@
 # Import data from Litterfall database and send to MongoDB
 
-
+import pymysql
 import ConfigParser
 from pymongo import MongoClient
-import pymysql
 
 # Need to start with SSH tunnel to Moodle host
 # e.g. ssh -n -N -f -L 3306:localhost:3306 aruethe2@acadweb.swarthmore.edu
@@ -68,9 +67,9 @@ for r in cur.fetchall():
 	
 	# Check to make sure the collection_date is present. If so, format it and add it to the document
 	if r["collection_date"]:
-		document["date"]["y"] = r["collection_date"].strftime("%Y")
-		document["date"]["m"] = r["collection_date"].strftime("%m")
-		document["date"]["d"] = r["collection_date"].strftime("%d")
+		document["date"] = {"y": r["collection_date"].strftime("%Y"),
+		"m": r["collection_date"].strftime("%m"),
+		"d": r["collection_date"].strftime("%d")}
 	
 	# Add all non-empty observers
 	if len(r["observerA"])>0:
