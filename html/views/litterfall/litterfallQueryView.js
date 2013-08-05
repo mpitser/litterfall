@@ -286,6 +286,9 @@ define([
 			var dis = this;
 
 			// template for the button that shows up in query well
+
+			
+			
 			var query_template = 
 				'<button class="btn btn-info query-item ' + query_type + '" disabled="disabled" value="'+ query_value +'">' + query_value + ' <a href="#data/litterfall/reports"> <i class="icon-black icon-remove"></i></a></button>';
 			if (query_type.indexOf("date") != -1){
@@ -299,18 +302,26 @@ define([
 			// add to the query well with animation
 			var $to_add = $(query_template).hide().fadeTo(500, 0.8);
 			$('#query-items-selected').append($to_add);
+			
+			if (navigator.userAgent.indexOf("fox") != -1) {
+				console.log("You should use a better browser.");
+				$(".query-item > a").remove();
+				
+			} else {
+			
 			$('.icon-remove').click(function() {
 				event.preventDefault();
 				//console.log("remove clicked");
 				dis.removeQueryItem(dis, query_type, $(this).parent().parent().val());
 			});
+			
+			}
 		},
 		
 		removeQueryItem: function(thisPtr, query_type, query_value) {
 			// called when user clicks remove button from an item in the query well (not in dropdown list)
 
 			var $to_remove = $('#query-items-selected > .btn-info:contains('+query_value+')');
-			console.log($to_remove);
 			$('#query-options-'+query_type+' > li > a:contains('+query_value+')').removeClass("in-query").addClass("not-query");
 			$to_remove.hide('slow', function() {
 				$to_remove.remove();
