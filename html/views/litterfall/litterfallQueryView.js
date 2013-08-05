@@ -134,6 +134,8 @@ define([
 				if (navigator.userAgent.indexOf("fox") != -1) {
 					console.log("You should use a better browser.");
 					$(".icon-ok").removeClass("pull-right");
+					$(".icon-remove").removeClass("pull-right");
+
 				}
 			}});
 		},
