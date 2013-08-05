@@ -82,7 +82,6 @@ define([
 
 			
   			$(".dbh").attr("href", document.location.hash);
-  			$(".btn").css("display", "inline-block");
     		
     		// add tablesorter jquery plugin (no sorting for first column)
   			$("#plot-table").tablesorter({headers: { 0: { sorter: false}}}); 
