@@ -5,7 +5,8 @@ define([
   'router' // Request router.js
 ], function($, _, Backbone, Router){
   var initialize = function(){
-  	console.log("initializing the typeahead");
+  	
+  	// pair original functions to be overwritten
 	var orig = {
 		matcher: $.fn.typeahead.Constructor.prototype.matcher,
 		updater: $.fn.typeahead.Constructor.prototype.updater,
@@ -13,15 +14,17 @@ define([
 		listen: $.fn.typeahead.Constructor.prototype.listen,
 		render: $.fn.typeahead.Constructor.prototype.render,
 	};
-  
+  	
+  	// extend prototype definitions of functions
 	$.extend($.fn.typeahead.Constructor.prototype, {
+	
 		matcher: function(item) {
 			if (this.options.type == 'observersList') {
-				/* typeahead that begins new after each comma, supports multiple entries in input field */
+				/* need a typeahead that begins new after each comma, supports multiple entries in input field */
 				
+				// find the last observer entered to match on
 				var observers = this.query.split(",");
-				var last_observer = observers[observers.length - 1];
-				var last_observer = last_observer.replace(/^\s+/,"");
+				var last_observer = observers[observers.length - 1].replace(/^\s+/,"");
 				
 				if (last_observer == "") return false;
 				
@@ -38,10 +41,9 @@ define([
 			} else if (this.options.type == 'observer') {
 				/* typeahead to enter one observer at a time */
 				
-				// TODO: not sure how much of this is important, go back through
 				this.$element.parent().removeClass("error");
 				var observer = this.query.toLowerCase();
-				console.log(observer);
+				
 				// take off all active classes
 				$(document).find('li .active').removeClass("active");
 				return observer.length && ~item.toLowerCase().indexOf(observer);
@@ -67,14 +69,11 @@ define([
 			
 		},
 		updater: function(item) {
-			console.log("updater called");
 
 			if (this.options.type == 'observersList') {
 				if (this.query.indexOf(",") == -1) {
-					console.log(item+", ");
 					return item+", ";
 				}
-				console.log(this.query.replace(/,[^,]*$/, ", "+item+", "));
 				return this.query.replace(/,[^,]*$/, ", "+item+", ");
 			}
 			
@@ -82,7 +81,6 @@ define([
 
 		},
 		select: function() {
-			console.log("select called");
 			
 			if (this.options.type == 'species') {
 				var to_return = orig.select.call(this);
@@ -105,25 +103,6 @@ define([
 			}
 			orig.listen.call(this);
 		}
-		/*,
-		render: function(items) {
- 			console.log(this.options.item);
-     		for (i in items) {
-     			console.log(items[i]);
-     			if (items[i] == "All Observers") {
-     				console.log(this.options.items[i]);
-     				$(this.options.items[i]).attr("id", "default-value");
-     				console.log(this.options.items[i]);
-     			}
-       			/*var i = $(that.options.item).attr('data-value', item);
-       			i.find('a').html(that.highlighter(item));
-       			return i[0];
-    		}
- 
-     		//this.$menu.html(items);
-     		
-     		return orig.render.call(this);
-		}*/
 	});
   
     // Pass in our Router module and call it's initialize function
