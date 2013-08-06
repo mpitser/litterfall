@@ -133,6 +133,8 @@ define([
 				if (navigator.userAgent.indexOf("fox") != -1) {
 					console.log("You should use a better browser.");
 					$(".icon-ok").removeClass("pull-right");
+					$(".icon-remove").removeClass("pull-right");
+
 				}
 			}});
 		},
@@ -151,6 +153,7 @@ define([
 			non_leaf_type_options.fetch({success: function(){
 				$('#query-options-type').find(".not-query").addClass("non-leaf");
 				$('#query-options-type').append('<li class="divider"></li>');
+				console.log("whay?");
 				
 				leaf_type_options = new selectionOptions({}, { id: "type" } );
 				
@@ -296,13 +299,15 @@ define([
 			var $to_add = $(query_template).hide().fadeTo(500, 0.8);
 			$('#query-items-selected').append($to_add);
 			if (navigator.userAgent.indexOf("fox") != -1) {
-				$(".icon-remove").remove();
+				console.log("You should use a better browser.");
+				$(".query-item > a").remove(); // get rid of x icons within query well.
+			} else {
+				$('.icon-remove').click(function() {
+					console.log("remove clicked");
+					event.preventDefault();
+					dis.removeQueryItem(dis, query_type, $(this).parent().parent().val());
+				});
 			}
-			$('.icon-remove').click(function() {
-				console.log("remove clicked");
-				event.preventDefault();
-				dis.removeQueryItem(dis, query_type, $(this).parent().parent().val());
-			});
 		},
 		
 		removeQueryItem: function(thisPtr, query_type, query_value) {
