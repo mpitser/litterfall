@@ -164,9 +164,9 @@ define([
 		},
 		addObserversTypeahead: function() {
 			/* initializes and populates the typeahead for observers */
-			console.log("hey there");
+
 			$.getJSON(app.config.cgiDir + 'tree_data.py?observers=getList', function(data){
-           	 	console.log(data);
+           	 	
            	 	// initialize the typeahead
 				$("#observers-typeahead").typeahead({
 					minLength: 0,	// should make the typeahead open on focus instead of having to type anything

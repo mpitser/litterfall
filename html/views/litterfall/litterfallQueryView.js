@@ -8,56 +8,20 @@ define([
 	'views/litterfall/reportsView'
 ], function($, _, Backbone, litterfallQuery, selectionOptions, selectionOptionsView, reportsView){
 	var litterfallQueryView = Backbone.View.extend({
-	
-		
-		/* HELPFUL CODE: 
-		
-		these are things I wrote, then they either broke or I needed to move on because I got stuck.  if it's helpful read it, otherwise jsut gnore!
-		
-		//remove item using the actual x icons.
-		var query_type = $to_remove.attr("class").replace("btn-info", "").replace("btn", "").trim();
-		var $corresponding_list_item = $('.query-options-dropdown.'+query_type + ' > li > a:contains("'+$to_remove.val()+'")');
-		$corresponding_list_item.removeClass("in-query");
-		$corresponding_list_item.addClass("not-query");
-		
-		$('#date-begin :input').on('change', function() {
-			console.log("in fxn");
-				if (dis.validateDate()) {
-					dis.addDateQuery();
-				} else {
-					console.log("validation failed so I should do something like alert the user...");
-				}
-		});
-		
-		validateDate: function() {
-			// return true if passes validation, false if fails
-			console.log("in validating date");
-			return true;
-		},
-		addDateQuery: function() {
-			console.log("in adding date query");
-		},
-		
-		
-		
-		*/
-
-
 		tagName: 'div',
 		initialize: function(){
 			this.render();	
 		},
 		render: function() {			
-			console.log("rendering the litterfallQueryView");
-
+			var dis = this;		
+			
 			/* populate fields*/
 			this.populateSiteOptions();
 			this.addObserversTypeahead();
 			this.populateDataOptions();	
 			this.populateTable();
-			var dis = this;		
 			
-			/* initialize bootstrap plugin things */
+			/* initialize bootstrap elements */
 			$('.dropdown-toggle').dropdown();
 			$('.query-options-datepicker').datepicker({
 				dateFormat: "mm/dd/yy", 
@@ -65,7 +29,6 @@ define([
 				changeYear: true, 
 				changeMonth: true, 
 				yearRange: '2000:c', // allow years to be edited back to the start of collection, and up to current year
-				//constrainInput: true,
 				onSelect: function(dateText) {
 					if ($(this).attr('id') == 'date-begin'){
 						text = "All dates after " + dateText;
@@ -77,10 +40,8 @@ define([
 				}
 			});
 			
-			/* bind events (idk why but i can't get events to bind to fxns in the backbone events delegation function..  */
-			// add/remove a query item when the corresponding list item clicked
+			/* bind events -- for some reason the events binding built into backbone isn't working, so we do it here */
 			$('.query-options.dropdown-menu').click({thisPtr: this}, this.queryListItem);
-			// bind typeahead change
 			$('#query-options-observers').on('change', function() {
 				// when observers field changed, validation called
 				var obs_to_add = dis.validateObservers();
@@ -89,13 +50,8 @@ define([
 					dis.addQueryItem('observer', obs_to_add);
 					$('#query-options-observers').val('');	 // clear the field to the placeholder
 				}
-				
 			});
-			
-			// start a query to the mongoDB
 			$('#analyze-data').click(this.queryOnSelectedItems);
-			
-			// clear the query well of query items
 			$('#clear-all').click(function() {
 				dis.clearAll(dis, "all");
 			});
@@ -142,28 +98,32 @@ define([
 		populateDataOptions: function() {
 			/* populates Data Type dropdown */			
 
+			// load non-leaf data options first, then append a divider and then the 
 			non_leaf_type_options = new selectionOptions({}, { id: "type" } );
-				
 			non_leaf_type_options.url = 'data/non_leaf_type_options.json';
-
+			
 			var non_leaf_type_select = new selectionOptionsView({
 				el: $('#query-options-type'),																//populates new selectionOptionsView with locations (sites)
 				collection: non_leaf_type_options
 			});
+			
 			non_leaf_type_options.fetch({success: function(){
+				
 				$('#query-options-type').find(".not-query").addClass("non-leaf");
 				$('#query-options-type').append('<li class="divider"></li>');
-				console.log("whay?");
 				
 				leaf_type_options = new selectionOptions({}, { id: "type" } );
-				
 				leaf_type_options.url = 'data/leaf_type_options.json';
 
 				var data_type_select = new selectionOptionsView({
 					el: $('#query-options-type'),																//populates new selectionOptionsView with locations (sites)
 					collection: leaf_type_options
 				});
+				
 				leaf_type_options.fetch({success: function(){
+
+					$('#query-options-type').find(".not-query").not(".non-leaf").addClass("leaf");		
+						
 					if (navigator.userAgent.indexOf("fox") != -1) {
 						console.log("You should use a better browser.");
 						$(".icon-ok").removeClass("pull-right");
@@ -172,19 +132,23 @@ define([
 				}});
 			}});
 		},
+		
 		populateTable: function() {
-			$.getJSON("data/leaf_type_options.json", function(data){
+			/* populate the table with header */
+		
+			var species = ["Acorns reproductive", "All reproductive", "Twigs", "Bark", "Miscellaneous"];
+			$.getJSON("data/tree_species.json", function(data){
 				$.each(data, function(index, value) {
 					$("#last").before("<th>"+value+"</th>")
 				});
 			});
+			
 		},
+		
 		addObserversTypeahead: function() {
 			/* initializes and populates the typeahead for observers */
 
 			$.getJSON(app.config.cgiDir + 'litterfall.py?observers=getList', function(data){
-           	 	
-           	 	// initialize the typeahead
 				$("#query-options-observers").typeahead({
 					minLength: 0,	// should make the typeahead open on focus instead of having to type anything
 					items: Infinity,
@@ -197,7 +161,6 @@ define([
 		
 		events: {
 			/* NOT WORKING... not sure whyyy no events are bound here... that's why they are all bound in render()*/
-			//'click .icon-remove': 'removeQueryItem',
 		},
 		
 		queryListItem: function(event) {
@@ -206,6 +169,7 @@ define([
 			// which list item clicked ?  
 			// (make sure that the icon is not returned as the event target! We need the Anchor tag.)
 			var $list_item_clicked = ( $(event.target).prop('tagName') == "I") ? $(event.target).parent() :  $(event.target);
+
 			// get query value & query type 
 			// (i.e. 'Beech', which is a 'site' query)
 			var query_value = $list_item_clicked.attr("name").toString();
@@ -237,21 +201,36 @@ define([
 				return;
 				
 			} else if ($list_item_clicked.hasClass("clear-all")) {
-				
+				console.log(query_type);
 				/* toggle list item from check all to clear all */
+				
+				var data_type = "";
+
 				$list_item_clicked.hide();
 				if ($list_item_clicked.hasClass("leaf")) {
+				console.log("good");
 					$("."+query_type+" > li > a.check-all.leaf").show();
 					$(".leaf.in-query").removeClass("in-query").addClass("not-query");
+					data_type = ".leaf";
 
 				} else if ($list_item_clicked.hasClass("non-leaf")) {
 					$("."+query_type+" > li > a.check-all.non-leaf").show();
+					data_type = ".non-leaf";
+					
 				} else {
 					$("."+query_type+" > li > a.check-all").show();
 				}
 				
+				console.log($("ul." + query_type + " > li > a.in-query" + data_type));
+				$("ul#query-options-" + query_type + " > li > a.in-query" + data_type).each(function(index, li) {
+					console.log("hallo");
+					
+					console.log(li.name);
+					event.data.thisPtr.removeQueryItem(event.data.thisPtr, query_type, li.name);
+					$(li).addClass("not-query").removeClass("in-query");
+				});
 				/* clear all items from query well and unclick in dropdowns */
-				event.data.thisPtr.clearAll(event.data.thisPtr, query_type);				
+				//event.data.thisPtr.clearAll(event.data.thisPtr, query_type);				
 				
 				return;
 			}
