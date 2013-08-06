@@ -137,7 +137,7 @@ define([
 			/* populate the table with header */
 		
 			var species = ["Acorns reproductive", "All reproductive", "Twigs", "Bark", "Miscellaneous"];
-			$.getJSON("data/tree_species.json", function(data){
+			$.getJSON("data/leaf_type_options.json", function(data){
 				$.each(data, function(index, value) {
 					$("#last").before("<th>"+value+"</th>")
 				});
@@ -281,7 +281,6 @@ define([
 				$(".query-item > a").remove(); // get rid of x icons within query well.
 			} else {
 				$('.icon-remove').click(function() {
-					console.log("remove clicked");
 					event.preventDefault();
 					dis.removeQueryItem(dis, query_type, $(this).parent().parent().val());
 				});
@@ -292,7 +291,6 @@ define([
 			// called when user clicks remove button from an item in the query well (not in dropdown list)
 
 			var $to_remove = $('#query-items-selected > .btn-info:contains('+query_value+')');
-			console.log($to_remove);
 			$('#query-options-'+query_type+' > li > a:contains('+query_value+')').removeClass("in-query").addClass("not-query");
 			$to_remove.hide('slow', function() {
 				$to_remove.remove();

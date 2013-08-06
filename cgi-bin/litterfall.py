@@ -26,17 +26,24 @@ def getdata(db, query):
 	object_to_match["date.y"] = {"$lte": 3000, "$gte": 2000}
 	object_to_match["date.m"] = {"$lte": 12, "$gte": 1}
 	object_to_match["date.d"] = {"$lte": 31, "$gte": 0}
+	begin = {}
+	end = {}
 	if query.getvalue('date-begin') != None and query.getvalue('date-begin') != []:
 		dcomp = query.getvalue('date-begin').split("/")
-		object_to_match['date.y']["$gte"] = int(dcomp[2])
-		object_to_match['date.m']["$gte"] = int(dcomp[0])
-		object_to_match['date.d']["$gte"] = int(dcomp[1])
+		y = int(dcomp[2])
+		m = int(dcomp[0])
+		d = int(dcomp[1])
+		object_to_match["$or"] = [{"date.y": {"$gt": y}}, {"date.y": y, "date.m": {"$gt": m}}, {"date.y": y, "date.m": m, "date.d": {"$gte": d}}]
+		begin = {"$or": [{"date.y": {"$gt": y}}, {"date.y": y, "date.m": {"$gt": m}}, {"date.y": y, "date.m": m, "date.d": {"$gte": d}}]}
 	if query.getvalue('date-end') != None and query.getvalue('date-end') != []:
 		dcomp = query.getvalue('date-end').split("/")
-		object_to_match['date.y']["$lte"] = int(dcomp[2])
-		object_to_match['date.m']["$lte"] = int(dcomp[0])
-		object_to_match['date.d']["$lte"] = int(dcomp[1])
-	
+		y = int(dcomp[2])
+		m = int(dcomp[0])
+		d = int(dcomp[1])
+		object_to_match["$or"] = [{"date.y": {"$lt": y}}, {"date.y": y, "date.m": {"$lt": m}}, {"date.y": y, "date.m": m, "date.d": {"$lte": d}}]
+		end = {"$or": [{"date.y": {"$lt": y}}, {"date.y": y, "date.m": {"$lt": m}}, {"date.y": y, "date.m": m, "date.d": {"$lte": d}}]}
+	if (query.getvalue('date-begin') != None and query.getvalue('date-begin') != []) and (query.getvalue('date-end') != None and query.getvalue('date-end') != []):
+		object_to_match["$and"] = [begin, end]
 	if query.getlist('observer') != 'all' and query.getlist('observer') != []:
 		#print query.getlist('observer')
 		object_to_match['observers'] = {"$all": query.getlist('observer')}
