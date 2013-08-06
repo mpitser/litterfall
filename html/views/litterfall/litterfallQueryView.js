@@ -9,7 +9,7 @@ define([
 ], function($, _, Backbone, litterfallQuery, selectionOptions, selectionOptionsView, reportsView){
 	var litterfallQueryView = Backbone.View.extend({
 		tagName: 'div',
-		initialize: function(){	
+		initialize: function(){
 			this.render();	
 		},
 		render: function() {			
@@ -48,7 +48,6 @@ define([
 				// if validation passes, add the value to the query well
 				if (obs_to_add) {
 					dis.addQueryItem('observer', obs_to_add);
-					console.log($('#query-options-observers').data('typeahead'));
 					$('#query-options-observers').val('');	 // clear the field to the placeholder
 				}
 			});
@@ -122,12 +121,13 @@ define([
 				});
 				
 				leaf_type_options.fetch({success: function(){
-				
+
 					$('#query-options-type').find(".not-query").not(".non-leaf").addClass("leaf");		
 						
 					if (navigator.userAgent.indexOf("fox") != -1) {
 						console.log("You should use a better browser.");
 						$(".icon-ok").removeClass("pull-right");
+						$(".icon-remove").removeClass("pull-right");
 					}
 				}});
 			}});
@@ -140,7 +140,6 @@ define([
 			$.getJSON("data/tree_species.json", function(data){
 				$.each(data, function(index, value) {
 					$("#last").before("<th>"+value+"</th>")
-					species.push(value);
 				});
 			});
 			
@@ -254,7 +253,6 @@ define([
 					dis.removeQueryItem(dis, query_type, $(value).val());
 				});
 			} else {
-				console.log("about to clear all of type "+ type_to_clear);
 				$.each($('.query-item.'+type_to_clear), function(index, value) {
 					var query_type = value.className.split(/\s+/)[3];
 					dis.removeQueryItem(dis, query_type, $(value).val());
@@ -265,13 +263,10 @@ define([
 			var dis = this;
 
 			// template for the button that shows up in query well
-
-			
-			
 			var query_template = 
-				'<button class="btn btn-info query-item ' + query_type + '" disabled="disabled" value="'+ query_value +'">' + query_value + ' <a href="#data/litterfall/reports"> <i class="icon-black icon-remove"></i></a></button>';
+				'<button class="btn btn-info query-item ' + query_type + '" disabled="disabled" value="'+ query_value +'">' + query_value + ' <a href="#data/litterfall/reports"> <i class="icon-black icon-remove" href="#"></i></a></button>';
 			if (query_type.indexOf("date") != -1){
-				query_template = '<button class="btn btn-info query-item ' + query_type + '" disabled="disabled" value="'+ query_value.substring(query_value.length-10, query_value.length) +'">' + query_value + ' <a href="#data/litterfall/reports"> <i class="icon-black icon-remove"></i></a></button>';
+				query_template = '<button class="btn btn-info query-item ' + query_type + '" disabled="disabled" value="'+ query_value.substring(query_value.length-10, query_value.length) +'">' + query_value + ' <a href="#data/litterfall/reports"> <i class="icon-black icon-remove" href="#"></i></a></button>';
 				$to_remove = $("#query-items-selected > ." + query_type)
 				$to_remove.hide('slow', function() {
 					$to_remove.remove();
@@ -281,19 +276,15 @@ define([
 			// add to the query well with animation
 			var $to_add = $(query_template).hide().fadeTo(500, 0.8);
 			$('#query-items-selected').append($to_add);
-			
 			if (navigator.userAgent.indexOf("fox") != -1) {
 				console.log("You should use a better browser.");
 				$(".query-item > a").remove(); // get rid of x icons within query well.
-				
 			} else {
-			
-			$('.icon-remove').click(function() {
-				event.preventDefault();
-				//console.log("remove clicked");
-				dis.removeQueryItem(dis, query_type, $(this).parent().parent().val());
-			});
-			
+				$('.icon-remove').click(function() {
+					console.log("remove clicked");
+					event.preventDefault();
+					dis.removeQueryItem(dis, query_type, $(this).parent().parent().val());
+				});
 			}
 		},
 		
@@ -301,6 +292,7 @@ define([
 			// called when user clicks remove button from an item in the query well (not in dropdown list)
 
 			var $to_remove = $('#query-items-selected > .btn-info:contains('+query_value+')');
+			console.log($to_remove);
 			$('#query-options-'+query_type+' > li > a:contains('+query_value+')').removeClass("in-query").addClass("not-query");
 			$to_remove.hide('slow', function() {
 				$to_remove.remove();
@@ -312,8 +304,6 @@ define([
 				$to_remove.hide('slow', function() {
 					$to_remove.remove();
 				});
-				console.log("in query");
-				console.log($('#query-options-'+query_type+' > li > a.in-query'));
 				// add all the other items to the query well (since "all" will no longer be listed but other items might still be selected
 				var $to_add = $('#query-options-'+query_type+' > li > a.in-query');
 				
@@ -345,7 +335,7 @@ define([
 					query_string += "&trap=" + ($(value).val().replace("Trap ", ""));
 				});	
 			}			
-			var types = ["site", "date-begin", "date-end", "date", "observer", "type", "collection_type"];
+			var types = ["site", "date-begin", "date-end", "date", "observer", "type", "collection_type", "precipitation", "sky"];
 			for (var i = 0; i < 9; i++) {
 				var type = types[i];
 				if ($(document).find(".query-item." + type) != []) {
@@ -360,7 +350,6 @@ define([
 			}
 				
 			query_string = query_string.replace("&", "?");				
-			console.log(query_string);
 			var row = new reportsView();
 			row.render(query_string);
 		},
@@ -368,7 +357,6 @@ define([
 		validateObservers: function() {
 		
 			//validation of observers so that they can't type in an observer that isn't already in the typeahead source			
-			console.log("in observer validation");
 			
 			// get the array of observers in input box and extract most recently added observer
 			var obs_entered = $('#query-options-observers').val();
@@ -383,7 +371,6 @@ define([
 			
 			// add error flag to input box if observer not allowed
 			if (obs_allowed.indexOf(obs_entered) == -1) {
-				console.log("observer not in database");
 				//TODO fix this so it actually shows some sort of error
 				$('#query-options-observers').parent().addClass("error");
 				return false;
