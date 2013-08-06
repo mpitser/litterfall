@@ -20,6 +20,7 @@ define([
 		},
 		
 		render: function(query) {
+			console.log("rendering");
 			$("#analyze-data").hide();	
 			$("#loading").show();
 			$("#csv").text("Date,Site,Plot,Collection Type,Observer 1,Observer 2,Observer 3,Trap,");
@@ -43,13 +44,18 @@ define([
 			var dis = this;
 			query = "cgi-bin/litterfall.py" + query;
 			$.getJSON(query, function(data){
-				var time = 100;
 				$.each(data, function(index, value) {
-					console.log(value.observers);
-					var date_formatted = toFormattedDate(value.date);
+					var date_formatted = "";
+					if (value.date != undefined) {
+						date_formatted = toFormattedDate(value.date);
+					}
 					var regex = new RegExp(",","g")
 					var observers = value.observers.toString().replace(regex, ", ");
-					$("#litterfall-table").append("<tr class='obs"+index+"'><td><button class='btn btn-mini btn-primary edit-obs' id='obs" + value["_id"]["$oid"] + "'><i class='icon-white icon-edit'></i> Edit</button></td><td>"+date_formatted+"</td><td>"+value.site+"</td><td>"+value.plot+"</td><td>"+value.collection_type+"</td><td></td><td>"+observers+"</td><td></td><td>" + value["_id"]["$oid"] + "</td></tr>");
+					var weather = "";
+					if (value.weather != undefined && value.weather.sky != "") {
+						weather =  value.weather.sky + ", " + value.weather.precipitation;
+					}
+					$("#litterfall-table").append("<tr class='obs"+index+"'><td><button class='btn btn-mini btn-primary edit-obs' id='obs" + value["_id"]["$oid"] + "'><i class='icon-white icon-edit'></i> Edit</button></td><td>"+date_formatted+"</td><td>"+value.site+"</td><td>"+value.plot+"</td><td>"+value.collection_type+"</td><td>"+weather+ "</td><td>"+observers+"</td><td></td><td>" + value["_id"]["$oid"] + "</td></tr>");
 					for (var i = 5; i > 0; i--) {
 						$(".obs"+index).after("<tr class='obs"+index+"trap"+i+"'><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>"+i+"</td><td></td></tr>");
 						var prev_csv = $("#csv").text()
@@ -63,6 +69,7 @@ define([
 							$.each(value.trap_data, function(ind, sample) {
 								if (sample.type == species && sample.trap == i) {
 									matched = true;
+									console.log(species);
 									$(".obs"+index+"trap"+sample.trap).append("<td>"+sample.value+"</td>");
 									csv_line += sample.value + ","
 								}
@@ -77,7 +84,6 @@ define([
 				});
 				var none = true;
 				$.each(species_list, function(index, value){
-					console.log("finding blanks");
 					var blank = true;
 					var n = index+9;
 					$.each($("#litterfall-table tbody tr td:nth-child("+n+")"), function(i, td){
@@ -105,18 +111,17 @@ define([
 					$("#show-empty").hide();
 					$("#export-data").hide();
 				}
-				$("#litterfall-table").tableNav();
 				// currently tablesorter messes everything up, which is unfortunate. 
 				//TODO: make a modified version of tablesorter that will not screw everything up.
 				//$("#litterfall-table").tablesorter();
-				console.log("finished getJSON");
 				$("#analyze-data").show();
 				$("#loading").hide();			
 				$(".edit-obs").click(function() {
-					console.log("edit obs?");
 					dis.editObservation(this);
-				});
-			});			
+				});			
+			}).done(function() {
+					$("#litterfall-table").tableNav();
+			});
 
 			$(".none-close").click(function() {
 				event.preventDefault();
@@ -214,8 +219,6 @@ define([
 			}, 50);
     	},
     	editObservation: function(btn) {
-    		console.log(btn);
-    		console.log($(btn).attr("id"));
     		document.location.hash = "data/litterfall/edit/" + $(btn).attr("id").replace("obs", "");
     	}
 
