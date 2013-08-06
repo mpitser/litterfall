@@ -202,21 +202,36 @@ define([
 				return;
 				
 			} else if ($list_item_clicked.hasClass("clear-all")) {
-				
+				console.log(query_type);
 				/* toggle list item from check all to clear all */
+				
+				var data_type = "";
+
 				$list_item_clicked.hide();
 				if ($list_item_clicked.hasClass("leaf")) {
+				console.log("good");
 					$("."+query_type+" > li > a.check-all.leaf").show();
 					$(".leaf.in-query").removeClass("in-query").addClass("not-query");
+					data_type = ".leaf";
 
 				} else if ($list_item_clicked.hasClass("non-leaf")) {
 					$("."+query_type+" > li > a.check-all.non-leaf").show();
+					data_type = ".non-leaf";
+					
 				} else {
 					$("."+query_type+" > li > a.check-all").show();
 				}
 				
+				console.log($("ul." + query_type + " > li > a.in-query" + data_type));
+				$("ul#query-options-" + query_type + " > li > a.in-query" + data_type).each(function(index, li) {
+					console.log("hallo");
+					
+					console.log(li.name);
+					event.data.thisPtr.removeQueryItem(event.data.thisPtr, query_type, li.name);
+					$(li).addClass("not-query").removeClass("in-query");
+				});
 				/* clear all items from query well and unclick in dropdowns */
-				event.data.thisPtr.clearAll(event.data.thisPtr, query_type);				
+				//event.data.thisPtr.clearAll(event.data.thisPtr, query_type);				
 				
 				return;
 			}
