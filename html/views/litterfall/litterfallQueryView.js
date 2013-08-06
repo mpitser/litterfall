@@ -206,7 +206,6 @@ define([
 			// which list item clicked ?  
 			// (make sure that the icon is not returned as the event target! We need the Anchor tag.)
 			var $list_item_clicked = ( $(event.target).prop('tagName') == "I") ? $(event.target).parent() :  $(event.target);
-			console.log($list_item_clicked);
 			// get query value & query type 
 			// (i.e. 'Beech', which is a 'site' query)
 			var query_value = $list_item_clicked.attr("name").toString();
@@ -303,7 +302,6 @@ define([
 				$(".query-item > a").remove(); // get rid of x icons within query well.
 			} else {
 				$('.icon-remove').click(function() {
-					console.log("remove clicked");
 					event.preventDefault();
 					dis.removeQueryItem(dis, query_type, $(this).parent().parent().val());
 				});
@@ -314,7 +312,6 @@ define([
 			// called when user clicks remove button from an item in the query well (not in dropdown list)
 
 			var $to_remove = $('#query-items-selected > .btn-info:contains('+query_value+')');
-			console.log($to_remove);
 			$('#query-options-'+query_type+' > li > a:contains('+query_value+')').removeClass("in-query").addClass("not-query");
 			$to_remove.hide('slow', function() {
 				$to_remove.remove();
