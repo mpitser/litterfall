@@ -137,7 +137,7 @@ define([
 			/* populate the table with header */
 		
 			var species = ["Acorns reproductive", "All reproductive", "Twigs", "Bark", "Miscellaneous"];
-			$.getJSON("data/tree_species.json", function(data){
+			$.getJSON("data/leaf_type_options.json", function(data){
 				$.each(data, function(index, value) {
 					$("#last").before("<th>"+value+"</th>")
 				});
