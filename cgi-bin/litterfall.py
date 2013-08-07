@@ -122,7 +122,7 @@ def getObserversList(db, x):
 	
 def getSitesList(db):
 	#return an array of distinct sites
-	data = obs.distinct('site')
+	data = db.distinct('site')
 	for j in range(0,len(data)):
 		data[j] = data[j].encode('ascii','ignore')
 	data.sort(key=str.lower)
@@ -153,15 +153,13 @@ def main():
 		# we want to read data from database (but not change it)
 		
 		"""
-		Mal's comments: 
-		I'm assuming we could do one of a few things: specify that we want a list of _ (observers, species, etc)
+		do one of a few things: specify that we want a list of _ (observers, species, etc)
 		to populate a dropdown, or else we're querying for data to report
 		"""
 				
 		query = cgi.FieldStorage()
 
 		# get the list of observers that have been entered in database 
-		# (note: this may mean that new observers have to be somehow added since they won't show up in typeahead and validation is based on what's already in db)
 		if query.getvalue("observers") == "getList":
 			data = getObserversList(db, 10)
 			print 'Content-Type: application/json\n'

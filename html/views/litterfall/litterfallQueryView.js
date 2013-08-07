@@ -72,13 +72,8 @@ define([
 			/* populates Site dropdown */
 			
 			location_options = new selectionOptions;
-////////////////////////////////////////////
-//TODO:  once *real* data has been enteered into litterfall DB
-//       change to comment-ed out version.  right now you only get Beech or something like that because all the sites aren't listed in the DB			
-////////////////////////////////////////////		
-			//location_options.url = app.config.cgiDir + "litterfall.py?site=getList";						//creates list with all possible locations
-			location_options.url = app.config.cgiDir + "tree_data.py?site=all";
-			//console.log(location_options);
+
+			location_options.url = app.config.cgiDir + "litterfall.py?site=getList";						//creates list with all possible locations
 				
 			var location_select = new selectionOptionsView({
 				el: $('#query-options-site'),																//populates new selectionOptionsView with locations (sites)
