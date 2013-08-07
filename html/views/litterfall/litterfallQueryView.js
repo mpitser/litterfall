@@ -208,7 +208,6 @@ define([
 				var data_type = "";
 				
 				if ($list_item_clicked.hasClass("leaf")) {
-					console.log("clear all LEAF");
 					$("."+query_type+" > li > a.check-all.leaf").show();
 					data_type = ".leaf";
 				} else if ($list_item_clicked.hasClass("non-leaf")) {
