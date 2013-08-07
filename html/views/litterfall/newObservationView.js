@@ -167,15 +167,19 @@ define([
 		
 			var self = this;
 			$alert_modal.find('#yes-clear').on('click', function() {
+				
 				$alert_modal.modal("hide");
+				
 				var table = self.name.substring(0, self.name.length-1);
 				var trap = self.name.substring(self.name.length-1, self.name.length);
+				
+				/* clear all data from trap column */
 				$.each($("." +table), function(index, value) {
-					if (value.name.substring(value.name.length-1, value.name.length) == trap) {
-						console.log("should be clearing this");
+					if (value.id.substring(value.id.length-1, value.id.length) == trap) {
 						value.value = "";
 					}
 				});
+				
 			});
 		},
 		validate: function() {
