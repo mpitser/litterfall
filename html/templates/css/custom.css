@@ -116,6 +116,9 @@ input.alert_invalid:focus{
 	margin: 5px 0px 20px;
 }
 
+#hide-empty, #show-empty {
+	margin: 22px;
+}
 
 
 /*Tables!*/
