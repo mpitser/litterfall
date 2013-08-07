@@ -26,9 +26,17 @@ mongo_db = mongo[MongoDB_db]
 # Use MongoDB observation collection
 observations = mongo_db.tree_observations
 
+def checkStatus():
+	status = "alive"
+	print "hello in checkStatus"
+	# change Status if needed
+	# check future statuses based on Status
+	# if something new found in the notes, update the status
+	# else default that obs status to Status from last time
+	
+	return status
 
 for file in args.excel_filenames:
-
 	workbook = xlrd.open_workbook(file)
 	sheet = workbook.sheet_by_index(0)
 	
@@ -56,23 +64,36 @@ for file in args.excel_filenames:
 		if len(full_tree_id) > 1:
 			observation['sub_tree_id'] = int(full_tree_id[1])
 	
-		observation['species'] = sheet.row_values(rownum)[headers.index("2009 Species full name")]
+		# change trees listed with species 'dead' to 'unidentified'
+		# allows for a tree to be identified by species AND marked as dead.
+		if (sheet.row_values(rownum)[headers.index("2009 Species full name")] == "dead"):
+			observation['species'] = "Unidentified spp."
+			observation['status'] = "dead_standing"	# NOTE: this is the Tree's overall status.  status is also noted down at each DBH observation.
+		else:
+			observation['species'] = sheet.row_values(rownum)[headers.index("2009 Species full name")]
+			observation['status'] = "alive"
+		
 		observation['species_certainty'] = sheet.row_values(rownum)[headers[::-1].index("Species ID certainty 0, 50 or 100%")]
 		observation['angle'] = sheet.row_values(rownum)[headers.index("2009 Angle Degrees")]
 		observation['distance'] = sheet.row_values(rownum)[headers.index("2009 Distance meters")]
 		observation['dbh_marked'] = bool(sheet.row_values(rownum)[headers[::-1].index("Marked DBH location yes/no?")] == "Y")
-		
-		observation['status'] = bool(observation['species'] == "dead") #true if dead, false if alive
-		if observation['status']:
-			observation['species'] = "Unidentified spp."
 			
 		observation['diameter'] = []
 		
+		# current state: Status is set to alive or dead_standing
+		
+		
+		# write for loop to go through years (upward), and make this script just add in the year
+		# call checkStatus(yearnotes, Status)
 		try:
 			dia_2009 = sheet.row_values(rownum)[headers.index("2009 DBH cm")]
 			notes_2009 = sheet.row_values(rownum)[headers.index("2009 Comments")]
 			if observation['status']:
-				status_2009 = 'dead'
+				status_2009 = 'dead_standing'
+			elif "dead" in notes_2009:
+				if "fallen" in notes_2009:
+					status_2009 = 'dead_fallen'
+				
 			else:
 				status_2009 = 'alive'
 			observation['diameter'].append({'value': dia_2009, 'notes':notes_2009, 'date': {'y': 2009, 'm': 01, 'd': 01}, 'status': status_2009, 'observers': [] })
