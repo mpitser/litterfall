@@ -15,7 +15,7 @@ sites_predef = ["beech","floodplains","Knoll","norway","Oaks","swamp","TBNO","TO
 def main():
 	# Load config (for database info, etc)
 	Config = ConfigParser.ConfigParser()
-	Config.read("litterfall_translate.conf")
+	Config.read("crum_woods_translate.conf")
 	MongoDB_host = Config.get('MongoDB', "host")
 	MongoDB_db = Config.get('MongoDB', "db")
 	
@@ -24,7 +24,7 @@ def main():
 	mongo_db = mongo[MongoDB_db]	
 	
 	# Use MongoDB observation collection
-	obs = mongo_db.observations
+	obs = mongo_db.tree_observations
 	
 	print 'Content-Type: application/json\n'
 	print {"site":"beech"}

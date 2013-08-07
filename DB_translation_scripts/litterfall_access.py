@@ -6,7 +6,7 @@ from pymongo import MongoClient
 
 # Load config (for database info, etc)
 Config = ConfigParser.ConfigParser()
-Config.read("litterfall_translate.conf")
+Config.read("crum_woods_translate.conf")
 MongoDB_host = Config.get('MongoDB', "host")
 MongoDB_db = Config.get('MongoDB', "db")
 
@@ -31,7 +31,7 @@ def get_unique_observation_parameters():
 	}
 	
 	for p in parameters.keys():
-		results = mongo_db.observations.distinct(p)
+		results = mongo_db.tree_observations.distinct(p)
 		parameters[p] = sorted(remove_empty_values_from_list(results))
 	
 	return parameters
@@ -40,7 +40,7 @@ def get_unique_observation_parameters():
 
 # Get the last n observations for a specific site and plot.  Set limit to zero to retrieve all results.
 def get_last_observations(site, plot, num_of_observations):
-	results = mongo_db.observations.find({"site":site, "plot":plot}, limit = num_of_observations).sort('collection_date',-1)
+	results = mongo_db.tree_observations.find({"site":site, "plot":plot}, limit = num_of_observations).sort('collection_date',-1)
 	return list(results)
 	
 

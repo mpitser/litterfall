@@ -529,7 +529,7 @@ def main():
 	mongo_db = mongo[MongoDB_db]	
 	
 	# Use MongoDB observation collection
-	obs = mongo_db.observations
+	obs = mongo_db.tree_observations
 	
 	method = os.environ['REQUEST_METHOD']
 
