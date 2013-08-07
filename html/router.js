@@ -47,7 +47,7 @@
 		app_router.on('route:accessTrees', function () {											//listening for user action (for user to select location and plot)
 			$(".tree-data").addClass("active");
 			$(".tree-data").siblings().removeClass("active");
-			var  template_file = 'access-tree.html';
+			var  template_file = 'tree_data/access-landing.html';
 			console.log("access");
 			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){			
 				$('#main').html(templateHTML);
@@ -77,7 +77,7 @@
 		app_router.on('route:accessLitterfall', function () {											//listening for user action (for user to select location and plot)
 			$(".litterfall").addClass("active");
 			$(".litterfall").siblings().removeClass("active");
-			var  template_file = 'access-litterfall.html';
+			var  template_file = 'litterfall/access-landing.html';
 			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){			
 				$('#main').html(templateHTML);
 				$('#query-records').click(function(){	
@@ -93,7 +93,7 @@
 		app_router.on('route:litterfallAddObservation', function() {
 			$(".litterfall").addClass("active");
 			$(".litterfall").siblings().removeClass("active");
-			var template_file = 'litterfall-add-observation.html';
+			var template_file = 'litterfall/add-observation.html';
 			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){
 				$('#main').html(templateHTML);
 				new_obs = new newObservation;
@@ -115,7 +115,7 @@
 		app_router.on('route:litterfallEditObservation', function(id) {
 			$(".litterfall").addClass("active");
 			$(".litterfall").siblings().removeClass("active");
-			var template_file = 'litterfall-add-observation.html';
+			var template_file = 'litterfall/add-observation.html';
 			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){
 				$('#main').html(templateHTML);
 				
@@ -139,7 +139,7 @@
 		app_router.on('route:accessLitterfallReports', function () {
 			$(".litterfall").addClass("active");
 			$(".litterfall").siblings().removeClass("active");
-			var template_file = 'query-litterfall.html';
+			var template_file = 'litterfall/query.html';
 			console.log("querying");
 			
 			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){							
@@ -162,7 +162,7 @@
 			
 			console.log("reporting");
 			
-			require(['lib/text!templates/reports2.html!strip'], function(templateHTML) {
+			require(['lib/text!templates/tree_data/report-tree.html!strip'], function(templateHTML) {
 				$('#main').html(_.template(templateHTML, {
 					site: decodeURI(site), 
 					plot: plot
@@ -222,7 +222,7 @@
 			
 			console.log("updating");
 			
-			require(['lib/text!templates/update2.html!strip'], function(templateHTML) {
+			require(['lib/text!templates/tree_data/update-plot.html!strip'], function(templateHTML) {
 				$('#main').html(_.template(templateHTML, {
 					site: decodeURI(site), 
 					plot: plot
@@ -293,7 +293,7 @@
 		app_router.on('route:goToTree', function(mode, site, plot, tree_id, sub_tree_id) {						//reloads page based on selected location (site) and plot
 			$(".tree-data").addClass("active");
 			$(".tree-data").siblings().removeClass("active");
-			var  template_file = 'update-tree.html';
+			var  template_file = 'tree_data/update-tree-info.html';
 			require(['lib/text!templates/' + template_file + '!strip'], function(templateHTML){			//<WHAT DOES THIS FUNCTION DO?> [ ] (some sort of require wrapper)
 	
 				if (typeof sub_tree_id === 'undefined'){
