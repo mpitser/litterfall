@@ -3,7 +3,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Crum Woods - Above and Below Ground Productivity Database</title>
+    <title>Crum Woods - Above and Belowground Productivity Database</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -30,13 +30,15 @@
                                    <link rel="shortcut icon" href="ico/favicon.png">
   </head>
 
-  <body id="access-tree">
+  <body>
 	<div class="container">
 
-      <h1>Access Tree Data Records</h1>
-      <p>Fill out the form below to begin accessing the tree data records.</p>
+      <h1>Access Data Records</h1>
+      <p>Fill out the form below to begin accessing the data records</p>
+	<div class="row">
+		<form>
 	
-	<div class="span4">
+	<div class="span6">
 		<div>
 			<h3>Site</h3>
 			<select id="site-select" name="site">
@@ -51,12 +53,12 @@
 		</div>
 	</div>
 	
-	<div class="span4">
-		<div>
-  			<button id="update-records" class="btn btn-large btn-primary btn-icon" type="button" disabled="disabled"><i class="icon-white icon-wrench"></i>&nbsp;&nbsp;Update records </button>
+	<div class="span6">
+		<div style="margin:50px 0px;">
+  			<button id="update-records" class="btn btn-large btn-primary" type="button" disabled="disabled">Update records &raquo;</button>
 		</div>
-		<div>
-			<button id="analyze-data"class="btn btn-large btn-primary btn-icon" type="button" disabled="disabled"><i class="icon-white icon-eye-open"></i>&nbsp;&nbsp;Analyze data</button>
+		<div style="margin:25px 0px;">
+			<button id="analyze-data"class="btn btn-large btn-primary" type="button" disabled="disabled">Analyze data &raquo;</button>
 		</div>
 	</div>
     </div> <!-- /container -->
