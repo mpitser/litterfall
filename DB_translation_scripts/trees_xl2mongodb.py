@@ -6,6 +6,7 @@ import argparse
 from datetime import datetime
 from pymongo import MongoClient
 import ConfigParser
+import json
 
 parser = argparse.ArgumentParser(description='Extract tree data from JLM Excel files.')
 parser.add_argument('excel_filenames', help='Excel tree data file(s)' ,nargs='+')
@@ -28,22 +29,18 @@ observations = mongo_db.tree_observations
 
 def getStatus(notes, observation):
 
-	#status_tree = observation['status']
-	# change Status if needed
-	if "missing" in notes:
+	# had to add in a lot of specific code to catch specific errors that would mess up a tree's status listing.
+	if ("missing" in notes and "not missing" not in notes) or ("no longer present" in notes) or ("can't find" in notes):
 		observation['status'] = "missing"
 	elif ("fallen" in notes or "fell" in notes) and ("dead" in notes or "dead" in observation['status']):
 		observation['status'] = "dead_fallen"
-	elif "standing" in notes or "dead" in notes:
+	elif "standing" in notes or ("dead" in notes and "not dead" not in notes and "might be dead" not in notes):
 		observation['status'] = "dead_standing"
 	else:
 		observation['status'] = "alive"
-	
-	# check future statuses based on Status
-	# if something new found in the notes, update the status
-	# else default that obs status to Status from last time
-	
+
 	return observation['status']
+
 
 def addDiameterObservation(sheet, headers, rownum, observation, year):
 	try:
@@ -55,9 +52,44 @@ def addDiameterObservation(sheet, headers, rownum, observation, year):
 		
 		observation['diameter'].append({'value': diam, 'notes':notes, 'date': {'y': year, 'm': 01, 'd': 01}, 'status': status, 'observers': [] })
 	except ValueError:
-		print "No data from " + str(year)
+		#print "No data from " + str(year)
+		return
 		
 	return
+
+
+def getSpecies(sheet, headers, rownum, observation):
+	
+	species_given = sheet.row_values(rownum)[headers.index("2009 Species full name")]
+	#print "given: ", species_given
+	
+	observation['species'] = "Unidentified spp."
+	
+	if species_given.lower() == "dead":
+		return
+	
+	f = open('../html/data/master_species_info.json')
+	species_array = json.load(f)
+
+	# see if species_given is in array (compare all lowercase)
+	for i in range (0, len(species_array)):
+
+		# exact match other than capitalizations		
+		if species_given.lower() == species_array[i]['Scientific_Name'].lower():
+			observation['species'] = species_array[i]['Scientific_Name']
+			f.close()
+			return
+		
+		# only genus matches, not specific species
+		if species_given.lower().split(" ")[0] == species_array[i]['Scientific_Name'].lower().split(" ")[0] and \
+		   species_given.lower().split(" ")[0] != "quercus":
+			observation['species'] = species_array[i]['Scientific_Name'].split(" ")[0] + " spp."
+			
+	f.close()
+	
+	# if we get through the loop, the species given was not matched exactly;
+	# return the species_given to enter into comments for user info.	
+	return species_given
 
 for file in args.excel_filenames:
 	workbook = xlrd.open_workbook(file)
@@ -72,7 +104,7 @@ for file in args.excel_filenames:
 	for rownum in range(sheet.nrows):
 		if rownum == 0:
 			continue
-		print rownum
+		#print rownum
 		
 		# Start a new document
 		observation = {}
@@ -88,14 +120,8 @@ for file in args.excel_filenames:
 		if len(full_tree_id) > 1:
 			observation['sub_tree_id'] = int(full_tree_id[1])
 	
-		# change trees listed with species 'dead' to 'unidentified'
-		# allows for a tree to be identified by species AND marked as dead.
-		if (sheet.row_values(rownum)[headers.index("2009 Species full name")] == "dead"):
-			observation['species'] = "Unidentified spp."
-			observation['status'] = "dead_standing"	# NOTE: this is the Tree's overall status.  status is also noted down at each DBH observation.
-		else:
-			observation['species'] = sheet.row_values(rownum)[headers.index("2009 Species full name")]
-			observation['status'] = "alive"
+		# sets the species in the function, but if any notes about species uncertainty are added, they are returned to be added at the end
+		note_to_add = getSpecies(sheet, headers, rownum, observation)
 		
 		observation['species_certainty'] = sheet.row_values(rownum)[headers[::-1].index("Species ID certainty 0, 50 or 100%")]
 		observation['angle'] = sheet.row_values(rownum)[headers.index("2009 Angle Degrees")]
@@ -109,9 +135,11 @@ for file in args.excel_filenames:
 		for y in range(2002, 2009):
 			addDiameterObservation(sheet, headers, rownum, observation, y)
 			
-		print observation
 		
-		observation_id = observations.save(observation)
-		print observation_id
+		#TODO: add species guess to 2009 notes 
+		#print observation
+		
+		#observation_id = observations.save(observation)
+		#print observation_id
 		
 	
