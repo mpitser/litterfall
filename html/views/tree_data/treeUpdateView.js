@@ -27,6 +27,7 @@ define([
   					<button type="button" class="btn btn-mini btn-info status alive" style="width: 120px" value="alive">Alive</button>\
   					<button type="button" class="btn btn-mini btn-warning status dead_standing" style="width: 120px" value="dead_standing">Dead (standing)</button>\
  					<button type="button" class="btn btn-mini btn-danger status dead_fallen" style="width: 120px" value="dead_fallen">Dead (fallen)</button>\
+					<button type="button" class="btn btn-mini btn-inverse status missing" style="width: 120px" value="missing">Missing</button>\
 					</div></span></td>\
 				<td class="editable"><span class="show-obs-info display_cell notes"><%= entry.notes %></span><span class="edit-obs-info edit_cell notes"><input type="text" value="<%= entry.notes %>"></span></span></td>\
 		',
@@ -110,9 +111,10 @@ define([
 					</td>\<td class="editable"><span class="show-obs-info display_cell observers"><%= entry.observers %></span><span class="edit-obs-info edit_cell observers"><input id="observers-typeahead" title="Who collected this data" type="text" value="<%= entry.observers %>"></span></td>\
 					<td class="editable"><span class="show-obs-info display_cell diameter"><%= entry.value %></span><span class="edit-obs-info edit_cell diameter"><input title="Please enter an integer or floating point number such as 5, 6.1, 10.33" type="text" value="<%= entry.value %>"></span></td>\
 					<td class="editable"><span class="show-obs-info display_cell status"><%= entry.status %></span><span class="edit-obs-info edit_cell status"><div class="edit-obs-info status btn-group btn-group-vertical" data-toggle="buttons-radio">\
-  					<button type="button" class="btn btn-mini btn-info status alive" style="width: 120px" value="alive">Alive</button>\
-  					<button type="button" class="btn btn-mini btn-warning status dead_standing" style="width: 120px" value="dead_standing">Dead (standing)</button>\
- 					<button type="button" class="btn btn-mini btn-danger status dead_fallen" style="width: 120px" value="dead_fallen">Dead (fallen)</button>\
+  						<button type="button" class="btn btn-mini btn-info status alive" style="width: 120px" value="alive">Alive</button>\
+  						<button type="button" class="btn btn-mini btn-warning status dead_standing" style="width: 120px" value="dead_standing">Dead (standing)</button>\
+ 						<button type="button" class="btn btn-mini btn-danger status dead_fallen" style="width: 120px" value="dead_fallen">Dead (fallen)</button>\
+ 						<button type="button" class="btn btn-mini btn-inverse status missing" style="width: 120px" value="missing">Missing</button>\
 					</div></span></td>\
 					<td class="editable"><span class="show-obs-info display_cell notes"><%= _.escape(entry.notes) %></span><span class="edit-obs-info edit_cell notes"><input type="text" value="<%= _.escape(entry.notes) %>"></span></span></td>\
 				</tr>\
@@ -338,19 +340,20 @@ define([
 				$new_entry_row.find(".edit_cell.diameter :input").addClass("to_validate");
 				dis.validateField();
 			});
-			$row_to_edit.find(".status.alive").on("click", function() {
+			
+			$new_entry_row.find(".status.alive").on("click", function() {
 				console.log("click allive");
-				$row_to_edit.find(".status.alive").addClass("to_validate");
+				$new_entry_row.find(".status.alive").addClass("to_validate");
 				dis.validateField();
 			});
-			$row_to_edit.find(".status.dead_standing").on("click", function() {
+			$new_entry_row.find(".status.dead_standing").on("click", function() {
 				console.log("click dead standing");			
-				$row_to_edit.find(".status.dead_standing").addClass("to_validate");
+				$new_entry_row.find(".status.dead_standing").addClass("to_validate");
 				dis.validateField();
 			});
-			$row_to_edit.find(".status.dead_fallen").on("click", function() {
+			$new_entry_row.find(".status.dead_fallen").on("click", function() {
 				console.log("click dead fallen");
-				$row_to_edit.find(".status.dead_fallen").parent().addClass("to_validate");
+				$new_entry_row.find(".status.dead_fallen").parent().addClass("to_validate");
 				dis.validateField();
 			});
 			
@@ -627,7 +630,7 @@ define([
 				console.log(status_error_message);
 				current_row.find(".btn-group.status").tooltip('destroy').tooltip({title: status_error_message}).tooltip('show');
 				current_row.find(".to_validate").removeClass("to_validate");
-				return false;
+				return true;
 			} else {
 				//if field passes all tests, make sure nothing is highlighted anymore 
 				// change the title that will be displayed on hovering
@@ -723,17 +726,20 @@ define([
 		validateStatus: function($current_row) {
 			console.log("in validate status");
 			//TODO: get the most recent status.
-
-			var last_known_status = (this.model.get("diameter")[0] !== undefined) ? this.model.get("diameter")[0].status : "alive";
+			
+			var curRowIndex = parseInt($current_row.attr("id").charAt($current_row.attr("id").length - 1));
+			
+			var last_known_status = (this.model.get("diameter")[0] !== undefined) ? this.model.get("diameter")[curRowIndex + 1].status : "alive";
 			console.log(last_known_status);
+			console.log(this.model.get("diameter")[0].status);
 
 			var entered_status = $current_row.find(".status.to_validate").val();
 			console.log(entered_status);
 
 			if (entered_status == "alive" && (last_known_status == "dead_standing" || last_known_status == "dead_fallen")) {
-				return "A dead tree doesn't usually come back to life... are you sure it is alive now???  If you are sure, go back and edit the previous data entries in error as well.";
+				return "A dead tree doesn't usually come back to life... are you sure it is alive now???";
 			} else if (entered_status == "dead_standing" && last_known_status == "dead_fallen") {
-				return "A fallen tree doesn't usually stand itself back up... are you sure you are recording it correctly?  If so, go back and edit the previous data entries in error as well.";
+				return "A fallen tree doesn't usually stand itself back up... are you sure you are recording it correctly?";
 			} else {
 				return false;
 			}
