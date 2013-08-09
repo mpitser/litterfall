@@ -54,7 +54,7 @@ def addDiameterObservation(sheet, headers, rownum, observation, year):
 		# getting the status for this observation involves combing through the notes and also the previously set global tree status
 		status = getStatus(notes, observation)
 		
-		observation['diameter'].append({'value': diam, 'notes':notes, 'date': {'y': year, 'm': 01, 'd': 01}, 'status': status, 'observers': [] })
+		observation['diameter'].append({'value': diam, 'notes':notes, 'date': {'y': year, 'm': 09, 'd': 15}, 'status': status, 'observers': [] })
 	except ValueError:
 		print "No data from " + str(year)
 		return observation['status']
