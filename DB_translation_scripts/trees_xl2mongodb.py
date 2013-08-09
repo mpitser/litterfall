@@ -7,6 +7,7 @@ from datetime import datetime
 from pymongo import MongoClient
 import ConfigParser
 import json
+import datetime
 
 parser = argparse.ArgumentParser(description='Extract tree data from JLM Excel files.')
 parser.add_argument('excel_filenames', help='Excel tree data file(s)' ,nargs='+')
@@ -30,11 +31,11 @@ observations = mongo_db.tree_observations
 def getStatus(notes, observation):
 
 	# had to add in a lot of specific code to catch specific errors that would mess up a tree's status listing.
-	if ("missing" in notes and "not missing" not in notes) or ("no longer present" in notes) or ("can't find" in notes):
+	if ("missing" in notes and "not missing" not in notes) or ("no longer present" in notes) or ("can't find" in notes) or (observation['status'] == "missing"):
 		observation['status'] = "missing"
 	elif ("fallen" in notes or "fell" in notes) and ("dead" in notes or "dead" in observation['status']):
 		observation['status'] = "dead_fallen"
-	elif "standing" in notes or ("dead" in notes and "not dead" not in notes and "might be dead" not in notes):
+	elif "standing" in notes or ("dead" in notes or "Dead" in notes and "not dead" not in notes and "might be dead" not in notes):
 		observation['status'] = "dead_standing"
 	else:
 		observation['status'] = "alive"
@@ -66,7 +67,7 @@ def getSpecies(sheet, headers, rownum, observation):
 	observation['species'] = "Unidentified spp."
 	
 	if species_given.lower() == "dead":
-		return
+		return ""
 	
 	f = open('../html/data/master_species_info.json')
 	species_array = json.load(f)
@@ -78,9 +79,9 @@ def getSpecies(sheet, headers, rownum, observation):
 		if species_given.lower() == species_array[i]['Scientific_Name'].lower():
 			observation['species'] = species_array[i]['Scientific_Name']
 			f.close()
-			return
+			return ""
 		
-		# only genus matches, not specific species
+		# only genus matches, not specific species (NOTE: quercus (oak trees) don't have a spp., so we have to exclude it.
 		if species_given.lower().split(" ")[0] == species_array[i]['Scientific_Name'].lower().split(" ")[0] and \
 		   species_given.lower().split(" ")[0] != "quercus":
 			observation['species'] = species_array[i]['Scientific_Name'].split(" ")[0] + " spp."
@@ -89,7 +90,7 @@ def getSpecies(sheet, headers, rownum, observation):
 	
 	# if we get through the loop, the species given was not matched exactly;
 	# return the species_given to enter into comments for user info.	
-	return species_given
+	return " **Species may be: " + species_given + " (check for mispelling and edit tree info accordingly!)**"
 
 for file in args.excel_filenames:
 	workbook = xlrd.open_workbook(file)
@@ -97,14 +98,16 @@ for file in args.excel_filenames:
 	
 	# Get values from header
 	headers = sheet.row_values(0)
-	
+
+	# years to check for
+	dataStartYear = 2002
+	dataEndYear = datetime.date.today().year
 	
 	# Iterate through rows, returning each as a list that you can index:
 	
 	for rownum in range(sheet.nrows):
 		if rownum == 0:
 			continue
-		#print rownum
 		
 		# Start a new document
 		observation = {}
@@ -129,17 +132,18 @@ for file in args.excel_filenames:
 		observation['dbh_marked'] = bool(sheet.row_values(rownum)[headers[::-1].index("Marked DBH location yes/no?")] == "Y")
 			
 		observation['diameter'] = []
-		
+		observation['status'] = "alive"
 		
 		# get all of the individual diameter information from the excel spreadsheet for a specific tree observation
-		for y in range(2002, 2009):
+		for y in range(dataStartYear, dataEndYear):
 			addDiameterObservation(sheet, headers, rownum, observation, y)
-			
 		
-		#TODO: add species guess to 2009 notes 
-		#print observation
+		# add any comments based on validation to the most recent comment
+		observation['diameter'][-1]['notes'] += note_to_add
+
+		print observation
 		
-		#observation_id = observations.save(observation)
-		#print observation_id
+		observation_id = observations.save(observation)
+		print observation_id
 		
 	
