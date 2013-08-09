@@ -111,8 +111,6 @@ for file in args.excel_filenames:
 	for rownum in range(sheet.nrows):
 		if rownum == 0:
 			continue
-		print rownum
-		print file
 		
 		# Start a new document
 		observation = {}
@@ -146,10 +144,9 @@ for file in args.excel_filenames:
 		# add any comments based on validation to the most recent comment
 		observation['diameter'][-1]['notes'] += note_to_add
 		
-		print observation['status']
 		print observation
 		
-		#observation_id = observations.save(observation)
-		#print observation_id
+		observation_id = observations.save(observation)
+		print observation_id
 		
 	

@@ -456,7 +456,6 @@ define([
 			}
 			$row_to_save.find(".status.active").addClass("to_validate");
 			if (! this.validateField()) {
-				console.log("lame");
 				return;
 			}
 			
@@ -473,9 +472,7 @@ define([
 				new_observer = new_observers_orig[i].trim(" ");
 				if (new_observer != "") new_observers.push(new_observer);
 			}
-			
-			// var new_date = new Date(parseInt($row_to_save.find(".unix-time").val()));
-			
+
 			// new entry object
 			var new_entry = {
 				date: ($row_to_save.find(".edit_cell.date_select :input").datepicker("getDate")).toLitterfallDateObject(),
@@ -484,36 +481,33 @@ define([
 				observers: new_observers,
 				notes: $row_to_save.find(".notes :input").val(),
 				status: $row_to_save.find(".status.active").val()
-			};				
+			};		
+					
 			this.model.set('status', $row_to_save.find(".status.active").val());
-			//console.log($row_to_save.find(".status.active").val());
-			//console.log(this.model);
+			
+		
 			// if it is a new one
 			if (is_this_row_new === true) {
 				
 				// add a new entry to the list, to where it should be
 				var target_index = _.sortedIndex(entries_array, new_entry, function(entry) {
-					return entry.year;
+					return entry.date.y;
 				});
 				
 				// then insert it
-				this.model.set('diameter', _.union(_.first(entries_array, target_index), [new_entry], _.rest(entries_array, target_index)));
+				this.model.set('diameter', _.union(_.last(entries_array, target_index), [new_entry], _.rest(entries_array, target_index)));
 				
 				
 			} else { // if we are editing a row
 				
 				// get the index from the id (id="entry-#")
 				var target_index = parseInt(($row_to_save.attr("id")).split("-")[1]);
+				
 				// set the entry at the target index to the new one
 				entries_array[target_index] = new_entry;
-				// sort it, because why not?
-				// well, really though, why not?
-				entries_array = _.sortBy(this.model.get('diameter'), function (entry) {
-					return 0 - (entry.date.y*366 + entry.date.m*32 + entry.date.d);
-				});
 				
-				// set the new diameter
-				this.model.set('diameter', entries_array);
+				// set the new diameter (need to reverse for the model!!)
+				this.model.set('diameter', entries_array.reverse());
 				
 			}
 			
