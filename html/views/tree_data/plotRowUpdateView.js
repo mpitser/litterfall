@@ -39,6 +39,8 @@ define([
 			<%		status_display = "Dead (standing)"; %>\
 			<%	} else if (tree.status == "dead_fallen"){ %>\
 			<%		status_display = "Dead (fallen)"; %>\
+			<%	} else if (tree.status == "missing"){ %>\
+			<%		status_display = "Missing"; %>\
 			<% } %>\
 				<%= status_display %>\
 			</td>\
