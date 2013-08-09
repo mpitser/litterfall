@@ -32,15 +32,18 @@ def getStatus(notes, observation):
 
 	# had to add in a lot of specific code to catch specific errors that would mess up a tree's status listing.
 	if ("missing" in notes and "not missing" not in notes) or ("no longer present" in notes) or ("can't find" in notes) or (observation['status'] == "missing"):
-		observation['status'] = "missing"
-	elif ("fallen" in notes or "fell" in notes) and ("dead" in notes or "dead" in observation['status']):
-		observation['status'] = "dead_fallen"
+		return "missing"
+	elif ("fallen" in notes or "fell" in notes) and ("dead" in notes or observation['status'].find("dead") != -1):
+		return "dead_fallen"
 	elif "standing" in notes or ("dead" in notes or "Dead" in notes and "not dead" not in notes and "might be dead" not in notes):
-		observation['status'] = "dead_standing"
+		return "dead_standing"
 	else:
-		observation['status'] = "alive"
-
-	return observation['status']
+		return "alive"
+	
+	#print notes
+	#print observation['status']
+	#print 
+	#return observation['status']
 
 
 def addDiameterObservation(sheet, headers, rownum, observation, year):
@@ -53,10 +56,10 @@ def addDiameterObservation(sheet, headers, rownum, observation, year):
 		
 		observation['diameter'].append({'value': diam, 'notes':notes, 'date': {'y': year, 'm': 01, 'd': 01}, 'status': status, 'observers': [] })
 	except ValueError:
-		#print "No data from " + str(year)
-		return
+		print "No data from " + str(year)
+		return observation['status']
 		
-	return
+	return status
 
 
 def getSpecies(sheet, headers, rownum, observation):
@@ -108,6 +111,8 @@ for file in args.excel_filenames:
 	for rownum in range(sheet.nrows):
 		if rownum == 0:
 			continue
+		print rownum
+		print file
 		
 		# Start a new document
 		observation = {}
@@ -136,14 +141,15 @@ for file in args.excel_filenames:
 		
 		# get all of the individual diameter information from the excel spreadsheet for a specific tree observation
 		for y in range(dataStartYear, dataEndYear):
-			addDiameterObservation(sheet, headers, rownum, observation, y)
+			observation['status'] = addDiameterObservation(sheet, headers, rownum, observation, y)
 		
 		# add any comments based on validation to the most recent comment
 		observation['diameter'][-1]['notes'] += note_to_add
-
+		
+		print observation['status']
 		print observation
 		
-		observation_id = observations.save(observation)
-		print observation_id
+		#observation_id = observations.save(observation)
+		#print observation_id
 		
 	
