@@ -8,8 +8,7 @@ define([
 		model: singleOption,
 		url: "data/sites.json",															//populates new selectionOptionsView with locations (sites)
 		initialize: function(models, options) {
-			//console.log(options);
-    		//this.type = options.type;
+
 		},								//calls for server DB's location (plot, etc. information)
     	parse: function(response){												
     		var parsed_options = [];												
@@ -19,8 +18,6 @@ define([
     					name: response[element].charAt(0).toUpperCase() + response[element].slice(1),
     				});
     		}
-    		console.log("selectionoptions");
-    		console.log(parsed_options);
     		return parsed_options;
     	}
 	});
