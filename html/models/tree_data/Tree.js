@@ -90,13 +90,6 @@ define([
 			// format full tree ID for display
 			response.full_tree_id = response.tree_id + ((response.sub_tree_id == 0) ? '' : ('.' + response.sub_tree_id));
 			
-			// get latest status (dead or alive) and set to the model
-			if (response.diameter.length > 0) {
-				response.status = response.diameter[0].status;
-			} else {
-				response.status = "alive";
-			}
-			
 			return response;
 		},
 		// overriding the save method, so that when the model saves it updates its inside to match what the server sends back
