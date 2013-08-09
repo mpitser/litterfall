@@ -69,7 +69,6 @@ define([
 							$.each(value.trap_data, function(ind, sample) {
 								if (sample.type == species && sample.trap == i) {
 									matched = true;
-									console.log(species);
 									$(".obs"+index+"trap"+sample.trap).append("<td>"+sample.value+"</td>");
 									csv_line += sample.value + ","
 								}
