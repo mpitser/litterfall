@@ -1,3 +1,5 @@
+NOTE: this is version completed over internship Summer 2013, provided as code sample.  Working version where I am currently contributing is at https://github.com/Swarthmore/litterfall.
+
 Application and Scripts used for the Litterfall/Crum Woods Productivity Project
 --------------------------------------------------------------------------------
 
